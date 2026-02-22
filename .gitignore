@@ -1,0 +1,49 @@
+# Archivos del sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Node (si usas npm/build tools en el futuro)
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+
+# Dependencias
+dist/
+build/
+
+# Logs
+*.log
+*.logs
+
+# Archivos temporales
+*.tmp
+tmp/
+temp/
+
+# Línea en blanco al final del archivo
+*.bak
