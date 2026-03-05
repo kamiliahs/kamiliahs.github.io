@@ -36,9 +36,11 @@ const Utils = {
             'recipes': 'nav-inventory',
             'reports': 'nav-reports',
             'orders': 'nav-orders',
-            'network': 'nav-network'
+            'config': null
         };
-        document.getElementById(navMap[viewId])?.classList.add('active');
+        if (navMap[viewId]) {
+            document.getElementById(navMap[viewId])?.classList.add('active');
+        }
         
         // Actualizar títulos
         const titles = {
@@ -47,7 +49,7 @@ const Utils = {
             recipes: 'FICHAS',
             reports: 'REPORTES',
             orders: 'PEDIDOS',
-            network: 'RED LOCAL'
+            config: 'CONFIGURACIÓN'
         };
         
         const subtitles = {
@@ -56,7 +58,7 @@ const Utils = {
             recipes: 'ESCANDALLOS',
             reports: 'ESTADÍSTICAS',
             orders: 'HISTÓRICO',
-            network: 'SINCRONIZACIÓN'
+            config: 'AJUSTES'
         };
         
         document.getElementById('viewTitle').innerText = titles[viewId] || 'TERMINAL';
@@ -74,8 +76,8 @@ const Utils = {
             UI.renderReports();
         } else if (viewId === 'orders') {
             UI.renderOrders();
-        } else if (viewId === 'network') {
-            UI.renderNetworkStatus();
+        } else if (viewId === 'config') {
+            UI.renderConfig();
         }
     },
 
@@ -118,6 +120,8 @@ const Utils = {
             document.getElementById('newProdName').value = '';
             document.getElementById('newProdIcon').value = '';
             document.getElementById('newProdPrice').value = '';
+            document.getElementById('newProdService').value = '';
+            document.getElementById('newProdMargin').value = '';
         }
     },
 

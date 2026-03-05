@@ -8,8 +8,11 @@ const APP = {
      * Inicializar aplicación
      */
     init() {
-        // Inicializar datos
+        // Inicializar datos (incluye settings)
         Data.init();
+
+        // Aplicar tema guardado
+        this.applyTheme(Data.settings.theme);
 
         // Renderizar todas las vistas
         UI.renderAll();
@@ -136,7 +139,10 @@ const APP = {
             return;
         }
 
-        Data.addProduct(name, icon, price, recipe);
+        const service = parseFloat(document.getElementById('newProdService').value) || 0;
+        const margin = parseFloat(document.getElementById('newProdMargin').value) || 0;
+
+        const product = Data.addProduct(name, icon, price, recipe, service, margin);
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('RECETA CREADA');
@@ -204,6 +210,8 @@ const APP = {
         document.getElementById('editProdName').value = product.name;
         document.getElementById('editProdIcon').value = product.icon;
         document.getElementById('editProdPrice').value = product.price;
+        document.getElementById('editProdService').value = product.servicePct || 0;
+        document.getElementById('editProdMargin').value = product.marginPct || 0;
 
         const builder = document.getElementById('editRecipeBuilder');
         builder.innerHTML = product.recipe.map((r, i) => {
@@ -260,7 +268,9 @@ const APP = {
             return;
         }
 
-        Data.updateProduct(id, name, icon, price, recipe);
+        const service = parseFloat(document.getElementById('editProdService').value) || 0;
+        const margin = parseFloat(document.getElementById('editProdMargin').value) || 0;
+        Data.updateProduct(id, name, icon, price, recipe, service, margin);
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('RECETA ACTUALIZADA');
@@ -277,6 +287,23 @@ const APP = {
             UI.updateCartUI();
             Utils.showToast(`${item.name} AGREGADO`);
         }
+    },
+
+    /**
+     * Cambiar cantidad de un producto en el carrito
+     */
+    changeCartQty(productId, delta) {
+        Data.changeCartQty(productId, delta);
+        UI.updateCartUI();
+    },
+
+    /**
+     * Eliminar un producto completamente del carrito
+     */
+    removeFromCart(productId) {
+        // remove all instances
+        while (Data.removeOneFromCart(productId));
+        UI.updateCartUI();
     },
 
     /**
@@ -310,13 +337,37 @@ const APP = {
         document.getElementById('orderDetailTotal').innerText = sale.total.toFixed(2);
         document.getElementById('orderEditPrice').value = '';
 
+        // paid status
+        const statusSpan = document.getElementById('orderPaidStatus');
+        const markBtn = document.getElementById('markPaidBtn');
+        if (sale.paid) {
+            statusSpan.innerText = 'Estado: Pagado';
+            markBtn.innerText = 'Desmarcar pago';
+        } else {
+            statusSpan.innerText = 'Estado: No pagado';
+            markBtn.innerText = 'Marcar pagado';
+        }
+        // deshabilitar edición de precio si está pagado
+        document.getElementById('orderEditPrice').disabled = sale.paid;
+
+        // populate product select
+        const select = document.getElementById('addItemSelect');
+        select.innerHTML = '<option value="">-- Añadir producto --</option>' +
+            Data.products.map(p => `<option value="${p.id}">${p.name} - SRD ${p.price.toFixed(2)}</option>`).join('');
+
         const itemsDiv = document.getElementById('orderDetailItems');
-        itemsDiv.innerHTML = sale.items.map(item => `
-            <div class="flex justify-between text-xs">
+        itemsDiv.innerHTML = sale.items.map((item, idx) => `
+            <div class="flex justify-between items-center text-xs">
                 <span>${item.name}</span>
                 <span>SRD ${item.price.toFixed(2)}</span>
+                ${item.servicePct ? `<span class="text-[8px] text-muted ml-2">+${item.servicePct}% serv.</span>` : ''}
+                ${sale.paid ? '' : `<button class="text-red-500 text-xs ml-2" onclick="APP.removeItemFromOrder('${saleId}', ${idx})">✕</button>`}
             </div>
         `).join('');
+
+        // disable add control if paid
+        document.getElementById('addItemSelect').disabled = sale.paid;
+        document.getElementById('addItemSelect').classList.toggle('opacity-50', sale.paid);
 
         // Guardar ID para editar
         document.getElementById('orderDetailModal').dataset.saleId = saleId;
@@ -350,12 +401,65 @@ const APP = {
      */
     deleteOrder() {
         const saleId = document.getElementById('orderDetailModal').dataset.saleId;
+        const sale = Data.getSale(saleId);
+        if (sale && sale.paid) {
+            Utils.showToast('No se puede eliminar un pedido pagado');
+            return;
+        }
         if (confirm('¿Eliminar este pedido?')) {
             Data.deleteSale(saleId);
             UI.renderAll();
             Utils.closeAllPopups();
             Utils.showToast('PEDIDO ELIMINADO');
         }
+    },
+
+    /**
+     * Quitar item del pedido
+     */
+    removeItemFromOrder(saleId, index) {
+        const sale = Data.getSale(saleId);
+        if (!sale) return;
+        const item = sale.items.splice(index, 1)[0];
+        if (item) {
+            sale.total -= item.price;
+            Data.saveAll();
+            this.viewOrderDetail(saleId);
+        }
+    },
+
+    /**
+     * Agregar item al pedido desde modal
+     */
+    addItemToOrder() {
+        const saleId = document.getElementById('orderDetailModal').dataset.saleId;
+        const prodId = document.getElementById('addItemSelect').value;
+        if (!prodId) return;
+        const sale = Data.getSale(saleId);
+        const product = Data.getProduct(prodId);
+        if (sale && product) {
+            sale.items.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                cost: Data.calculateProductCost(product.id)
+            });
+            sale.total += product.price;
+            Data.saveAll();
+            this.viewOrderDetail(saleId);
+        }
+    },
+
+    /**
+     * Alternar estado pagado del pedido
+     */
+    toggleOrderPaid() {
+        const saleId = document.getElementById('orderDetailModal').dataset.saleId;
+        const sale = Data.getSale(saleId);
+        if (!sale) return;
+        sale.paid = !sale.paid;
+        Data.saveAll();
+        this.viewOrderDetail(saleId);
     },
 
     /**
@@ -401,6 +505,121 @@ const APP = {
     },
 
     /**
+     * Aplicar tema visual (light/dark/system)
+     */
+    applyTheme(mode) {
+        const body = document.body;
+        if (mode === 'light') {
+            body.setAttribute('data-theme', 'light');
+        } else if (mode === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+        } else {
+            body.removeAttribute('data-theme');
+        }
+    },
+
+    /**
+     * Guardar ajustes de configuración
+     */
+    saveSettings() {
+        const theme = document.getElementById('configTheme').value;
+
+        Data.updateSettings({
+            theme: theme
+            // units y equivalences ya se han actualizado con addUnit y addEquivalence
+        });
+        this.applyTheme(theme);
+        Utils.showToast('Configuración guardada');
+    },
+
+    /**
+     * Agregar nueva unidad de medida
+     */
+    addUnit() {
+        const symbol = document.getElementById('newUnitSymbol').value.trim();
+        const name = document.getElementById('newUnitName').value.trim();
+
+        if (!symbol || !name) {
+            Utils.showToast('Complete símbolo y nombre');
+            return;
+        }
+
+        if (Data.addUnit(symbol, name)) {
+            document.getElementById('newUnitSymbol').value = '';
+            document.getElementById('newUnitName').value = '';
+            UI.renderConfig();
+            Utils.showToast(`Unidad "${symbol}" agregada`);
+        } else {
+            Utils.showToast('Unidad duplicada o inválida');
+        }
+    },
+
+    /**
+     * Abrir modal para editar unidad
+     */
+    openEditUnitModal(symbol, name) {
+        const newSymbol = prompt(`Símbolo para "${symbol}":`, symbol);
+        if (newSymbol === null) return;
+        const newName = prompt(`Nombre para "${symbol}":`, name);
+        if (newName === null) return;
+
+        if (Data.editUnit(symbol, newSymbol, newName)) {
+            UI.renderConfig();
+            Utils.showToast('Unidad actualizada');
+        } else {
+            Utils.showToast('Error al actualizar unidad');
+        }
+    },
+
+    /**
+     * Eliminar unidad de medida
+     */
+    deleteUnit(symbol) {
+        if (!confirm(`¿Eliminar la unidad "${symbol}"?`)) return;
+
+        if (Data.deleteUnit(symbol)) {
+            UI.renderConfig();
+            Utils.showToast(`Unidad "${symbol}" eliminada`);
+        } else {
+            Utils.showToast('Error al eliminar unidad');
+        }
+    },
+
+    /**
+     * Agregar equivalencia entre dos unidades
+     */
+    addEquivalence() {
+        const fromUnit = document.getElementById('eqFromUnit').value;
+        const ratio = document.getElementById('eqRatio').value;
+        const toUnit = document.getElementById('eqToUnit').value;
+
+        if (!fromUnit || !toUnit || !ratio) {
+            Utils.showToast('Complete todos los campos');
+            return;
+        }
+
+        if (Data.addEquivalence(fromUnit, ratio, toUnit)) {
+            document.getElementById('eqRatio').value = '';
+            document.getElementById('eqFromUnit').value = '';
+            document.getElementById('eqToUnit').value = '';
+            UI.renderConfig();
+            Utils.showToast('Equivalencia agregada');
+        } else {
+            Utils.showToast('Error en equivalencia');
+        }
+    },
+
+    /**
+     * Eliminar equivalencia
+     */
+    removeEquivalence(key) {
+        if (Data.removeEquivalence(key)) {
+            UI.renderConfig();
+            Utils.showToast('Equivalencia eliminada');
+        }
+    },
+
+    /**
      * Abrir modal
      */
     openModal(modalId) {
@@ -421,642 +640,8 @@ const APP = {
         Utils.addIngredientRow();
     },
 
-    // ========== RED Y SINCRONIZACIÓN ==========
 
-    /**
-     * Seleccionar modo servidor
-     */
-    async selectServerRole() {
-        const info = await WebRTC.startServer();
 
-        // Llenar modal de servidor iniciado
-        document.getElementById('serverIP').innerText = info.ip;
-        document.getElementById('serverID').innerText = info.peerId;
-
-        // Generar QR
-        this.generateServerQR(info);
-
-        // Iniciar monitoreo de clientes conectados
-        this.startServerClientMonitoring(info);
-
-        Utils.closeAllPopups();
-        Utils.openModal('serverStartedModal');
-
-        Utils.showToast('SERVIDOR INICIADO ✓');
-    },
-
-    /**
-     * Monitorear clientes que se conectan al servidor
-     */
-    startServerClientMonitoring(serverInfo) {
-        // Limpiar intervalo anterior si existe
-        if (this.serverMonitoringInterval) {
-            clearInterval(this.serverMonitoringInterval);
-        }
-
-        const monitoredClients = new Set();
-
-        // Verificar cada 2 segundos si hay nuevos clientes
-        this.serverMonitoringInterval = setInterval(() => {
-            const connectedClients = WebRTC.getConnectedClients();
-
-            connectedClients.forEach(client => {
-                const clientKey = `${client.clientPeerId}`;
-
-                // Si es un cliente nuevo
-                if (!monitoredClients.has(clientKey)) {
-                    monitoredClients.add(clientKey);
-
-                    // Mostrar alerta
-                    this.showClientConnectionAlert(client);
-
-                    console.log(`🔔 Cliente conectado: IP=${client.clientIP}, ID=${client.clientPeerId}`);
-                }
-            });
-        }, 2000);
-    },
-
-    /**
-     * Mostrar alerta visual cuando cliente se conecta
-     */
-    showClientConnectionAlert(clientInfo) {
-        // Crear notificación
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 9999;
-            font-family: monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            max-width: 350px;
-            animation: slideIn 0.3s ease-out;
-        `;
-
-        const timestamp = new Date().toLocaleTimeString();
-
-        notification.innerHTML = `
-            <div style="font-weight: bold; margin-bottom: 8px;">✅ Cliente Conectado</div>
-            <div style="font-size: 12px; opacity: 0.9;">
-                <div><strong>IP:</strong> ${clientInfo.clientIP}</div>
-                <div><strong>ID:</strong> ${clientInfo.clientPeerId.substring(0, 20)}...</div>
-                <div><strong>Hora:</strong> ${timestamp}</div>
-            </div>
-        `;
-
-        document.body.appendChild(notification);
-
-        // También mostrar toast
-        Utils.showToast(`Cliente conectado: ${clientInfo.clientIP}`);
-
-        // Remover notificación después de 8 segundos
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transition = 'opacity 0.3s ease-out';
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 8000);
-    },
-
-    /**
-     * Detener monitoreo de clientes
-     */
-    stopServerClientMonitoring() {
-        if (this.serverMonitoringInterval) {
-            clearInterval(this.serverMonitoringInterval);
-            this.serverMonitoringInterval = null;
-        }
-    },
-
-    /**
-     * Generar código QR para conexión del servidor
-     */
-    generateServerQR(serverInfo) {
-        console.log('📱 Generando QR para servidor:', serverInfo);
-
-        const qrData = JSON.stringify({
-            ip: serverInfo.ip,
-            id: serverInfo.peerId,
-            type: 'server',
-            version: '1.0'
-        });
-
-        const qrCanvas = document.getElementById('qrCode');
-
-        // Validar que el canvas existe
-        if (!qrCanvas) {
-            console.error('❌ Canvas QR no encontrado en el DOM');
-            Utils.showToast('Error: Canvas QR no disponible');
-            return;
-        }
-
-        try {
-            // Verificar que la librería está disponible
-            if (!window.QRCode) {
-                console.error('❌ Librería QRCode no está cargada');
-                console.warn('Intentando cargar desde CDN alternativo...');
-                this.loadQRCodeLibrary();
-                return;
-            }
-
-            console.log('📊 Datos QR:', qrData);
-
-            // Usar node-qr-code para generar en el canvas
-            window.QRCode.toCanvas(qrCanvas, qrData, {
-                width: 200,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                },
-                errorCorrectionLevel: 'H'
-            }, (error) => {
-                if (error) {
-                    console.error('❌ Error generando QR:', error);
-                    Utils.showToast('Error al generar código QR');
-                } else {
-                    console.log('✅ QR generado exitosamente');
-                }
-            });
-
-            // Forzar actualización visual
-            setTimeout(() => {
-                qrCanvas.style.opacity = '0.99';
-                setTimeout(() => {
-                    qrCanvas.style.opacity = '1';
-                }, 10);
-            }, 100);
-
-        } catch (err) {
-            console.error('❌ Error generando QR:', err);
-            Utils.showToast('Error al generar código QR: ' + err.message);
-        }
-    },
-
-    /**
-     * Cargar librería QRCode desde CDN alternativo
-     */
-    loadQRCodeLibrary() {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
-        script.onload = () => {
-            console.log('✅ Librería QRCode cargada desde CDN');
-            // Reintentar generar QR
-            const status = WebRTC.getStatus();
-            if (status.localInfo) {
-                this.generateServerQR(status.localInfo);
-            }
-        };
-        script.onerror = () => {
-            console.error('❌ No se pudo cargar la librería QRCode');
-            Utils.showToast('No se pudo cargar la librería QR');
-        };
-        document.head.appendChild(script);
-    },
-
-    /**
-     * Copiar información del servidor al portapapeles
-     */
-    copyServerInfo() {
-        const status = WebRTC.getStatus();
-        const text = `IP: ${status.localInfo.ip}\nID: ${status.localInfo.peerId}`;
-
-        navigator.clipboard.writeText(text).then(() => {
-            Utils.showToast('COPIADO AL PORTAPAPELES');
-        });
-    },
-
-    // ========== RESOLUCIÓN DE CONFLICTOS ==========
-
-    /**
-     * Manejar desconexión inesperada del servidor
-     */
-    handleServerDisconnection() {
-        console.log('Servidor desconectado inesperadamente. Intentando promover cliente a servidor...');
-
-        // Solo proceder si somos cliente
-        if (localStorage.getItem('networkRole') !== 'client') {
-            return;
-        }
-
-        // Esperar un poco para ver si otro cliente ya tomó el rol
-        setTimeout(async () => {
-            try {
-                // Intentar convertirse en servidor
-                const info = await WebRTC.startServer();
-
-                // Actualizar estado
-                localStorage.setItem('networkRole', 'server');
-                localStorage.setItem('networkConnected', 'true');
-
-                // Generar nuevo QR
-                this.generateServerQR(info);
-
-                // Notificar a otros clientes
-                SYNC.broadcastServerPromotion(info);
-
-                Utils.showToast('¡Promovido a servidor! ✓');
-                console.log('Cliente promovido a servidor exitosamente');
-
-            } catch (error) {
-                console.error('Error al promover a servidor:', error);
-                Utils.showToast('Error al promover a servidor');
-
-                // Intentar reconectar como cliente
-                this.attemptReconnection();
-            }
-        }, 2000); // Esperar 2 segundos
-    },
-
-    /**
-     * Intentar reconexión automática
-     */
-    attemptReconnection() {
-        console.log('Intentando reconexión automática...');
-
-        // Buscar servidores activos en la red
-        this.scanForActiveServers().then(servers => {
-            if (servers.length > 0) {
-                // Conectar al primer servidor encontrado
-                const server = servers[0];
-                this.connectToServer({
-                    ip: server.ip,
-                    id: server.id
-                });
-            } else {
-                Utils.showToast('No se encontraron servidores activos');
-            }
-        }).catch(err => {
-            console.error('Error en reconexión:', err);
-        });
-    },
-
-    /**
-     * Escanear servidores activos en la red local
-     */
-    async scanForActiveServers() {
-        console.log('Escaneando servidores activos...');
-
-        // Primero intentar detectar por localStorage (mismo navegador)
-        const localServers = WebRTC.detectServers();
-
-        if (localServers.length > 0) {
-            console.log('Servidores detectados localmente:', localServers);
-            return localServers;
-        }
-
-        // Si no hay locales, intentar método alternativo (limitado por CORS)
-        const servers = [];
-        const localIP = await WebRTC.detectLocalIP();
-        if (!localIP) return servers;
-
-        // Obtener el rango de IP (ej: 192.168.1.x)
-        const ipParts = localIP.split('.');
-        const baseIP = ipParts.slice(0, 3).join('.');
-
-        // Solo probar algunas IPs comunes (no podemos hacer fetch sin CORS)
-        const commonIPs = ['100', '101', '102', '1', '10', '50'];
-
-        for (const ip of commonIPs) {
-            const testIP = `${baseIP}.${ip}`;
-            if (testIP !== localIP) {
-                // En lugar de fetch, asumimos que si hay algo en localStorage con esa IP, existe
-                const presenceKey = `server_presence_${testIP}`;
-                const presence = localStorage.getItem(presenceKey);
-                if (presence) {
-                    try {
-                        const data = JSON.parse(presence);
-                        if (Date.now() - data.timestamp < 30000) {
-                            servers.push(data);
-                        } else {
-                            localStorage.removeItem(presenceKey);
-                        }
-                    } catch (e) {
-                        localStorage.removeItem(presenceKey);
-                    }
-                }
-            }
-        }
-
-        console.log(`Encontrados ${servers.length} servidores activos`);
-        return servers;
-    },
-
-    /**
-     * Probar conexión a un servidor específico
-     */
-    async testServerConnection(ip) {
-        try {
-            // Intentar una conexión rápida (timeout corto)
-            const response = await fetch(`http://${ip}:8080/status`, {
-                method: 'GET',
-                mode: 'no-cors', // Para evitar CORS issues
-                signal: AbortSignal.timeout(1000) // Timeout de 1 segundo
-            });
-
-            // Si llega aquí, hay algo respondiendo
-            return { ip, id: 'unknown', status: 'active' };
-
-        } catch (error) {
-            // No hay servidor en esta IP
-            return null;
-        }
-    },
-
-    /**
-     * Escanear servidores activos en la red local (para UI)
-     */
-    async scanForActiveServersUI() {
-        Utils.showToast('Buscando servidores...');
-
-        try {
-            const servers = await this.scanForActiveServers();
-
-            if (servers.length === 0) {
-                Utils.showToast('No se encontraron servidores activos');
-                return;
-            }
-
-            // Mostrar modal con lista de servidores
-            this.showServerListModal(servers);
-
-        } catch (error) {
-            console.error('Error escaneando servidores:', error);
-            Utils.showToast('Error al buscar servidores');
-        }
-    },
-
-    /**
-     * Mostrar modal con lista de servidores encontrados
-     */
-    showServerListModal(servers) {
-        // Crear modal dinámicamente
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.id = 'serverListModal';
-        modal.innerHTML = `
-            <p class="label-caps mb-8">Servidores Encontrados</p>
-            <div class="space-y-4 max-h-60 overflow-y-auto">
-                ${servers.map(server => `
-                    <div class="border border-gray-300 rounded p-4 cursor-pointer hover:bg-gray-50" 
-                         onclick="APP.selectServer('${server.ip}', '${server.id || 'unknown'}')">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-bold">IP: ${server.ip}</p>
-                                <p class="text-sm text-gray-600">ID: ${server.id || 'Desconocido'}</p>
-                            </div>
-                            <div class="text-green-600">● Activo</div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-            <div class="flex gap-4 pt-6">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
-                <button onclick="APP.openModal('clientConnectModal')" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Entrada Manual</button>
-            </div>
-        `;
-
-        // Agregar al DOM
-        document.body.appendChild(modal);
-        Utils.openModal('serverListModal');
-    },
-
-    /**
-     * Seleccionar servidor de la lista
-     */
-    selectServer(ip, id) {
-        document.getElementById('serverIpInput').value = ip;
-        document.getElementById('serverIdInput').value = id;
-        Utils.closeAllPopups();
-        Utils.openModal('clientConnectModal');
-        Utils.showToast('Servidor seleccionado');
-    },
-
-    /**
-     * Conectar a servidor
-     */
-    connectToServer() {
-        const ip = document.getElementById('serverIpInput').value.trim();
-        const id = document.getElementById('serverIdInput').value.trim();
-
-        if (!ip) {
-            Utils.showToast('Ingresa IP del servidor');
-            return;
-        }
-
-        WebRTC.connectToServer(ip, id || 'unknown').then(() => {
-            // Iniciar heartbeat para detectar desconexiones
-            this.startServerHeartbeat();
-
-            Utils.closeAllPopups();
-            UI.renderNetworkStatus();
-            Utils.showToast('CONECTADO AL SERVIDOR');
-        }).catch(err => {
-            Utils.showToast('Error de conexión');
-            console.error(err);
-        });
-    },
-
-    // Heartbeat para detectar desconexión del servidor
-    startServerHeartbeat() {
-        if (this.heartbeatInterval) {
-            clearInterval(this.heartbeatInterval);
-        }
-
-        this.heartbeatInterval = setInterval(async () => {
-            if (localStorage.getItem('networkRole') === 'client') {
-                try {
-                    // Verificar si el servidor sigue respondiendo
-                    const serverIP = localStorage.getItem('serverIP');
-                    if (serverIP) {
-                        const response = await fetch(`http://${serverIP}:8080/ping`, {
-                            method: 'GET',
-                            mode: 'no-cors',
-                            signal: AbortSignal.timeout(2000)
-                        });
-                        // Si llega aquí, servidor está vivo
-                    }
-                } catch (error) {
-                    console.warn('Servidor no responde, detectando desconexión');
-                    this.handleServerDisconnection();
-                    clearInterval(this.heartbeatInterval);
-                }
-            }
-        }, 10000); // Cada 10 segundos
-    },
-
-    stopServerHeartbeat() {
-        if (this.heartbeatInterval) {
-            clearInterval(this.heartbeatInterval);
-            this.heartbeatInterval = null;
-        }
-    },
-
-    /**
-     * Iniciar escáner QR
-     */
-    startQRScanner() {
-        const video = document.getElementById('qrScannerVideo');
-        let scanInterval = null;
-        let currentStream = null;
-
-        // Mostrar estado "Inicializando"
-        Utils.showToast('Inicializando cámara...');
-
-        navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            }
-        })
-            .then(stream => {
-                currentStream = stream;
-                video.srcObject = stream;
-                video.play();
-
-                // Esperar a que video esté listo
-                video.onloadedmetadata = () => {
-                    Utils.showToast('Apunta al código QR');
-
-                    // Crear canvas con las dimensiones del video
-                    const canvasElement = document.createElement('canvas');
-                    canvasElement.width = video.videoWidth;
-                    canvasElement.height = video.videoHeight;
-                    const canvas = canvasElement.getContext('2d');
-
-                    let qrDetectado = false;
-
-                    scanInterval = setInterval(() => {
-                        if (!video.paused && !video.ended) {
-                            try {
-                                canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-                                const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-
-                                if (window.jsQR) {
-                                    const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-                                    if (code && !qrDetectado) {
-                                        qrDetectado = true;
-                                        clearInterval(scanInterval);
-
-                                        console.log('✓ QR detectado:', code.data);
-
-                                        try {
-                                            const qrData = JSON.parse(code.data);
-
-                                            // Validar que sea un código válido
-                                            if (qrData.ip && qrData.id && qrData.type === 'server') {
-                                                document.getElementById('serverIpInput').value = qrData.ip;
-                                                document.getElementById('serverIdInput').value = qrData.id;
-
-                                                // Detener video
-                                                if (currentStream) {
-                                                    currentStream.getTracks().forEach(track => track.stop());
-                                                }
-
-                                                Utils.closeAllPopups();
-                                                Utils.openModal('clientConnectModal');
-                                                Utils.showToast('✓ QR ESCANEADO CORRECTAMENTE');
-                                            } else {
-                                                Utils.showToast('QR inválido - No es un código de servidor');
-                                                qrDetectado = false;
-                                            }
-                                        } catch (parseErr) {
-                                            console.error('Error parsing QR data:', parseErr);
-                                            Utils.showToast('QR inválido - No se pudo leer datos');
-                                            qrDetectado = false;
-                                        }
-                                    }
-                                } else {
-                                    console.error('jsQR no disponible');
-                                    Utils.showToast('Librería de escaneo no disponible');
-                                    clearInterval(scanInterval);
-                                }
-                            } catch (err) {
-                                console.error('Error en scanning:', err);
-                            }
-                        }
-                    }, 300);
-                };
-            })
-            .catch(err => {
-                console.error('Error accessing camera:', err);
-
-                let errorMsg = 'No se pudo acceder a la cámara';
-                if (err.name === 'NotAllowedError') {
-                    errorMsg = 'Permiso de cámara denegado';
-                } else if (err.name === 'NotFoundError') {
-                    errorMsg = 'No hay cámara disponible';
-                } else if (err.name === 'NotReadableError') {
-                    errorMsg = 'La cámara está en uso por otra aplicación';
-                }
-
-                Utils.showToast(errorMsg);
-
-                // Mostrar alternativa manual
-                document.getElementById('clientConnectModal').style.display = 'block';
-                Utils.closeAllPopups();
-                Utils.openModal('clientConnectModal');
-            });
-    },
-
-    /**
-     * Detener escáner QR
-     */
-    stopQRScanner() {
-        const video = document.getElementById('qrScannerVideo');
-        if (video && video.srcObject) {
-            video.srcObject.getTracks().forEach(track => {
-                track.stop();
-            });
-            video.srcObject = null;
-        }
-    },
-
-    /**
-     * Sincronizar manualmente
-     */
-    manualSync() {
-        if (!WebRTC.isConnected) {
-            Utils.showToast('No conectado');
-            return;
-        }
-
-        if (WebRTC.isServer) {
-            Utils.showToast('Servidor sincronizado');
-        } else {
-            WebRTC.sendMessage({
-                type: 'SYNC_REQUEST',
-                from: WebRTC.localInfo.peerId,
-                to: WebRTC.localInfo.serverId
-            });
-            Utils.showToast('Sincronizando...');
-        }
-
-        Sync.setLastSync();
-        UI.renderNetworkStatus();
-    },
-
-    /**
-     * Desconectar de la red
-     */
-    disconnectNetwork() {
-        if (confirm('¿Desconectar de la red?')) {
-            this.stopServerHeartbeat();
-            this.stopServerClientMonitoring();
-            WebRTC.disconnect();
-            UI.renderNetworkStatus();
-            Utils.showToast('DESCONECTADO');
-        }
-    },
 
     /**
      * Agregar fila de ingrediente en edición

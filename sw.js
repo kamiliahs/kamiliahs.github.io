@@ -12,8 +12,6 @@ const ASSETS_TO_CACHE = [
     './src/js/modules/data.js',
     './src/js/modules/ui.js',
     './src/js/modules/utils.js',
-    './src/js/modules/webrtc.js',
-    './src/js/modules/sync.js',
     './src/js/app.js',
     './manifest.json',
     'https://cdn.tailwindcss.com',
@@ -107,17 +105,6 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
-// Sincronización de datos en segundo plano
-self.addEventListener('sync', (event) => {
-    console.log('Service Worker: Sincronizando datos...');
-    
-    if (event.tag === 'sync-sales') {
-        event.waitUntil(
-            // Aquí se podría sincronizar datos con un servidor
-            Promise.resolve()
-        );
-    }
-});
 
 // Notificaciones push
 self.addEventListener('push', (event) => {

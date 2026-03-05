@@ -6,7 +6,8 @@ const STORAGE_KEYS = {
     INGREDIENTS: 'min_pos_ing',
     PRODUCTS: 'min_pos_prod',
     SALES_HISTORY: 'min_pos_sales',
-    STOCK: 'min_pos_stock'
+    STOCK: 'min_pos_stock',
+    SETTINGS: 'min_pos_settings'
 };
 
 const Storage = {
@@ -28,7 +29,9 @@ const Storage = {
         return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)) || [
             {
                 id: 'p1', name: 'MARGHERITA CLASSIC', icon: '🍕', price: 120.00,
-                recipe: [{ id: 'ing1', qty: 1 }, { id: 'ing2', qty: 200 }, { id: 'ing3', qty: 100 }]
+                recipe: [{ id: 'ing1', qty: 1 }, { id: 'ing2', qty: 200 }, { id: 'ing3', qty: 100 }],
+                servicePct: 0,
+                marginPct: 0
             }
         ];
     },
@@ -76,6 +79,35 @@ const Storage = {
     },
 
     /**
+     * Obtener configuración desde localStorage o valores por defecto
+     */
+    getSettings() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || {
+            theme: 'system',
+            units: [
+                { symbol: 'gr', name: 'Gramo' },
+                { symbol: 'ml', name: 'Mililitro' },
+                { symbol: 'pza', name: 'Pieza' },
+                { symbol: 'kg', name: 'Kilogramo' },
+                { symbol: 'l', name: 'Litro' }
+            ],
+            equivalences: {
+                'kg_to_gr': 1000,
+                'gr_to_kg': 0.001,
+                'l_to_ml': 1000,
+                'ml_to_l': 0.001
+            }
+        };
+    },
+
+    /**
+     * Guardar configuración
+     */
+    saveSettings(settings) {
+        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    },
+
+    /**
      * Limpiar todos los datos del localStorage
      */
     clearAll() {
@@ -83,6 +115,7 @@ const Storage = {
         localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
         localStorage.removeItem(STORAGE_KEYS.SALES_HISTORY);
         localStorage.removeItem(STORAGE_KEYS.STOCK);
+        localStorage.removeItem(STORAGE_KEYS.SETTINGS);
     }
 };
 

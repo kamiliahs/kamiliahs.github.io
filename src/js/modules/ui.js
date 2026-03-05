@@ -48,7 +48,9 @@ const UI = {
         const container = document.getElementById('recipesContainer');
         container.innerHTML = Data.products.map(p => {
             const cost = Data.calculateProductCost(p.id);
-            const margin = p.price > 0 ? (((p.price - cost) / p.price) * 100).toFixed(0) : 0;
+            const computedMargin = p.price > 0 ? (((p.price - cost) / p.price) * 100).toFixed(0) : 0;
+            const margin = p.marginPct != null ? p.marginPct : computedMargin;
+            const service = p.servicePct != null ? p.servicePct : 0;
             
             return `
                 <div>
@@ -74,6 +76,10 @@ const UI = {
                             <p class="label-caps text-white/50 mb-1">Margen %</p>
                             <p class="font-bold">${margin}%</p>
                         </div>
+                    </div>
+                    <div class="mt-4 text-sm text-muted">
+                        <p>Servicio: ${service}%</p>
+                        <p>Margen aplicado: ${margin}%</p>
                     </div>
                 </div>
             `;
@@ -121,9 +127,30 @@ const UI = {
         const itemsContainer = document.getElementById('cartItems');
         const total = Data.getCartTotal();
 
-        itemsContainer.innerHTML = Data.cart.length > 0
-            ? Data.cart.map(item => `<div class="flex justify-between"><span>${item.name}</span><span>${item.price.toFixed(2)}</span></div>`).join('')
-            : '<span class="text-muted text-xs">Carrito vacío</span>';
+        if (Data.cart.length > 0) {
+            // aggregate by product id
+            const summary = {};
+            Data.cart.forEach(item => {
+                if (!summary[item.id]) {
+                    summary[item.id] = { name: item.name, price: item.price, count: 0 };
+                }
+                summary[item.id].count += 1;
+            });
+            itemsContainer.innerHTML = Object.entries(summary).map(([id, info]) => {
+                const lineTotal = (info.price * info.count).toFixed(2);
+                return `
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <button class="text-white bg-gray-700 px-2" onclick="APP.changeCartQty('${id}',-1)">-</button>
+                        <span>${info.name} x${info.count}</span>
+                        <button class="text-white bg-gray-700 px-2" onclick="APP.changeCartQty('${id}',1)">+</button>
+                    </div>
+                    <span>${lineTotal}</span>
+                </div>`;
+            }).join('');
+        } else {
+            itemsContainer.innerHTML = '<span class="text-muted text-xs">Carrito vacío</span>';
+        }
 
         document.getElementById('cartTotal').innerText = total.toFixed(2);
         document.getElementById('cartCount').innerText = Data.cart.length;
@@ -155,6 +182,7 @@ const UI = {
                     <div class="text-right">
                         <p class="heading-lg">SRD ${sale.total.toFixed(2)}</p>
                         <p class="text-[9px] font-bold text-muted">${sale.items.length} items</p>
+                        <p class="text-[9px] ${sale.paid ? 'text-green-600' : 'text-red-500'}">${sale.paid ? 'Pagado' : 'Pendiente'}</p>
                     </div>
                 </div>
             </div>
@@ -162,52 +190,53 @@ const UI = {
     },
 
     /**
-     * Renderizar estado de conexión de red
+     * Renderizar vista de configuración
      */
-    renderNetworkStatus() {
-        const status = WebRTC.getStatus();
-        const statusDiv = document.getElementById('networkStatus');
-        const infoDiv = document.getElementById('networkInfo');
-        const detailsDiv = document.getElementById('networkDetails');
-        const syncButton = document.getElementById('syncButton');
-        const disconnectButton = document.getElementById('disconnectButton');
+    renderConfig() {
+        const s = Data.settings || {};
+        
+        // Theme
+        document.getElementById('configTheme').value = s.theme || 'system';
+        
+        // Units list with edit/delete
+        const unitsList = document.getElementById('unitsList');
+        unitsList.innerHTML = (s.units || []).map(u => `
+            <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded">
+                <div class="flex-1">
+                    <input type="text" class="text-xs w-24 border-0 bg-transparent font-bold" value="${u.symbol}" readonly data-unit-symbol="${u.symbol}" class="unitSymbolInput">
+                    <span class="text-xs text-muted ml-2">${u.name}</span>
+                </div>
+                <button class="text-blue-500 text-xs mr-2" onclick="APP.openEditUnitModal('${u.symbol}', '${u.name}')">Editar</button>
+                <button class="text-red-500 text-xs" onclick="APP.deleteUnit('${u.symbol}')">✕</button>
+            </div>
+        `).join('');
 
-        if (!status.isConnected) {
-            statusDiv.innerHTML = '<span class="text-red-500 font-bold">● Desconectado</span>';
-            infoDiv.classList.add('hidden');
-            syncButton.classList.add('hidden');
-            disconnectButton.classList.add('hidden');
-        } else {
-            statusDiv.innerHTML = `<span class="text-green-500 font-bold">● Conectado (${status.isServer ? 'Servidor' : 'Cliente'})</span>`;
-            infoDiv.classList.remove('hidden');
-            syncButton.classList.remove('hidden');
-            disconnectButton.classList.remove('hidden');
+        // Equivalences list
+        const eqList = document.getElementById('equivalencesList');
+        const eqObj = s.equivalences || {};
+        const displayed = new Set();
+        eqList.innerHTML = Object.entries(eqObj)
+            .filter(([key]) => !displayed.has(key.split('_to_')[0]))
+            .map(([key, val]) => {
+                displayed.add(key.split('_to_')[0]);
+                const parts = key.split('_to_');
+                return `
+                    <div class="flex justify-between items-center text-xs p-2 bg-gray-50 rounded">
+                        <span>1 ${parts[0]} = ${val} ${parts[1]}</span>
+                        <button class="text-red-500 text-xs" onclick="APP.removeEquivalence('${key}')">✕</button>
+                    </div>
+                `;
+            }).join('');
 
-            // Mostrar detalles
-            if (status.localInfo) {
-                if (status.isServer) {
-                    detailsDiv.innerHTML = `
-                        <div>IP: ${status.localInfo.ip}</div>
-                        <div>ID: ${status.localInfo.peerId.substring(0, 20)}...</div>
-                        <div>Modo: Servidor</div>
-                    `;
-                } else {
-                    detailsDiv.innerHTML = `
-                        <div>Mi IP: ${status.localInfo.ip}</div>
-                        <div>Server: ${status.localInfo.serverIp}</div>
-                        <div>Modo: Cliente</div>
-                    `;
-                }
-            }
-
-            // Mostrar último sync
-            const lastSync = Sync.getLastSync();
-            if (lastSync) {
-                document.getElementById('syncStatus').classList.remove('hidden');
-                document.getElementById('lastSyncTime').innerText = new Date(lastSync).toLocaleString();
-            }
-        }
+        // Populate selects for creating equivalence
+        const fromSelect = document.getElementById('eqFromUnit');
+        const toSelect = document.getElementById('eqToUnit');
+        const options = (s.units || []).map(u => `<option value="${u.symbol}">${u.symbol.toUpperCase()} (${u.name})</option>`).join('');
+        
+        fromSelect.innerHTML = '<option value="">De --</option>' + options;
+        toSelect.innerHTML = '<option value="">A --</option>' + options;
     },
+
 
     /**
      * Renderizar todas las vistas

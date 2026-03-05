@@ -8,6 +8,15 @@ const Data = {
     salesHistory: [],
     stock: {}, // Inventario de insumos
     cart: [],
+    settings: { 
+        theme: 'system', 
+        units: [ 
+            { symbol: 'gr', name: 'Gramo' },
+            { symbol: 'ml', name: 'Mililitro' },
+            { symbol: 'pza', name: 'Pieza' }
+        ],
+        equivalences: {} 
+    },
 
     /**
      * Inicializar datos desde Storage
@@ -18,6 +27,7 @@ const Data = {
         this.salesHistory = Storage.getSalesHistory();
         this.stock = Storage.getStock();
         this.cart = [];
+        this.settings = Storage.getSettings();
     },
 
     /**
@@ -28,6 +38,7 @@ const Data = {
         Storage.saveProducts(this.products);
         Storage.saveSalesHistory(this.salesHistory);
         Storage.saveStock(this.stock);
+        Storage.saveSettings(this.settings);
     },
 
     /**
@@ -49,7 +60,6 @@ const Data = {
             this.stock[ingredient.id] = parseFloat(quantity);
         }
         this.saveAll();
-        Sync.syncAddIngredient(ingredient);
         return ingredient;
     },
 
@@ -63,7 +73,6 @@ const Data = {
             ingredient.cost = parseFloat(cost);
             ingredient.unit = unit;
             this.saveAll();
-            Sync.syncUpdateIngredient(id, ingredient);
             return true;
         }
         return false;
@@ -77,7 +86,6 @@ const Data = {
         if (ingredient) {
             ingredient.cost = parseFloat(newCost);
             this.saveAll();
-            Sync.syncUpdateIngredient(id, ingredient);
             return true;
         }
         return false;
@@ -92,7 +100,6 @@ const Data = {
             this.ingredients.splice(index, 1);
             delete this.stock[id];
             this.saveAll();
-            Sync.syncDeleteIngredient(id);
             return true;
         }
         return false;
@@ -104,7 +111,6 @@ const Data = {
     updateStock(ingredientId, quantity) {
         this.stock[ingredientId] = parseFloat(quantity);
         this.saveAll();
-        Sync.syncStockUpdate(ingredientId, quantity);
     },
 
     /**
@@ -121,32 +127,34 @@ const Data = {
     /**
      * Agregar producto (receta)
      */
-    addProduct(name, icon, price, recipe) {
+    addProduct(name, icon, price, recipe, servicePct = 0, marginPct = 0) {
         const product = {
-            id: 'p_' + Date.now(),
+            id: 'p' + Date.now(),
             name: name.toUpperCase(),
-            icon: icon || '🍽️',
+            icon: icon || '',
             price: parseFloat(price),
-            recipe: recipe
+            recipe: recipe,
+            servicePct: parseFloat(servicePct) || 0,
+            marginPct: parseFloat(marginPct) || 0
         };
         this.products.push(product);
         this.saveAll();
-        Sync.syncAddProduct(product);
         return product;
     },
 
     /**
      * Actualizar producto completo
      */
-    updateProduct(id, name, icon, price, recipe) {
+    updateProduct(id, name, icon, price, recipe, servicePct = 0, marginPct = 0) {
         const product = this.products.find(p => p.id === id);
         if (product) {
             product.name = name.toUpperCase();
-            product.icon = icon || product.icon;
+            product.icon = icon;
             product.price = parseFloat(price);
             product.recipe = recipe;
+            product.servicePct = parseFloat(servicePct) || 0;
+            product.marginPct = parseFloat(marginPct) || 0;
             this.saveAll();
-            Sync.syncUpdateProduct(id, product);
             return true;
         }
         return false;
@@ -158,7 +166,6 @@ const Data = {
     deleteProduct(id) {
         this.products = this.products.filter(p => p.id !== id);
         this.saveAll();
-        Sync.syncDeleteProduct(id);
     },
 
     /**
@@ -170,6 +177,7 @@ const Data = {
 
     /**
      * Calcular costo de producción de un producto
+     * Respeta las equivalencias y unidades actuales
      */
     calculateProductCost(productId) {
         const product = this.products.find(p => p.id === productId);
@@ -177,7 +185,15 @@ const Data = {
 
         return product.recipe.reduce((total, item) => {
             const ingredient = this.ingredients.find(i => i.id === item.id);
-            return total + (ingredient ? (ingredient.cost * item.qty) : 0);
+            if (!ingredient) return total;
+
+            // Si hay equivalencias definidas, usar convertUnit
+            const unitCost = ingredient.cost;
+            const quantity = item.qty;
+            
+            // Si el costo está en una unidad diferente a la del ingrediente, convertir
+            // Por ahora: costo * cantidad (sin conversión automática, solo si usuario lo especifica)
+            return total + (unitCost * quantity);
         }, 0);
     },
 
@@ -188,12 +204,48 @@ const Data = {
         const product = this.products.find(p => p.id === productId);
         if (!product) return null;
 
+        // compute effective price including service charge
+        const basePrice = parseFloat(product.price);
+        const servicePct = parseFloat(product.servicePct) || 0;
+        const effectivePrice = basePrice * (1 + servicePct / 100);
+
         const cartItem = {
             ...product,
-            costAtSale: this.calculateProductCost(productId)
+            costAtSale: this.calculateProductCost(productId),
+            price: effectivePrice,    // override price with service applied
+            basePrice: basePrice      // preserve original
         };
         this.cart.push(cartItem);
         return cartItem;
+    },
+
+    /**
+     * Remove a single instance of a product from the cart
+     */
+    removeOneFromCart(productId) {
+        const idx = this.cart.findIndex(i => i.id === productId);
+        if (idx !== -1) {
+            this.cart.splice(idx, 1);
+            this.saveAll();
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Adjust quantity by delta (positive will add, negative will remove)
+     */
+    changeCartQty(productId, delta) {
+        if (delta > 0) {
+            // simply add copies
+            for (let i = 0; i < delta; i++) {
+                this.addToCart(productId);
+            }
+        } else if (delta < 0) {
+            for (let i = 0; i < Math.abs(delta); i++) {
+                if (!this.removeOneFromCart(productId)) break;
+            }
+        }
     },
 
     /**
@@ -220,15 +272,17 @@ const Data = {
                 id: item.id,
                 name: item.name,
                 price: item.price,
-                cost: item.costAtSale
+                cost: item.costAtSale,
+                servicePct: item.servicePct || 0,
+                basePrice: item.basePrice || item.price
             })),
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            paid: false
         };
 
         this.salesHistory.push(sale);
         this.cart = [];
         this.saveAll();
-        Sync.syncNewSale(sale);
         return true;
     },
 
@@ -240,14 +294,34 @@ const Data = {
     },
 
     /**
+     * Actualizar configuración general
+     */
+    updateSettings(newSettings) {
+        this.settings = { ...this.settings, ...newSettings };
+        this.saveAll();
+    },
+
+    /**
      * Actualizar pedido
      */
     updateSale(saleId, price) {
         const sale = this.salesHistory.find(s => s.id === saleId);
         if (sale) {
-            sale.price = parseFloat(price);
+            sale.total = parseFloat(price);
             this.saveAll();
-            Sync.syncUpdateSale(saleId, sale);
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Marcar venta como pagada
+     */
+    markSalePaid(saleId) {
+        const sale = this.salesHistory.find(s => s.id === saleId);
+        if (sale) {
+            sale.paid = true;
+            this.saveAll();
             return true;
         }
         return false;
@@ -281,8 +355,9 @@ const Data = {
         let totalCosts = 0;
 
         this.salesHistory.forEach(sale => {
-            totalSales += sale.price;
-            totalCosts += sale.cost;
+            totalSales += sale.total || 0;
+            const saleCost = sale.items.reduce((sum, item) => sum + (item.cost || 0), 0);
+            totalCosts += saleCost;
         });
 
         const netProfit = totalSales - totalCosts;
@@ -304,17 +379,19 @@ const Data = {
         const profitMap = {};
 
         this.salesHistory.forEach(sale => {
-            if (!profitMap[sale.name]) {
-                profitMap[sale.name] = {
-                    name: sale.name,
-                    count: 0,
-                    totalRevenue: 0,
-                    totalCost: 0
-                };
-            }
-            profitMap[sale.name].count++;
-            profitMap[sale.name].totalRevenue += sale.price;
-            profitMap[sale.name].totalCost += sale.cost;
+            sale.items.forEach(item => {
+                if (!profitMap[item.name]) {
+                    profitMap[item.name] = {
+                        name: item.name,
+                        count: 0,
+                        totalRevenue: 0,
+                        totalCost: 0
+                    };
+                }
+                profitMap[item.name].count++;
+                profitMap[item.name].totalRevenue += item.price;
+                profitMap[item.name].totalCost += item.cost || 0;
+            });
         });
 
         return Object.values(profitMap).map(item => ({
@@ -322,6 +399,160 @@ const Data = {
             profit: item.totalRevenue - item.totalCost,
             margin: item.totalRevenue > 0 ? ((item.totalRevenue - item.totalCost) / item.totalRevenue * 100) : 0
         }));
+    },
+
+    /**
+     * ========== GESTIÓN DE UNIDADES Y EQUIVALENCIAS ==========
+     */
+
+    /**
+     * Obtener todas las unidades disponibles (símbolos)
+     */
+    getUnits() {
+        return (this.settings.units || []).map(u => u.symbol);
+    },
+
+    /**
+     * Obtener lista completa de unidades con nombre
+     */
+    getUnitsList() {
+        return this.settings.units || [];
+    },
+
+    /**
+     * Agregar una nueva unidad
+     */
+    addUnit(symbol, name) {
+        const sym = symbol.trim().toLowerCase();
+        const nm = name.trim();
+        if (!sym || !nm || this.settings.units.some(u => u.symbol === sym)) {
+            return false;
+        }
+        this.settings.units.push({ symbol: sym, name: nm });
+        this.saveAll();
+        return true;
+    },
+
+    /**
+     * Editar una unidad existente
+     */
+    editUnit(oldSymbol, newSymbol, newName) {
+        const unit = this.settings.units.find(u => u.symbol === oldSymbol);
+        if (!unit) return false;
+        const newSym = newSymbol.trim().toLowerCase();
+        const newNm = newName.trim();
+        if (!newSym || !newNm) return false;
+        if (oldSymbol !== newSym) {
+            const eqKeys = Object.keys(this.settings.equivalences);
+            eqKeys.forEach(key => {
+                const parts = key.split('_to_');
+                const from = parts[0];
+                const to = parts[1];
+                let newKey = key;
+                if (from === oldSymbol) newKey = newSym + '_to_' + to;
+                if (to === oldSymbol) newKey = from + '_to_' + newSym;
+                if (newKey !== key) {
+                    this.settings.equivalences[newKey] = this.settings.equivalences[key];
+                    delete this.settings.equivalences[key];
+                }
+            });
+        }
+        unit.symbol = newSym;
+        unit.name = newNm;
+        this.saveAll();
+        return true;
+    },
+
+    /**
+     * Eliminar una unidad
+     */
+    deleteUnit(symbol) {
+        const idx = this.settings.units.findIndex(u => u.symbol === symbol);
+        if (idx === -1) return false;
+        this.settings.units.splice(idx, 1);
+        const keysToDelete = Object.keys(this.settings.equivalences).filter(key => {
+            const parts = key.split('_to_');
+            const from = parts[0];
+            const to = parts[1];
+            return from === symbol || to === symbol;
+        });
+        keysToDelete.forEach(key => delete this.settings.equivalences[key]);
+        this.saveAll();
+        return true;
+    },
+
+    /**
+     * Crear equivalencia bidireccional entre dos unidades
+     * e.g. 1 kg = 1000 gr → agrega "kg_to_gr": 1000 y "gr_to_kg": 0.001
+     */
+    addEquivalence(fromUnit, ratio, toUnit) {
+        const from = fromUnit.toLowerCase().trim();
+        const to = toUnit.toLowerCase().trim();
+        const r = parseFloat(ratio);
+
+        if (!from || !to || isNaN(r) || r <= 0) return false;
+        const symbols = this.getUnits();
+        if (!symbols.includes(from) || !symbols.includes(to)) {
+            return false;
+        }
+
+        // Crear clave directa e inversa
+        const key1 = `${from}_to_${to}`;
+        const key2 = `${to}_to_${from}`;
+
+        this.settings.equivalences[key1] = r;
+        this.settings.equivalences[key2] = 1 / r;
+
+        this.saveAll();
+        this.recalculateProductCosts(); // Recalcular costos de recetas vigentes
+        return true;
+    },
+
+    /**
+     * Convertir cantidad entre unidades
+     */
+    convertUnit(quantity, fromUnit, toUnit) {
+        if (fromUnit === toUnit) return quantity;
+
+        const key = `${fromUnit.toLowerCase()}_to_${toUnit.toLowerCase()}`;
+        const ratio = this.settings.equivalences[key];
+
+        if (ratio === undefined) {
+            console.warn(`No conversion available: ${key}`);
+            return quantity; // retorna sin convertir
+        }
+
+        return quantity * ratio;
+    },
+
+    /**
+     * Recalcular costo de todas las recetas vigentes
+     * (no toca el histórico de ventas)
+     */
+    recalculateProductCosts() {
+        // Los costos se calculan on-the-fly en calculateProductCost
+        // aquí solo marcamos que la receta debe ser recalculada
+        // Al renderizar, usamos calculateProductCost que lee las unidades actuales
+    },
+
+    /**
+     * Obtener equivalencias para renderizar
+     */
+    getEquivalences() {
+        return this.settings.equivalences || {};
+    },
+
+    /**
+     * Eliminar una equivalencia
+     */
+    removeEquivalence(key) {
+        if (this.settings.equivalences[key]) {
+            delete this.settings.equivalences[key];
+            this.saveAll();
+            this.recalculateProductCosts();
+            return true;
+        }
+        return false;
     }
 };
 
