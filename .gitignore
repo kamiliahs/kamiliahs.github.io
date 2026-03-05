@@ -1,12 +1,21 @@
-# Archivos del sistema operativo
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
+# Dependencias
+node_modules/
+package-lock.json
+yarn.lock
 
-# Editores
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+.env
+.env.local
+.env.*.local
+
+# Directorios de build y distribución
+dist/
+build/
+out/
+
+# IDEs
 .vscode/
 .idea/
 *.swp
@@ -14,36 +23,33 @@ ehthumbs.db
 *~
 .project
 .classpath
-.c9/
-*.launch
 .settings/
-*.sublime-workspace
-
-# IDE - VS Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# Node (si usas npm/build tools en el futuro)
-node_modules/
-npm-debug.log
-yarn-error.log
-.npm
-
-# Dependencias
-dist/
-build/
-
-# Logs
-*.log
-*.logs
 
 # Archivos temporales
 *.tmp
-tmp/
-temp/
+*.temp
+*.log
+npm-debug.log*
 
-# Línea en blanco al final del archivo
+# Archivos de backup
 *.bak
+*.backup
+
+# Cachés
+.cache/
+.parcel-cache/
+
+# Editor configs
+.editorconfig
+
+# OS
+.Spotlight-V100
+.Trashes
+
+# Configuración local de usuario (si aplica)
+.vscode/settings.json
+.vscode/extensions.json
+
+# Archivos generados
+*.gz
+*.zip

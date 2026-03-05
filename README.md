@@ -1,288 +1,223 @@
-# 🎉 Kamiliahs - PWA Instalable
+# POS Minimalist - Sistema de Gestión de Puntos de Venta
 
-Proyecto web completo como Progressive Web App (PWA) con soporte para instalación como aplicación nativa en cualquier dispositivo.
+Una aplicación web progresiva (PWA) minimalista y moderna para gestión de puntos de venta, compatible con diseño editorial de vanguardia.
 
-## ⚡ Características principales
+## 🚀 Características
 
-✨ **PWA Completo**
-- Instalable como aplicación nativa
-- Funciona completamente offline
-- Sincronización en background
-- Notificaciones push listas
+- ✅ **PWA Instalable** - Funciona como aplicación nativa en dispositivos
+- 📱 **Responsive Design** - Optimizada para móviles, tablets y escritorio
+- 🌐 **Funciona Offline** - Acceso a datos sin conexión a internet
+- 💾 **Sincronización Automática** - Los datos se guardan automáticamente en localStorage
+- 🎨 **Diseño Editorial Minimalista** - Tipografía y UI de alto contraste
+- 🔧 **Modular** - Código organizado en módulos reutilizables
+- ⚡ **Ligero** - Sin dependencias externas (solo Tailwind CSS)
+- 📊 **Reportes en Tiempo Real** - Estadísticas de ventas y márgenes
 
-🌐 **Multiidioma (i18n)**
-- Soporte para Español e Inglés
-- Traductor integrado i18next
-- Cambio de idioma instantáneo
+## 📋 Funcionalidades
 
-🌙 **Tema Claro/Oscuro**
-- Detección automática del sistema
-- Cambio manual de tema
-- Persistencia en localStorage
-- Transiciones suaves
+### 📦 Gestión de Insumos
+- Crear y editar insumos con costos unitarios
+- Especificar unidades de medida (gramos, mililitros, piezas)
+- Actualizar costos en tiempo real
 
-📱 **Responsive**
-- Mobile-first design
-- Adaptado para cualquier pantalla
-- Bootstrap 5 integrado
-- Icons de Bootstrap incluidos
+### 🍽️ Gestión de Recetas
+- Crear fichas de productos con ingredientes
+- Asociar múltiples insumos a cada producto
+- Calcular costos de producción automáticamente
+- Visualizar márgenes de ganancia
 
-🎨 **Diseño moderno**
-- Navbar con offcanvas
-- Fuente Kausan Script personalizada
-- Animaciones y transiciones
-- Interfaz limpia y profesional
+### 💰 Terminal de Ventas
+- Interfaz rápida y touch-friendly para punto de venta
+- Agregar productos al carrito
+- Procesar pagos
 
-## 🚀 Instalación
-
-### En navegadores de escritorio (Chrome/Edge)
-1. Abre https://tu-usuario.github.io
-2. Click en el botón "+" en la barra de direcciones
-3. Selecciona "Instalar"
-
-### En Android
-1. Abre https://tu-usuario.github.io en Chrome
-2. Toca Menu → "Instalar aplicación"
-3. Confirma la instalación
-
-### En iOS (Safari)
-1. Abre https://tu-usuario.github.io en Safari
-2. Toca Compartir → "Agregar a pantalla de inicio"
-3. Elige el nombre y confirma
-
-### En Windows
-1. Abre https://tu-usuario.github.io en Edge
-2. Click en "..." → Aplicaciones → "Instalar esta aplicación"
-3. Sigue los pasos
+### 📈 Reportes
+- Balance general de ventas
+- Análisis de márgenes por producto
+- Historial de transacciones
+- Estadísticas de rentabilidad
 
 ## 📁 Estructura del Proyecto
 
 ```
 kamiliahs.github.io/
-├── index.html                   # Página principal
-├── manifest.json                # Configuración PWA
-├── sw.js                        # Service Worker
-├── README.md                    # Este archivo
-├── PWA_GUIDE.md                 # Guía completa PWA
-├── ICONOS_INTEGRADOS.md         # Info sobre iconos
-├── validate-pwa.sh              # Script de validación
-│
-├── css/
-│   └── style.css                # Estilos con variables de tema
-│
-├── js/
-│   ├── script.js                # JavaScript principal
-│   ├── i18n.js                  # Configuración i18next
-│   ├── sw-manager.js            # Gestor de Service Worker
-│   └── pwa-devtools.js          # Herramientas de desarrollo
-│
-├── locales/
-│   ├── es.json                  # Traducciones español
-│   └── en.json                  # Traducciones inglés
-│
-└── assets/
-    ├── icons/
-    │   ├── android/             # Iconos Android
-    │   ├── ios/                 # Iconos iOS
-    │   ├── windows11/           # Iconos Windows
-    │   └── icons.json           # Referencia de iconos
-    └── README.md                # Guía de recursos
+├── index.html                 # HTML principal
+├── src/
+│   ├── css/
+│   │   └── main.css          # Estilos principales
+│   └── js/
+│       ├── app.js            # Lógica principal de la app
+│       └── modules/
+│           ├── storage.js    # Gestión de localStorage
+│           ├── data.js       # Lógica de datos
+│           ├── ui.js         # Renderizado de vistas
+│           └── utils.js      # Funciones auxiliares
+├── public/
+│   ├── manifest.json         # Configuración PWA
+│   └── sw.js                 # Service Worker
+├── assets/
+│   └── icons/                # Iconos y activos
+├── README.md                 # Este archivo
+└── .gitignore               # Archivos ignorados por git
 ```
 
-## 🚀 Inicio Rápido
+## 🚀 Instalación y Uso
 
-### Localmente
+### En el Navegador
 
-1. **Clonar o descargar el repositorio**
-   ```bash
-   git clone https://github.com/tu-usuario/kamiliahs.github.io.git
-   cd kamiliahs.github.io
-   ```
+1. Abrir `https://yourusername.github.io` en un navegador moderno
+2. La aplicación cargará automáticamente
 
-2. **Servir localmente** (opcional)
-   - Usar una extensión como [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) en VS Code
-   - O con Python: `python -m http.server 8000`
-   - O con Node: `npx http-server`
+### Instalar como Aplicación
 
-3. **Acceder en el navegador**
-   - `http://localhost:8000` (o el puerto que uses)
+#### En Android:
+1. Abrir la página en Chrome
+2. Tocar el menú (⋮) → "Instalar aplicación"
+3. Confirmar instalación
 
-### En GitHub Pages
+#### En iPhone/iPad:
+1. Abrir la página en Safari
+2. Tocar Compartir → "Agregar a la pantalla de inicio"
+3. Confirmar instalación
 
-Tu sitio estará disponible en: `https://tu-usuario.github.io`
+#### En Windows/Mac:
+1. Abrir la página en Chrome/Edge
+2. Hacer clic en el icono de instalación en la barra de direcciones
+3. Confirmar instalación
+
+## 🔧 Tecnologías Utilizadas
+
+- **HTML5** - Estructura semántica
+- **CSS3** - Estilos modernos con variables CSS
+- **JavaScript Vanilla** - Sin frameworks, máxima compatibilidad
+- **Tailwind CSS** - Framework de utilidades CSS
+- **Service Workers** - Para funcionalidad offline
+- **localStorage** - Para persistencia de datos
+- **Web Manifest** - Para instalación como PWA
+
+## 💾 Almacenamiento de Datos
+
+Los datos se guardan en **localStorage** del navegador:
+- `min_pos_ing` - Insumos
+- `min_pos_prod` - Productos/Recetas
+- `min_pos_sales` - Historial de ventas
+
+> ⚠️ Los datos son locales al dispositivo. No se sincronizan automáticamente entre dispositivos.
+
+## 📱 Compatibilidad
+
+- ✅ Chrome/Edge (v90+)
+- ✅ Firefox (v88+)
+- ✅ Safari (v14+)
+- ✅ Android Browser
+- ✅ iOS Safari
+
+## 🛠️ Desarrollo
+
+### Estructura Modular
+
+**storage.js** - Gestiona lectura/escritura en localStorage
+```javascript
+Storage.getIngredients()
+Storage.saveProducts(products)
+```
+
+**data.js** - Lógica de datos y cálculos
+```javascript
+Data.addIngredient(name, cost, unit)
+Data.calculateProductCost(productId)
+Data.checkout()
+```
+
+**ui.js** - Renderizado de vistas
+```javascript
+UI.renderPOS()
+UI.renderInventory()
+UI.renderReports()
+```
+
+**utils.js** - Funciones auxiliares
+```javascript
+Utils.switchView(viewId)
+Utils.showToast(message)
+Utils.toggleMenu()
+```
+
+**app.js** - Orquestación y event listeners
+```javascript
+APP.init()
+APP.saveIngredient()
+APP.checkout()
+```
+
+### Agregar Nuevas Funciones
+
+1. Agregar método en `data.js` para la lógica
+2. Agregar render en `ui.js` si es visual
+3. Agregar acción en `app.js` para conectar con UI
+4. Llamar desde HTML con `onclick="APP.nombreFuncion()"`
+
+## 📦 Empaquetado para GitHub Pages
+
+El proyecto está listo para ser publicado en GitHub Pages:
+
+1. Hacer push a la rama `main` o `gh-pages`
+2. Habilitar GitHub Pages en Settings del repositorio
+3. La aplicación estará disponible en `https://yourusername.github.io`
+
+## 🔐 Seguridad
+
+- ✅ No requiere autenticación (uso local)
+- ✅ No envía datos a servidores
+- ✅ Funciona completamente offline
+- ⚠️ Los datos son locales al dispositivo/navegador
 
 ## 🎨 Personalización
 
-### Cambiar nombre de la aplicación
-Edita `manifest.json`:
-```json
-{
-  "name": "Mi App",
-  "short_name": "App"
-}
-```
-
-### Cambiar colores de tema
-Edita variables CSS en [css/style.css](css/style.css):
+### Cambiar Colores
+Editar variables CSS en `src/css/main.css`:
 ```css
 :root {
-    --color-primary: #007bff;
-    --color-secondary: #6c757d;
-    /* ... más variables */
+    --bg: #ffffff;
+    --text-main: #000000;
+    --text-muted: #888888;
+    --border: #eeeeee;
+    --accent: #000000;
 }
 ```
 
-### Agregar nuevos idiomas
-1. Crea archivo en `/locales/nuevo-idioma.json`
-2. Copia estructura de `es.json`
-3. Actualiza `js/i18n.js` con el nuevo idioma
-
-### Cambiar contenido
-Cualquier modificación de texto debe:
-1. Actualizar en ambos archivos: `/locales/es.json` y `/locales/en.json`
-2. Usar atributo `data-i18n="clave"` en HTML
-3. Usar `i18next.t('clave')` en JavaScript
-
-## 🔧 Comandos útiles
-
-### Validar PWA
-```bash
-bash validate-pwa.sh
-```
-
-### Servir localmente
-```bash
-# Con Python 3
-python -m http.server 8000
-
-# Con Node
-npx http-server
-
-# Con Live Server (VS Code)
-# Extensión: ritwickdey.LiveServer
-```
-
-### Verificar con Lighthouse (Chrome)
-1. F12 → Lighthouse
-2. Selecciona "Progressive Web App"
-3. Click en "Analyze"
-4. Deberías obtener: ✅ 100/100
-
-## 📊 Verificación de PWA
-
-### Estado del Service Worker
-En la consola del navegador:
+### Cambiar Datos Iniciales
+Editar `src/js/modules/storage.js`:
 ```javascript
-PWADevTools.showDevPanel()           // Mostrar ayuda
-PWADevTools.generateReport()         // Reporte completo
-PWADevTools.getSWInfo()              // Info del SW
-PWADevTools.getConnectionInfo()      // Estado de conexión
+getIngredients() {
+    return JSON.parse(...) || [
+        { id: 'ing1', name: 'TU INSUMO', cost: 0.00, unit: 'gr' }
+    ];
+}
 ```
 
-### Probar offline
-1. F12 → Application → Service Workers
-2. Marca "Offline"
-3. Recarga la página
-4. ¡Debe funcionar sin conexión!
-
-## 🌍 Multiidioma (i18n)
-
-### Cambiar idioma
-Los botones de idioma están en la navbar:
-- **ES** - Español
-- **EN** - English
-
-El idioma se guarda automáticamente en localStorage.
-
-### Estructura de traducciones
+### Cambiar Nombre de la App
+Editar `public/manifest.json`:
 ```json
 {
-  "navbar": { "brand": "..." },
-  "hero": { "title": "...", "subtitle": "..." },
-  "about": { "title": "...", "description": "..." }
+    "name": "Tu Nombre de App",
+    "short_name": "Nombre Corto"
 }
 ```
-
-## 🌙 Tema claro/oscuro
-
-### Cambiar tema
-Los botones en la navbar permiten:
-- ☀️ **Claro** - Modo light
-- 💻 **Sistema** - Detecta preferencia del OS
-- 🌙 **Oscuro** - Modo dark
-
-El tema se guarda en localStorage y se aplica automáticamente.
-
-### Detectar cambios del sistema
-Escucha cambios en `prefers-color-scheme`:
-```javascript
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-```
-
-## 🚀 Stack tecnológico
-
-- **HTML5** - Estructura semántica con PWA metadata
-- **CSS3** - Variables dinámicas, tema claro/oscuro
-- **JavaScript Vanilla** - i18n, Service Worker, PWA
-- **i18next** - Sistema de internacionalización
-- **Bootstrap 5** - Framework responsivo
-- **Bootstrap Icons** - Iconos profesionales
-- **Google Fonts** - Fuente Kausan Script
-- **GitHub Pages** - Hosting gratuito HTTPS
-
-## 📚 Documentación adicional
-
-| Archivo | Descripción |
-|---------|-------------|
-| [PWA_GUIDE.md](PWA_GUIDE.md) | Guía completa de PWA |
-| [ICONOS_INTEGRADOS.md](ICONOS_INTEGRADOS.md) | Estado de integración de iconos |
-| [assets/ICONS_GUIDE.md](assets/ICONS_GUIDE.md) | Cómo generar iconos |
-
-## ✅ Características completadas
-
-- [x] PWA totalmente funcional e instalable
-- [x] Funcionalidad offline con Service Worker
-- [x] Tema claro/oscuro con detección automática
-- [x] Sistema multiidioma (español/inglés)
-- [x] Navbar offcanvas responsivo
-- [x] Iconos en múltiples plataformas
-- [x] Cacheo inteligente de recursos
-- [x] Actualización automática del SW
-- [x] Sincronización en background listo
-- [x] Atajos de navegación rápida
-- [x] Meta tags de instalación
-- [x] Validación automática de PWA
-
-## 🚀 Próximos pasos
-
-1. **Hacer push a GitHub**
-   ```bash
-   git add .
-   git commit -m "PWA con iconos integrados"
-   git push origin main
-   ```
-
-2. **Verificar en tu dominio**
-   - Abre `https://tu-usuario.github.io`
-   - Deberías ver el botón de instalar (+)
-
-3. **Instalar como app**
-   - Click en (+) y "Instalar"
-   - O en mobile: Menu → "Instalar aplicación"
-
-4. **Verificar con Lighthouse**
-   - F12 → Lighthouse → Progressive Web App
-   - Deberías obtener ✅ 100/100
 
 ## 📞 Soporte
 
-Para más información:
-- [PWA_GUIDE.md](PWA_GUIDE.md) - Guía completa de PWA
-- [Documentación PWA de Google](https://developers.google.com/web/progressive-web-apps)
-- [MDN - Progressive Web Apps](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+Para problemas o sugerencias, crear un issue en el repositorio.
+
+## 📄 Licencia
+
+Este proyecto es de código abierto y puede ser usado libremente.
+
+## 🙏 Agradecimientos
+
+Diseño inspirado en principios editoriales minimalistas y moderno UX/UI.
 
 ---
 
-✨ **Tu PWA está completamente configurado y listo para usar!** ✨
-
-Última actualización: 22 de febrero de 2026
+**Última actualización:** Marzo 2026
+**Versión:** 1.0.0
