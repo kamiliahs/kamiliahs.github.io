@@ -77,6 +77,9 @@ const WebRTC = {
         // Crear servidor WebSocket local simulado
         this.startWebSocketServer();
 
+        // Iniciar broadcast de presencia
+        this.startPresenceBroadcast();
+
         return this.localInfo;
     },
 
@@ -289,9 +292,76 @@ const WebRTC = {
         this.isConnected = false;
         if (this.isServer) {
             localStorage.removeItem('wsServer');
+            this.stopPresenceBroadcast();
         } else {
             localStorage.removeItem('peerClient_' + this.localInfo.peerId);
         }
+    },
+
+    /**
+     * Broadcast presencia del servidor
+     */
+    broadcastPresence() {
+        if (this.isServer && this.localInfo) {
+            const presenceData = {
+                type: 'server_presence',
+                ip: this.localInfo.ip,
+                id: this.localInfo.peerId,
+                timestamp: Date.now()
+            };
+            
+            // Guardar en localStorage para que otros puedan detectar
+            localStorage.setItem('server_presence', JSON.stringify(presenceData));
+            
+            // Limpiar después de 30 segundos
+            setTimeout(() => {
+                localStorage.removeItem('server_presence');
+            }, 30000);
+        }
+    },
+
+    /**
+     * Iniciar broadcast periódico de presencia
+     */
+    startPresenceBroadcast() {
+        this.broadcastPresence(); // Broadcast inmediato
+        
+        // Broadcast cada 10 segundos
+        this.presenceInterval = setInterval(() => {
+            this.broadcastPresence();
+        }, 10000);
+    },
+
+    /**
+     * Detener broadcast de presencia
+     */
+    stopPresenceBroadcast() {
+        if (this.presenceInterval) {
+            clearInterval(this.presenceInterval);
+            this.presenceInterval = null;
+        }
+        localStorage.removeItem('server_presence');
+    },
+
+    /**
+     * Detectar servidores presentes
+     */
+    detectServers() {
+        const presence = localStorage.getItem('server_presence');
+        if (presence) {
+            try {
+                const data = JSON.parse(presence);
+                // Verificar que no haya expirado (30 segundos)
+                if (Date.now() - data.timestamp < 30000) {
+                    return [data];
+                } else {
+                    localStorage.removeItem('server_presence');
+                }
+            } catch (e) {
+                localStorage.removeItem('server_presence');
+            }
+        }
+        return [];
     },
 
     /**

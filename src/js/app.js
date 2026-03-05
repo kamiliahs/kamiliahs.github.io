@@ -446,6 +446,8 @@ const APP = {
      * Generar código QR para conexión del servidor
      */
     generateServerQR(serverInfo) {
+        console.log('Generando QR para servidor:', serverInfo);
+        
         const qrData = JSON.stringify({
             ip: serverInfo.ip,
             id: serverInfo.peerId,
@@ -454,12 +456,26 @@ const APP = {
         });
 
         const qrCanvas = document.getElementById('qrCode');
+        
+        // Validar que el canvas existe
+        if (!qrCanvas) {
+            console.error('Canvas QR no encontrado');
+            Utils.showToast('Error: Canvas QR no disponible');
+            return;
+        }
+        
         try {
             if (window.QRCode) {
-                // Limpiar canvas anterior
-                qrCanvas.getContext('2d').clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+                // Limpiar canvas completamente
+                const ctx = qrCanvas.getContext('2d');
+                ctx.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
                 
-                // Generar QR
+                // Forzar redibujo limpiando el contenido anterior
+                qrCanvas.width = qrCanvas.width; // Reset canvas
+                
+                console.log('Generando QR con datos:', qrData);
+                
+                // Generar QR con callback mejorado
                 QRCode.toCanvas(qrCanvas, qrData, {
                     errorCorrectionLevel: 'H',
                     type: 'image/png',
@@ -472,14 +488,19 @@ const APP = {
                     }
                 }, (error) => {
                     if (error) {
-                        console.error('Error generating QR:', error);
-                        Utils.showToast('Error al generar QR');
+                        console.error('Error generando QR:', error);
+                        Utils.showToast('Error al generar código QR');
                     } else {
                         console.log('✓ QR generado correctamente');
+                        // Forzar actualización visual
+                        qrCanvas.style.display = 'none';
+                        qrCanvas.offsetHeight; // Trigger reflow
+                        qrCanvas.style.display = 'block';
                     }
                 });
             } else {
-                Utils.showToast('QRCode library no disponible');
+                console.error('QRCode library no disponible');
+                Utils.showToast('Biblioteca QR no disponible');
             }
         } catch (err) {
             console.error('Error en generateServerQR:', err);
@@ -499,6 +520,212 @@ const APP = {
         });
     },
 
+    // ========== RESOLUCIÓN DE CONFLICTOS ==========
+
+    /**
+     * Manejar desconexión inesperada del servidor
+     */
+    handleServerDisconnection() {
+        console.log('Servidor desconectado inesperadamente. Intentando promover cliente a servidor...');
+        
+        // Solo proceder si somos cliente
+        if (localStorage.getItem('networkRole') !== 'client') {
+            return;
+        }
+
+        // Esperar un poco para ver si otro cliente ya tomó el rol
+        setTimeout(async () => {
+            try {
+                // Intentar convertirse en servidor
+                const info = await WebRTC.startServer();
+                
+                // Actualizar estado
+                localStorage.setItem('networkRole', 'server');
+                localStorage.setItem('networkConnected', 'true');
+                
+                // Generar nuevo QR
+                this.generateServerQR(info);
+                
+                // Notificar a otros clientes
+                SYNC.broadcastServerPromotion(info);
+                
+                Utils.showToast('¡Promovido a servidor! ✓');
+                console.log('Cliente promovido a servidor exitosamente');
+                
+            } catch (error) {
+                console.error('Error al promover a servidor:', error);
+                Utils.showToast('Error al promover a servidor');
+                
+                // Intentar reconectar como cliente
+                this.attemptReconnection();
+            }
+        }, 2000); // Esperar 2 segundos
+    },
+
+    /**
+     * Intentar reconexión automática
+     */
+    attemptReconnection() {
+        console.log('Intentando reconexión automática...');
+        
+        // Buscar servidores activos en la red
+        this.scanForActiveServers().then(servers => {
+            if (servers.length > 0) {
+                // Conectar al primer servidor encontrado
+                const server = servers[0];
+                this.connectToServer({
+                    ip: server.ip,
+                    id: server.id
+                });
+            } else {
+                Utils.showToast('No se encontraron servidores activos');
+            }
+        }).catch(err => {
+            console.error('Error en reconexión:', err);
+        });
+    },
+
+    /**
+     * Escanear servidores activos en la red local
+     */
+    async scanForActiveServers() {
+        console.log('Escaneando servidores activos...');
+        
+        // Primero intentar detectar por localStorage (mismo navegador)
+        const localServers = WebRTC.detectServers();
+        
+        if (localServers.length > 0) {
+            console.log('Servidores detectados localmente:', localServers);
+            return localServers;
+        }
+        
+        // Si no hay locales, intentar método alternativo (limitado por CORS)
+        const servers = [];
+        const localIP = await WebRTC.detectLocalIP();
+        if (!localIP) return servers;
+        
+        // Obtener el rango de IP (ej: 192.168.1.x)
+        const ipParts = localIP.split('.');
+        const baseIP = ipParts.slice(0, 3).join('.');
+        
+        // Solo probar algunas IPs comunes (no podemos hacer fetch sin CORS)
+        const commonIPs = ['100', '101', '102', '1', '10', '50'];
+        
+        for (const ip of commonIPs) {
+            const testIP = `${baseIP}.${ip}`;
+            if (testIP !== localIP) {
+                // En lugar de fetch, asumimos que si hay algo en localStorage con esa IP, existe
+                const presenceKey = `server_presence_${testIP}`;
+                const presence = localStorage.getItem(presenceKey);
+                if (presence) {
+                    try {
+                        const data = JSON.parse(presence);
+                        if (Date.now() - data.timestamp < 30000) {
+                            servers.push(data);
+                        } else {
+                            localStorage.removeItem(presenceKey);
+                        }
+                    } catch (e) {
+                        localStorage.removeItem(presenceKey);
+                    }
+                }
+            }
+        }
+        
+        console.log(`Encontrados ${servers.length} servidores activos`);
+        return servers;
+    },
+
+    /**
+     * Probar conexión a un servidor específico
+     */
+    async testServerConnection(ip) {
+        try {
+            // Intentar una conexión rápida (timeout corto)
+            const response = await fetch(`http://${ip}:8080/status`, {
+                method: 'GET',
+                mode: 'no-cors', // Para evitar CORS issues
+                signal: AbortSignal.timeout(1000) // Timeout de 1 segundo
+            });
+            
+            // Si llega aquí, hay algo respondiendo
+            return { ip, id: 'unknown', status: 'active' };
+            
+        } catch (error) {
+            // No hay servidor en esta IP
+            return null;
+        }
+    },
+
+    /**
+     * Escanear servidores activos en la red local (para UI)
+     */
+    async scanForActiveServersUI() {
+        Utils.showToast('Buscando servidores...');
+        
+        try {
+            const servers = await this.scanForActiveServers();
+            
+            if (servers.length === 0) {
+                Utils.showToast('No se encontraron servidores activos');
+                return;
+            }
+            
+            // Mostrar modal con lista de servidores
+            this.showServerListModal(servers);
+            
+        } catch (error) {
+            console.error('Error escaneando servidores:', error);
+            Utils.showToast('Error al buscar servidores');
+        }
+    },
+
+    /**
+     * Mostrar modal con lista de servidores encontrados
+     */
+    showServerListModal(servers) {
+        // Crear modal dinámicamente
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'serverListModal';
+        modal.innerHTML = `
+            <p class="label-caps mb-8">Servidores Encontrados</p>
+            <div class="space-y-4 max-h-60 overflow-y-auto">
+                ${servers.map(server => `
+                    <div class="border border-gray-300 rounded p-4 cursor-pointer hover:bg-gray-50" 
+                         onclick="APP.selectServer('${server.ip}', '${server.id || 'unknown'}')">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-bold">IP: ${server.ip}</p>
+                                <p class="text-sm text-gray-600">ID: ${server.id || 'Desconocido'}</p>
+                            </div>
+                            <div class="text-green-600">● Activo</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="flex gap-4 pt-6">
+                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
+                <button onclick="APP.openModal('clientConnectModal')" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Entrada Manual</button>
+            </div>
+        `;
+        
+        // Agregar al DOM
+        document.body.appendChild(modal);
+        Utils.openModal('serverListModal');
+    },
+
+    /**
+     * Seleccionar servidor de la lista
+     */
+    selectServer(ip, id) {
+        document.getElementById('serverIpInput').value = ip;
+        document.getElementById('serverIdInput').value = id;
+        Utils.closeAllPopups();
+        Utils.openModal('clientConnectModal');
+        Utils.showToast('Servidor seleccionado');
+    },
+
     /**
      * Conectar a servidor
      */
@@ -512,6 +739,9 @@ const APP = {
         }
 
         WebRTC.connectToServer(ip, id || 'unknown').then(() => {
+            // Iniciar heartbeat para detectar desconexiones
+            this.startServerHeartbeat();
+            
             Utils.closeAllPopups();
             UI.renderNetworkStatus();
             Utils.showToast('CONECTADO AL SERVIDOR');
@@ -519,6 +749,41 @@ const APP = {
             Utils.showToast('Error de conexión');
             console.error(err);
         });
+    },
+
+    // Heartbeat para detectar desconexión del servidor
+    startServerHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+        }
+        
+        this.heartbeatInterval = setInterval(async () => {
+            if (localStorage.getItem('networkRole') === 'client') {
+                try {
+                    // Verificar si el servidor sigue respondiendo
+                    const serverIP = localStorage.getItem('serverIP');
+                    if (serverIP) {
+                        const response = await fetch(`http://${serverIP}:8080/ping`, {
+                            method: 'GET',
+                            mode: 'no-cors',
+                            signal: AbortSignal.timeout(2000)
+                        });
+                        // Si llega aquí, servidor está vivo
+                    }
+                } catch (error) {
+                    console.warn('Servidor no responde, detectando desconexión');
+                    this.handleServerDisconnection();
+                    clearInterval(this.heartbeatInterval);
+                }
+            }
+        }, 10000); // Cada 10 segundos
+    },
+
+    stopServerHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+        }
     },
 
     /**
@@ -672,6 +937,7 @@ const APP = {
      */
     disconnectNetwork() {
         if (confirm('¿Desconectar de la red?')) {
+            this.stopServerHeartbeat();
             WebRTC.disconnect();
             UI.renderNetworkStatus();
             Utils.showToast('DESCONECTADO');

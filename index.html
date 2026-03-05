@@ -166,6 +166,7 @@
                 <input type="text" id="serverIdInput" placeholder="peer_xxx">
             </div>
             <p class="text-xs text-muted text-center">O escanea el código QR</p>
+            <button onclick="APP.scanForActiveServersUI()" class="w-full bg-gray-100 border-2 border-gray-300 py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-gray-200">🔍 Buscar Servidores</button>
             <button onclick="APP.openModal('qrScannerModal')" class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold">📱 Escanear QR</button>
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
@@ -390,6 +391,71 @@
             navigator.serviceWorker.register('./public/sw.js').catch(err => {
                 console.log('Service Worker registration failed: ', err);
             });
+        }
+    </script>
+    
+    <!-- PWA Install Banner -->
+    <div id="installBanner" class="fixed bottom-4 left-4 right-4 bg-black text-white p-4 rounded-lg shadow-lg z-50 hidden">
+        <div class="flex items-center justify-between">
+            <div class="flex-1">
+                <h3 class="font-bold text-lg mb-1">Instalar POS Minimalist</h3>
+                <p class="text-sm opacity-90">Instala la app para acceso rápido y modo offline</p>
+            </div>
+            <div class="flex gap-2 ml-4">
+                <button id="installBtn" class="bg-white text-black px-4 py-2 rounded font-bold text-sm">Instalar</button>
+                <button id="dismissBtn" class="text-white opacity-70 px-4 py-2 rounded text-sm">Después</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Solo mostrar si no está instalado y no fue descartado
+            if (!window.matchMedia('(display-mode: standalone)').matches && 
+                localStorage.getItem('installBannerDismissed') !== 'true') {
+                showInstallBanner();
+            }
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada');
+            hideInstallBanner();
+        });
+        
+        function showInstallBanner() {
+            const banner = document.getElementById('installBanner');
+            banner.classList.remove('hidden');
+            
+            document.getElementById('installBtn').onclick = async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('Usuario aceptó instalar PWA');
+                    }
+                    deferredPrompt = null;
+                }
+                hideInstallBanner();
+            };
+            
+            document.getElementById('dismissBtn').onclick = () => {
+                localStorage.setItem('installBannerDismissed', 'true');
+                hideInstallBanner();
+            };
+        }
+        
+        function hideInstallBanner() {
+            document.getElementById('installBanner').classList.add('hidden');
+        }
+        
+        // Verificar estado inicial
+        if (localStorage.getItem('installBannerDismissed') === 'true') {
+            document.getElementById('installBanner').classList.add('hidden');
         }
     </script>
 </body>
