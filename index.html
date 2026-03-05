@@ -17,7 +17,6 @@
     
     <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     
     <title>POS Minimalist - Editorial Design</title>
 </head>
@@ -395,68 +394,154 @@
     </script>
     
     <!-- PWA Install Banner -->
-    <div id="installBanner" class="fixed bottom-4 left-4 right-4 bg-black text-white p-4 rounded-lg shadow-lg z-50 hidden">
-        <div class="flex items-center justify-between">
+    <div id="installBanner" class="fixed bottom-4 left-4 right-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white p-5 rounded-lg shadow-2xl z-50 hidden">
+        <div class="flex items-center justify-between gap-4">
             <div class="flex-1">
-                <h3 class="font-bold text-lg mb-1">Instalar POS Minimalist</h3>
-                <p class="text-sm opacity-90">Instala la app para acceso rápido y modo offline</p>
+                <h3 class="font-bold text-base mb-1">📱 Instalar POS Minimalist</h3>
+                <p class="text-sm opacity-95">Agrega a tu pantalla de inicio para acceso rápido</p>
             </div>
-            <div class="flex gap-2 ml-4">
-                <button id="installBtn" class="bg-white text-black px-4 py-2 rounded font-bold text-sm">Instalar</button>
-                <button id="dismissBtn" class="text-white opacity-70 px-4 py-2 rounded text-sm">Después</button>
+            <div class="flex gap-3 flex-shrink-0">
+                <button id="installBtn" class="bg-white text-blue-600 px-5 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition">Instalar</button>
+                <button id="dismissBtn" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg text-sm transition">✕</button>
             </div>
         </div>
     </div>
     
     <script>
-        let deferredPrompt;
+        let deferredPrompt = null;
+        const installBannerDismissedKey = 'pwa_installBannerDismissed';
+        const installCheckInterval = 'pwa_installCheckInterval';
         
+        // Función para mostrar banner
+        function showInstallBanner() {
+            const banner = document.getElementById('installBanner');
+            if (banner && !isAppInstalled()) {
+                banner.classList.remove('hidden');
+                banner.style.animation = 'slideInUp 0.3s ease-out';
+            }
+        }
+        
+        // Función para ocultar banner
+        function hideInstallBanner() {
+            const banner = document.getElementById('installBanner');
+            if (banner) {
+                banner.classList.add('hidden');
+            }
+        }
+        
+        // Verificar si la app está instalada
+        function isAppInstalled() {
+            // Verificación 1: display-mode standalone
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                return true;
+            }
+            
+            // Verificación 2: navigator.standalone (Safari iOS)
+            if (navigator.standalone === true) {
+                return true;
+            }
+            
+            // Verificación 3: fullscreen mode
+            if (window.matchMedia('(display-mode: fullscreen)').matches) {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Event: beforeinstallprompt (navegadores que lo soportan)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+            console.log('beforeinstallprompt detectado');
             
-            // Solo mostrar si no está instalado y no fue descartado
-            if (!window.matchMedia('(display-mode: standalone)').matches && 
-                localStorage.getItem('installBannerDismissed') !== 'true') {
+            // Mostrar banner si no está instalado
+            if (!isAppInstalled() && localStorage.getItem(installBannerDismissedKey) !== 'true') {
                 showInstallBanner();
             }
         });
         
+        // Event: appinstalled
         window.addEventListener('appinstalled', () => {
-            console.log('PWA instalada');
+            console.log('✅ PWA instalada');
             hideInstallBanner();
+            localStorage.setItem(installBannerDismissedKey, 'true');
+            deferredPrompt = null;
         });
         
-        function showInstallBanner() {
-            const banner = document.getElementById('installBanner');
-            banner.classList.remove('hidden');
+        // Botón de instalar
+        document.addEventListener('DOMContentLoaded', () => {
+            const installBtn = document.getElementById('installBtn');
+            const dismissBtn = document.getElementById('dismissBtn');
             
-            document.getElementById('installBtn').onclick = async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        console.log('Usuario aceptó instalar PWA');
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`Usuario elegió: ${outcome}`);
+                        hideInstallBanner();
+                    } else {
+                        // Si no hay deferredPrompt, mostrar instrucciones alternativas
+                        showAlternativeInstallInstructions();
                     }
-                    deferredPrompt = null;
-                }
-                hideInstallBanner();
-            };
+                });
+            }
             
-            document.getElementById('dismissBtn').onclick = () => {
-                localStorage.setItem('installBannerDismissed', 'true');
-                hideInstallBanner();
-            };
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    localStorage.setItem(installBannerDismissedKey, 'true');
+                    hideInstallBanner();
+                });
+            }
+            
+            // Mostrar banner si aplica
+            if (!isAppInstalled() && localStorage.getItem(installBannerDismissedKey) !== 'true') {
+                // Si no hay beforeinstallprompt pero no está instalado, esperar un poco y mostrar
+                setTimeout(() => {
+                    if (!deferredPrompt && !isAppInstalled()) {
+                        showInstallBanner();
+                    }
+                }, 2000);
+            }
+        });
+        
+        // Mostrar instrucciones alternativas
+        function showAlternativeInstallInstructions() {
+            const message = `
+Para instalar esta app:
+            
+📱 Android (Chrome):
+1. Toca el menú (⋮)
+2. Selecciona "Instalar app"
+
+🍎 iOS (Safari):
+1. Toca Compartir (↗️)
+2. Selecciona "Agregar a pantalla de inicio"
+
+🖥️ Desktop (Chrome/Edge):
+1. Toca el ícono de instalación (⊞) en la barra
+O
+1. Menú (⋮) → "Instalar POS Minimalist"
+            `;
+            alert(message);
         }
         
-        function hideInstallBanner() {
-            document.getElementById('installBanner').classList.add('hidden');
-        }
-        
-        // Verificar estado inicial
-        if (localStorage.getItem('installBannerDismissed') === 'true') {
-            document.getElementById('installBanner').classList.add('hidden');
-        }
+        // Estilos de animación
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInUp {
+                from {
+                    transform: translateY(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

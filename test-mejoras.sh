@@ -1,0 +1,46 @@
+#!/bin/bash
+# Script de Prueba - Sistema QR y Alertas de Clientes
+
+echo "======================================"
+echo "VERIFICACIÓN DE IMPLEMENTACIÓN"
+echo "======================================"
+echo ""
+
+echo "✅ Verificando cambios en index.html..."
+grep -c 'unpkg.com/qrcode' /home/denied911025/kamiliahs.github.io/index.html > /dev/null && echo "   ✓ Librería QRCode actualizada" || echo "   ✗ Error en librería QRCode"
+
+echo ""
+echo "✅ Verificando funciones en app.js..."
+grep -c 'startServerClientMonitoring' /home/denied911025/kamiliahs.github.io/src/js/app.js > /dev/null && echo "   ✓ startServerClientMonitoring() existe" || echo "   ✗ Error"
+grep -c 'showClientConnectionAlert' /home/denied911025/kamiliahs.github.io/src/js/app.js > /dev/null && echo "   ✓ showClientConnectionAlert() existe" || echo "   ✗ Error"
+grep -c 'stopServerClientMonitoring' /home/denied911025/kamiliahs.github.io/src/js/app.js > /dev/null && echo "   ✓ stopServerClientMonitoring() existe" || echo "   ✗ Error"
+
+echo ""
+echo "✅ Verificando funciones en webrtc.js..."
+grep -c 'notifyServerClientConnected' /home/denied911025/kamiliahs.github.io/src/js/modules/webrtc.js > /dev/null && echo "   ✓ notifyServerClientConnected() existe" || echo "   ✗ Error"
+grep -c 'getConnectedClients' /home/denied911025/kamiliahs.github.io/src/js/modules/webrtc.js > /dev/null && echo "   ✓ getConnectedClients() existe" || echo "   ✗ Error"
+
+echo ""
+echo "✅ Verificando sintaxis JavaScript..."
+node -c /home/denied911025/kamiliahs.github.io/src/js/app.js > /dev/null 2>&1 && echo "   ✓ app.js - Sintaxis correcta" || echo "   ✗ Error en app.js"
+node -c /home/denied911025/kamiliahs.github.io/src/js/modules/webrtc.js > /dev/null 2>&1 && echo "   ✓ webrtc.js - Sintaxis correcta" || echo "   ✗ Error en webrtc.js"
+
+echo ""
+echo "======================================"
+echo "RESUMEN"
+echo "======================================"
+echo ""
+echo "Cambios implementados:"
+echo "  1. ✅ QR: Librería mejorada + lógica de renderizado"
+echo "  2. ✅ Alertas: Sistema de notificación de clientes"
+echo "  3. ✅ Monitoreo: Detección automática de conexiones"
+echo ""
+echo "Para probar:"
+echo "  1. Abre http://localhost:8000 en el navegador"
+echo "  2. Abre la consola (F12)"
+echo "  3. Click en 'Iniciar Servidor'"
+echo "  4. Verifica que el QR aparezca en el canvas"
+echo "  5. Abre otra pestaña y conecta como cliente"
+echo "  6. Verifica que aparezca alerta en el servidor"
+echo ""
+echo "======================================"

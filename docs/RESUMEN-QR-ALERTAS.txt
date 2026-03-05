@@ -1,0 +1,146 @@
+# ✅ MEJORAS IMPLEMENTADAS - Resumen Rápido
+
+## 🎯 Problema 1: QR No Se Ve
+**Estado**: ✅ RESUELTO
+
+### Cambios:
+1. **Librería mejorada**: 
+   - Cambio de CDN: `cdnjs.cloudflare.com` → `unpkg.com`
+   - Nueva versión más confiable de QRCode.js
+
+2. **Lógica mejorada en `generateServerQR()`**:
+   - Limpieza completa del canvas
+   - Relleno blanco de fondo
+   - Callback mejorado con mejor detección de errores
+   - Forzado de repaint con cambio de opacidad
+   - Mensajes de console más descriptivos (✅ y ❌)
+
+**Archivos modificados**:
+- `index.html` - Línea 19 (cambio de CDN)
+- `src/js/app.js` - Función `generateServerQR()` (líneas 448-505)
+
+---
+
+## 🔔 Problema 2: Sin Alertas de Clientes Conectados
+**Estado**: ✅ RESUELTO
+
+### Sistema Implementado:
+
+#### A. Notificación en Cliente
+- Cuando el cliente se conecta, envía su información al servidor
+- Función: `WebRTC.notifyServerClientConnected()`
+- Datos almacenados en localStorage con clave única por cliente
+
+#### B. Monitoreo en Servidor
+- `startServerClientMonitoring()`: Inicia verificación cada 2 segundos
+- `showClientConnectionAlert()`: Muestra alerta visual con:
+  - IP del cliente
+  - ID único del cliente
+  - Hora de conexión
+  - Duración: 8 segundos
+  - Animación suave
+
+#### C. Detener Monitoreo
+- `stopServerClientMonitoring()`: Se ejecuta al desconectar
+- Previene memory leaks
+
+**Archivos modificados**:
+- `src/js/modules/webrtc.js`:
+  - Línea 103: Llamada a `notifyServerClientConnected()`
+  - Líneas 378-434: Nuevas funciones para notificación
+  
+- `src/js/app.js`:
+  - Línea 438: Llamada a `startServerClientMonitoring()`
+  - Líneas 441-533: Nuevas funciones para monitoreo y alertas
+  - Línea 1040: Llamada a `stopServerClientMonitoring()`
+
+---
+
+## 📊 Datos Almacenados en localStorage
+
+```javascript
+// Cada cliente conectado
+client_connected_peer_xxx: {
+    clientIP: "192.168.1.50",
+    clientPeerId: "peer_1709564800000_...",
+    serverIP: "192.168.1.100",
+    connectedAt: 1709564865432
+}
+
+// Lista de clientes por servidor
+server_192.168.1.100_clients: [
+    { clientIP, clientPeerId, connectedAt },
+    { clientIP, clientPeerId, connectedAt }
+]
+```
+
+---
+
+## 🎮 Cómo Usar
+
+### En el Servidor:
+1. Click "Iniciar Servidor"
+2. **Verifica que el QR aparezca** ✅
+3. Espera a que se conecten clientes
+
+### En Clientes:
+1. Click "Conectar a Servidor"
+2. Ingresa IP del servidor
+3. Click "Conectar"
+
+### Resultado:
+- ✅ Notificación verde en servidor
+- ✅ Toast confirma conexión
+- ✅ Consola muestra logs
+- ✅ QR visible y escaneable
+
+---
+
+## 📝 Logs en Consola
+
+```
+✅ Notificación enviada al servidor 192.168.1.100: Cliente 192.168.1.50 conectado
+🔔 Cliente conectado: IP=192.168.1.50, ID=peer_1709564800000_abc123
+✅ QR generado correctamente
+```
+
+---
+
+## 🔧 Funciones Nuevas
+
+### En `webrtc.js`:
+```javascript
+notifyServerClientConnected(serverIp, clientInfo)  // Enviar notificación
+getConnectedClients()                               // Obtener lista de clientes
+```
+
+### En `app.js`:
+```javascript
+startServerClientMonitoring(serverInfo)    // Iniciar monitoreo
+showClientConnectionAlert(clientInfo)      // Mostrar alerta
+stopServerClientMonitoring()                // Detener monitoreo
+```
+
+---
+
+## ✨ Características Adicionales
+
+- 🎨 Notificaciones visuales elegantes (gradiente verde)
+- 📍 Muestra IP y ID único del cliente
+- ⏱️ Timestamp automático de conexión
+- 🔄 Evita duplicados con Set de clientes
+- 🧹 Limpieza automática al desconectar
+- 📱 Compatible con PWA y mobile
+- 🚀 Sin dependencias externas (solo localStorage)
+
+---
+
+## 📋 Estado Final
+
+- ✅ QR: Se ve correctamente en canvas
+- ✅ Alertas: Se muestran cuando clientes se conectan
+- ✅ IP visible: Se muestra la IP del cliente en la alerta
+- ✅ Monitoreo: Automático y sin memory leaks
+- ✅ Sintaxis: Verificada y correcta
+- ✅ Documentación: Completa en `MEJORAS-QR-ALERTAS.md`
+

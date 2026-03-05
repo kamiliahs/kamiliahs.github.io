@@ -436,6 +436,9 @@ const APP = {
         // Generar QR
         this.generateServerQR(info);
 
+        // Iniciar monitoreo de clientes conectados
+        this.startServerClientMonitoring(info);
+
         Utils.closeAllPopups();
         Utils.openModal('serverStartedModal');
 
@@ -443,10 +446,100 @@ const APP = {
     },
 
     /**
+     * Monitorear clientes que se conectan al servidor
+     */
+    startServerClientMonitoring(serverInfo) {
+        // Limpiar intervalo anterior si existe
+        if (this.serverMonitoringInterval) {
+            clearInterval(this.serverMonitoringInterval);
+        }
+
+        const monitoredClients = new Set();
+
+        // Verificar cada 2 segundos si hay nuevos clientes
+        this.serverMonitoringInterval = setInterval(() => {
+            const connectedClients = WebRTC.getConnectedClients();
+            
+            connectedClients.forEach(client => {
+                const clientKey = `${client.clientPeerId}`;
+                
+                // Si es un cliente nuevo
+                if (!monitoredClients.has(clientKey)) {
+                    monitoredClients.add(clientKey);
+                    
+                    // Mostrar alerta
+                    this.showClientConnectionAlert(client);
+                    
+                    console.log(`🔔 Cliente conectado: IP=${client.clientIP}, ID=${client.clientPeerId}`);
+                }
+            });
+        }, 2000);
+    },
+
+    /**
+     * Mostrar alerta visual cuando cliente se conecta
+     */
+    showClientConnectionAlert(clientInfo) {
+        // Crear notificación
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 9999;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 350px;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        
+        notification.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 8px;">✅ Cliente Conectado</div>
+            <div style="font-size: 12px; opacity: 0.9;">
+                <div><strong>IP:</strong> ${clientInfo.clientIP}</div>
+                <div><strong>ID:</strong> ${clientInfo.clientPeerId.substring(0, 20)}...</div>
+                <div><strong>Hora:</strong> ${timestamp}</div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // También mostrar toast
+        Utils.showToast(`Cliente conectado: ${clientInfo.clientIP}`);
+        
+        // Remover notificación después de 8 segundos
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s ease-out';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 8000);
+    },
+
+    /**
+     * Detener monitoreo de clientes
+     */
+    stopServerClientMonitoring() {
+        if (this.serverMonitoringInterval) {
+            clearInterval(this.serverMonitoringInterval);
+            this.serverMonitoringInterval = null;
+        }
+    },
+
+    /**
      * Generar código QR para conexión del servidor
      */
     generateServerQR(serverInfo) {
-        console.log('Generando QR para servidor:', serverInfo);
+        console.log('📱 Generando QR para servidor:', serverInfo);
         
         const qrData = JSON.stringify({
             ip: serverInfo.ip,
@@ -459,53 +552,74 @@ const APP = {
         
         // Validar que el canvas existe
         if (!qrCanvas) {
-            console.error('Canvas QR no encontrado');
+            console.error('❌ Canvas QR no encontrado en el DOM');
             Utils.showToast('Error: Canvas QR no disponible');
             return;
         }
         
         try {
-            if (window.QRCode) {
-                // Limpiar canvas completamente
-                const ctx = qrCanvas.getContext('2d');
-                ctx.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
-                
-                // Forzar redibujo limpiando el contenido anterior
-                qrCanvas.width = qrCanvas.width; // Reset canvas
-                
-                console.log('Generando QR con datos:', qrData);
-                
-                // Generar QR con callback mejorado
-                QRCode.toCanvas(qrCanvas, qrData, {
-                    errorCorrectionLevel: 'H',
-                    type: 'image/png',
-                    quality: 0.95,
-                    margin: 1,
-                    width: 200,
-                    color: {
-                        dark: '#000000',
-                        light: '#FFFFFF'
-                    }
-                }, (error) => {
-                    if (error) {
-                        console.error('Error generando QR:', error);
-                        Utils.showToast('Error al generar código QR');
-                    } else {
-                        console.log('✓ QR generado correctamente');
-                        // Forzar actualización visual
-                        qrCanvas.style.display = 'none';
-                        qrCanvas.offsetHeight; // Trigger reflow
-                        qrCanvas.style.display = 'block';
-                    }
-                });
-            } else {
-                console.error('QRCode library no disponible');
-                Utils.showToast('Biblioteca QR no disponible');
+            // Verificar que la librería está disponible
+            if (!window.QRCode) {
+                console.error('❌ Librería QRCode no está cargada');
+                console.warn('Intentando cargar desde CDN alternativo...');
+                this.loadQRCodeLibrary();
+                return;
             }
+            
+            console.log('📊 Datos QR:', qrData);
+            
+            // Limpiar canvas completamente
+            const ctx = qrCanvas.getContext('2d');
+            
+            // Rellenar con blanco primero
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+            
+            // Crear instancia nueva de QRCode
+            const qr = new window.QRCode(qrCanvas, {
+                text: qrData,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#FFFFFF',
+                correctLevel: window.QRCode.CorrectLevel.H
+            });
+            
+            console.log('✅ QR generado exitosamente');
+            
+            // Forzar actualización visual
+            setTimeout(() => {
+                qrCanvas.style.opacity = '0.99';
+                setTimeout(() => {
+                    qrCanvas.style.opacity = '1';
+                }, 10);
+            }, 100);
+            
         } catch (err) {
-            console.error('Error en generateServerQR:', err);
-            Utils.showToast('Error al generar código QR');
+            console.error('❌ Error generando QR:', err);
+            Utils.showToast('Error al generar código QR: ' + err.message);
         }
+    },
+
+    /**
+     * Cargar librería QRCode desde CDN alternativo
+     */
+    loadQRCodeLibrary() {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js';
+        script.onload = () => {
+            console.log('✅ Librería QRCode cargada desde CDN');
+            // Reintentar generar QR
+            const status = WebRTC.getStatus();
+            if (status.localInfo) {
+                this.generateServerQR(status.localInfo);
+            }
+        };
+        script.onerror = () => {
+            console.error('❌ No se pudo cargar la librería QRCode');
+            Utils.showToast('No se pudo cargar la librería QR');
+        };
+        document.head.appendChild(script);
     },
 
     /**
@@ -938,6 +1052,7 @@ const APP = {
     disconnectNetwork() {
         if (confirm('¿Desconectar de la red?')) {
             this.stopServerHeartbeat();
+            this.stopServerClientMonitoring();
             WebRTC.disconnect();
             UI.renderNetworkStatus();
             Utils.showToast('DESCONECTADO');

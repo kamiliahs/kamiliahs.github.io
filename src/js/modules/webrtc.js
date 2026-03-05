@@ -101,6 +101,9 @@ const WebRTC = {
         // Intentar conexión WebSocket
         this.connectWebSocket(serverIp, 8081);
         
+        // Notificar al servidor que se conectó un cliente
+        this.notifyServerClientConnected(serverIp, this.localInfo);
+        
         return this.localInfo;
     },
 
@@ -373,5 +376,68 @@ const WebRTC = {
             isConnected: this.isConnected,
             localInfo: this.localInfo
         };
+    },
+
+    /**
+     * Notificar al servidor que un cliente se conectó
+     */
+    notifyServerClientConnected(serverIp, clientInfo) {
+        try {
+            // Guardar en localStorage para que el servidor lo detecte
+            const clientConnectionKey = `client_connected_${clientInfo.peerId}`;
+            const connectionData = {
+                clientIP: clientInfo.ip,
+                clientPeerId: clientInfo.peerId,
+                serverIP: serverIp,
+                connectedAt: Date.now(),
+                type: 'client_connection_notification'
+            };
+            
+            // Guardar en localStorage
+            localStorage.setItem(clientConnectionKey, JSON.stringify(connectionData));
+            
+            // También guardar en una lista general de clientes conectados
+            const connectedClientsKey = `server_${serverIp}_clients`;
+            let connectedClients = [];
+            try {
+                const existing = localStorage.getItem(connectedClientsKey);
+                if (existing) {
+                    connectedClients = JSON.parse(existing);
+                }
+            } catch (e) {
+                connectedClients = [];
+            }
+            
+            // Agregar nuevo cliente si no existe
+            if (!connectedClients.find(c => c.clientPeerId === clientInfo.peerId)) {
+                connectedClients.push({
+                    clientIP: clientInfo.ip,
+                    clientPeerId: clientInfo.peerId,
+                    connectedAt: Date.now()
+                });
+            }
+            
+            localStorage.setItem(connectedClientsKey, JSON.stringify(connectedClients));
+            
+            console.log(`✅ Notificación enviada al servidor ${serverIp}: Cliente ${clientInfo.ip} conectado`);
+        } catch (error) {
+            console.error('Error notificando al servidor:', error);
+        }
+    },
+
+    /**
+     * Obtener lista de clientes conectados al servidor actual
+     */
+    getConnectedClients() {
+        try {
+            if (this.isServer && this.localInfo) {
+                const connectedClientsKey = `server_${this.localInfo.ip}_clients`;
+                const data = localStorage.getItem(connectedClientsKey);
+                return data ? JSON.parse(data) : [];
+            }
+        } catch (error) {
+            console.error('Error obteniendo clientes conectados:', error);
+        }
+        return [];
     }
 };
