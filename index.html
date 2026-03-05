@@ -15,6 +15,10 @@
     <link rel="stylesheet" href="./src/css/main.css">
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    
     <title>POS Minimalist - Editorial Design</title>
 </head>
 <body>
@@ -120,6 +124,113 @@
         </div>
     </div>
 
+    <!-- Network Configuration Modals -->
+    <div id="networkRoleModal" class="modal">
+        <p class="label-caps mb-8">Configuración de Red</p>
+        <div class="space-y-6">
+            <button onclick="APP.selectServerRole()" class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest hover:bg-gray-800">Iniciar Servidor</button>
+            <button onclick="APP.openModal('clientConnectModal')" class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-gray-100">Conectar a Servidor</button>
+            <button onclick="APP.closeAllPopups()" class="w-full label-caps text-black py-4">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="serverStartedModal" class="modal">
+        <p class="label-caps mb-8">Servidor Iniciado ✓</p>
+        <div class="space-y-6">
+            <div class="bg-gray-50 p-4">
+                <p class="label-caps mb-2">IP Local</p>
+                <p class="font-bold text-sm" id="serverIP">192.168.1.100</p>
+            </div>
+            <div class="bg-gray-50 p-4">
+                <p class="label-caps mb-2">ID del Servidor</p>
+                <p class="font-bold text-xs" id="serverID">peer_xxx</p>
+            </div>
+            <div class="flex justify-center">
+                <canvas id="qrCode" width="200" height="200"></canvas>
+            </div>
+            <p class="text-xs text-center text-muted">Escanea este código desde otra aplicación</p>
+            <button onclick="APP.copyServerInfo()" class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Copiar Info</button>
+            <button onclick="APP.closeAllPopups()" class="w-full label-caps text-black py-4">Entendido</button>
+        </div>
+    </div>
+
+    <div id="clientConnectModal" class="modal">
+        <p class="label-caps mb-8">Conectar a Servidor</p>
+        <div class="space-y-6">
+            <div>
+                <p class="label-caps mb-2">IP del Servidor</p>
+                <input type="text" id="serverIpInput" placeholder="192.168.1.100">
+            </div>
+            <div>
+                <p class="label-caps mb-2">ID del Servidor (opcional)</p>
+                <input type="text" id="serverIdInput" placeholder="peer_xxx">
+            </div>
+            <p class="text-xs text-muted text-center">O escanea el código QR</p>
+            <button onclick="APP.openModal('qrScannerModal')" class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold">📱 Escanear QR</button>
+            <div class="flex gap-4 pt-10">
+                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
+                <button onclick="APP.connectToServer()" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Conectar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="qrScannerModal" class="modal">
+        <p class="label-caps mb-8">Escanear Código QR</p>
+        <div class="space-y-6">
+            <div style="position: relative; background: #000; border-radius: 8px; overflow: hidden;">
+                <video id="qrScannerVideo" width="100%" style="max-height: 400px; display: block;"></video>
+                <!-- Overlay con cruz para centrar QR -->
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                    <svg style="width: 100%; height: 100%;" viewBox="0 0 400 400">
+                        <!-- Esquinas -->
+                        <path d="M 40 40 L 40 100 L 100 100" stroke="#00ff00" stroke-width="2" fill="none"/>
+                        <path d="M 360 40 L 360 100 L 300 100" stroke="#00ff00" stroke-width="2" fill="none"/>
+                        <path d="M 40 360 L 40 300 L 100 300" stroke="#00ff00" stroke-width="2" fill="none"/>
+                        <path d="M 360 360 L 360 300 L 300 300" stroke="#00ff00" stroke-width="2" fill="none"/>
+                        <!-- Cruz central -->
+                        <line x1="200" y1="150" x2="200" y2="250" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+                        <line x1="150" y1="200" x2="250" y2="200" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <p class="text-xs text-center text-muted">
+                Centra el código QR dentro del recuadro verde
+            </p>
+            
+            <div class="flex gap-4">
+                <button onclick="APP.startQRScanner()" class="flex-1 bg-black text-white font-bold py-3 uppercase text-[10px] tracking-widest">
+                    📷 Iniciar
+                </button>
+                <button onclick="APP.stopQRScanner()" class="flex-1 border-2 border-black py-3 uppercase text-[10px] tracking-widest font-bold">
+                    ⊗ Detener
+                </button>
+            </div>
+            
+            <div style="background: #f9f9f9; padding: 12px; border-radius: 4px; font-size: 12px;">
+                <p class="font-bold mb-2">💡 Consejos:</p>
+                <ul style="margin: 0; padding-left: 20px; font-size: 11px; line-height: 1.5;">
+                    <li>Asegúrate que el código sea visible y esté bien iluminado</li>
+                    <li>Mantén el dispositivo quieto</li>
+                    <li>Intenta acercarte más si es muy pequeño</li>
+                    <li>Si no funciona, ingresa la IP manualmente</li>
+                </ul>
+            </div>
+            
+            <button onclick="APP.closeAllPopups(); Utils.openModal('clientConnectModal')" class="w-full label-caps text-black py-4">
+                ← Volver a Conexión Manual
+            </button>
+        </div>
+    </div>
+
+    <div id="connectionStatusModal" class="modal">
+        <p class="label-caps mb-8">Estado de Conexión</p>
+        <div class="space-y-6" id="connectionStatus">
+            <!-- Contenido dinámico -->
+        </div>
+        <button onclick="APP.closeAllPopups()" class="w-full label-caps text-black py-4 mt-6">Cerrar</button>
+    </div>
+
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <button onclick="APP.toggleMenu()" class="label-caps mb-20">← Volver</button>
@@ -128,6 +239,7 @@
             <div onclick="APP.switchView('recipes')" class="heading-xl">RECETAS</div>
             <div onclick="APP.switchView('reports')" class="heading-xl">MÁRGENES</div>
             <div onclick="APP.switchView('orders')" class="heading-xl">PEDIDOS</div>
+            <div onclick="APP.switchView('network')" class="heading-xl">RED</div>
         </div>
     </div>
 
@@ -212,12 +324,54 @@
         <div id="ordersContainer" class="space-y-4"></div>
     </div>
 
+    <!-- Network Configuration View -->
+    <div id="networkView" class="view-container hidden-view p-6">
+        <div class="mb-10">
+            <h3 class="heading-lg mb-2">RED LOCAL</h3>
+            <div id="networkStatus" class="text-sm text-muted">Desconectado</div>
+        </div>
+        
+        <div class="space-y-6">
+            <button onclick="APP.openModal('networkRoleModal')" class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">
+                ⚙️ Configurar Conexión
+            </button>
+            
+            <div id="networkInfo" class="bg-gray-50 p-4 rounded hidden">
+                <p class="label-caps mb-2">Información</p>
+                <div id="networkDetails" class="text-xs space-y-1 font-medium"></div>
+            </div>
+
+            <div id="syncStatus" class="bg-gray-50 p-4 rounded hidden">
+                <p class="label-caps mb-2">Último Sync</p>
+                <p id="lastSyncTime" class="text-xs font-medium">---</p>
+            </div>
+
+            <button onclick="APP.manualSync()" class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold hidden" id="syncButton">
+                🔄 Sincronizar Ahora
+            </button>
+
+            <button onclick="APP.disconnectNetwork()" class="w-full text-red-500 py-4 uppercase text-[10px] tracking-widest font-bold border-2 border-red-500 hidden" id="disconnectButton">
+                ✕ Desconectar
+            </button>
+        </div>
+
+        <div class="mt-12 pt-6 line-border">
+            <p class="label-caps mb-4">Documentación</p>
+            <p class="text-xs text-muted leading-relaxed">
+                Modo Servidor: Actúa como punto central de sincronización. Solo el servidor puede eliminar pedidos confirmados.
+                <br><br>
+                Modo Cliente: Se sincroniza con el servidor. Los datos locales se respalddan automáticamente.
+            </p>
+        </div>
+    </div>
+
     <!-- BOTTOM NAVIGATION -->
     <nav class="bottom-nav">
         <div onclick="APP.switchView('pos')" class="nav-item active" id="nav-pos">Ventas</div>
         <div onclick="APP.switchView('inventory')" class="nav-item" id="nav-inventory">Stock</div>
         <div onclick="APP.switchView('reports')" class="nav-item" id="nav-reports">Stats</div>
         <div onclick="APP.switchView('orders')" class="nav-item" id="nav-orders">Pedidos</div>
+        <div onclick="APP.switchView('network')" class="nav-item" id="nav-network">Red</div>
         <div onclick="APP.toggleMenu()" class="nav-item">Menu</div>
     </nav>
 
@@ -226,6 +380,8 @@
     <script src="./src/js/modules/data.js"></script>
     <script src="./src/js/modules/ui.js"></script>
     <script src="./src/js/modules/utils.js"></script>
+    <script src="./src/js/modules/webrtc.js"></script>
+    <script src="./src/js/modules/sync.js"></script>
     <script src="./src/js/app.js"></script>
     
     <!-- Service Worker Registration -->

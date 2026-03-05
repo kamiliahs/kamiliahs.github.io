@@ -49,6 +49,7 @@ const Data = {
             this.stock[ingredient.id] = parseFloat(quantity);
         }
         this.saveAll();
+        Sync.syncAddIngredient(ingredient);
         return ingredient;
     },
 
@@ -62,6 +63,7 @@ const Data = {
             ingredient.cost = parseFloat(cost);
             ingredient.unit = unit;
             this.saveAll();
+            Sync.syncUpdateIngredient(id, ingredient);
             return true;
         }
         return false;
@@ -75,6 +77,22 @@ const Data = {
         if (ingredient) {
             ingredient.cost = parseFloat(newCost);
             this.saveAll();
+            Sync.syncUpdateIngredient(id, ingredient);
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Eliminar ingrediente
+     */
+    deleteIngredient(id) {
+        const index = this.ingredients.findIndex(i => i.id === id);
+        if (index !== -1) {
+            this.ingredients.splice(index, 1);
+            delete this.stock[id];
+            this.saveAll();
+            Sync.syncDeleteIngredient(id);
             return true;
         }
         return false;
@@ -86,6 +104,7 @@ const Data = {
     updateStock(ingredientId, quantity) {
         this.stock[ingredientId] = parseFloat(quantity);
         this.saveAll();
+        Sync.syncStockUpdate(ingredientId, quantity);
     },
 
     /**
@@ -93,15 +112,6 @@ const Data = {
      */
     getStock(ingredientId) {
         return this.stock[ingredientId] || 0;
-    },
-
-    /**
-     * Eliminar ingrediente
-     */
-    deleteIngredient(id) {
-        this.ingredients = this.ingredients.filter(i => i.id !== id);
-        delete this.stock[id];
-        this.saveAll();
     },
 
     /**
@@ -121,6 +131,7 @@ const Data = {
         };
         this.products.push(product);
         this.saveAll();
+        Sync.syncAddProduct(product);
         return product;
     },
 
@@ -135,6 +146,7 @@ const Data = {
             product.price = parseFloat(price);
             product.recipe = recipe;
             this.saveAll();
+            Sync.syncUpdateProduct(id, product);
             return true;
         }
         return false;
@@ -146,6 +158,7 @@ const Data = {
     deleteProduct(id) {
         this.products = this.products.filter(p => p.id !== id);
         this.saveAll();
+        Sync.syncDeleteProduct(id);
     },
 
     /**
@@ -200,19 +213,22 @@ const Data = {
     checkout() {
         if (this.cart.length === 0) return false;
 
-        this.cart.forEach(item => {
-            this.salesHistory.push({
-                id: 'sale_' + Date.now() + Math.random(),
-                price: item.price,
-                cost: item.costAtSale,
+        const sale = {
+            id: 'sale_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            total: this.getCartTotal(),
+            items: this.cart.map(item => ({
+                id: item.id,
                 name: item.name,
-                timestamp: Date.now(),
-                items: item.recipe || []
-            });
-        });
+                price: item.price,
+                cost: item.costAtSale
+            })),
+            timestamp: Date.now()
+        };
 
+        this.salesHistory.push(sale);
         this.cart = [];
         this.saveAll();
+        Sync.syncNewSale(sale);
         return true;
     },
 
@@ -231,6 +247,7 @@ const Data = {
         if (sale) {
             sale.price = parseFloat(price);
             this.saveAll();
+            Sync.syncUpdateSale(saleId, sale);
             return true;
         }
         return false;

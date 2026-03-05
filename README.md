@@ -12,6 +12,27 @@ Una aplicación web progresiva (PWA) minimalista y moderna para gestión de punt
 - 🔧 **Modular** - Código organizado en módulos reutilizables
 - ⚡ **Ligero** - Sin dependencias externas (solo Tailwind CSS)
 - 📊 **Reportes en Tiempo Real** - Estadísticas de ventas y márgenes
+- 🌐 **Red Local P2P** - Sincronización entre múltiples dispositivos en la misma red WiFi
+- 📱 **Modo Servidor/Cliente** - Configura un dispositivo como central de datos
+- 🔄 **Sincronización Bidireccional** - Los cambios se reflejan en tiempo real
+
+## 🆕 Red Local (Novedad)
+
+POS Minimalist ahora permite conectar múltiples dispositivos para trabajar colaborativamente:
+
+### Modos de Operación
+- **Servidor**: Dispositivo central que gestiona datos maestros
+- **Cliente**: Terminales conectadas que sincronizan datos
+
+### Características de Red
+- ✓ Detección automática de IP local
+- ✓ Conexión mediante código QR
+- ✓ Sincronización de insumos, recetas y pedidos
+- ✓ Respaldo automático en cada dispositivo
+- ✓ Control centralizado de eliminación de pedidos
+- ✓ Funciona en redes WiFi locales (192.168.x.x, 10.x.x.x)
+
+**Ver [GUIA_RED_LOCAL.md](docs/GUIA_RED_LOCAL.md) para instrucciones completas.**
 
 ## 📋 Funcionalidades
 
@@ -101,8 +122,27 @@ Los datos se guardan en **localStorage** del navegador:
 - `min_pos_ing` - Insumos
 - `min_pos_prod` - Productos/Recetas
 - `min_pos_sales` - Historial de ventas
+- `min_pos_stock` - Inventario de stock
 
-> ⚠️ Los datos son locales al dispositivo. No se sincronizan automáticamente entre dispositivos.
+> 💡 **Nuevo**: Con el sistema de red local, los datos se sincronizan entre dispositivos conectados.
+
+## 🌐 Red Local (WebRTC)
+
+El sistema ahora incluye sincronización P2P para múltiples dispositivos:
+
+### Módulos de Red
+- **webrtc.js** - Conexión P2P y gestión de red
+- **sync.js** - Sincronización bidireccional de datos
+
+### Funcionalidades
+- ✓ Modo Servidor (dispositivo central)
+- ✓ Modo Cliente (terminales conectadas)
+- ✓ Generación y escaneo de código QR
+- ✓ Sincronización de insumos, recetas y pedidos
+- ✓ Solo servidor puede eliminar pedidos confirmados
+- ✓ Respaldo automático en cada dispositivo
+
+**Ver [docs/GUIA_RED_LOCAL.md](docs/GUIA_RED_LOCAL.md) para más detalles.**
 
 ## 📱 Compatibilidad
 
@@ -170,7 +210,24 @@ El proyecto está listo para ser publicado en GitHub Pages:
 - ✅ No requiere autenticación (uso local)
 - ✅ No envía datos a servidores
 - ✅ Funciona completamente offline
+- ✅ Red local cifrada internamente
 - ⚠️ Los datos son locales al dispositivo/navegador
+- ⚠️ Red local no es segura para internet público (solo LAN)
+
+## 📚 Documentación Adicional
+
+### Guías de Red Local
+- [GUIA_RED_LOCAL.md](docs/GUIA_RED_LOCAL.md) - Guía de usuario paso a paso
+- [ARQUITECTURA_RED.md](docs/ARQUITECTURA_RED.md) - Diseño técnico
+- [EJEMPLO_PRACTICO_RED.md](docs/EJEMPLO_PRACTICO_RED.md) - Caso de uso: Pizzería
+- [API_RED_REFERENCIA.md](docs/API_RED_REFERENCIA.md) - Referencia API para desarrolladores
+- [DIAGRAMA_ARQUITECTURA.md](DIAGRAMA_ARQUITECTURA.md) - Diagramas visuales
+- [IMPLEMENTACION_RED_LOCAL.md](IMPLEMENTACION_RED_LOCAL.md) - Resumen de implementación
+
+### Guías Generales
+- [docs/GUIA_USUARIO.md](docs/GUIA_USUARIO.md) - Manual de usuario
+- [docs/MANUAL_INSTALACION.md](docs/MANUAL_INSTALACION.md) - Instalación
+- Más guías en carpeta `docs/`
 
 ## 🎨 Personalización
 

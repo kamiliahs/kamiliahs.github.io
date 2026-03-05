@@ -419,6 +419,270 @@ const APP = {
      */
     addIngredientRow() {
         Utils.addIngredientRow();
+    },
+
+    // ========== RED Y SINCRONIZACIÓN ==========
+
+    /**
+     * Seleccionar modo servidor
+     */
+    async selectServerRole() {
+        const info = await WebRTC.startServer();
+        
+        // Llenar modal de servidor iniciado
+        document.getElementById('serverIP').innerText = info.ip;
+        document.getElementById('serverID').innerText = info.peerId;
+
+        // Generar QR
+        this.generateServerQR(info);
+
+        Utils.closeAllPopups();
+        Utils.openModal('serverStartedModal');
+
+        Utils.showToast('SERVIDOR INICIADO ✓');
+    },
+
+    /**
+     * Generar código QR para conexión del servidor
+     */
+    generateServerQR(serverInfo) {
+        const qrData = JSON.stringify({
+            ip: serverInfo.ip,
+            id: serverInfo.peerId,
+            type: 'server',
+            version: '1.0'
+        });
+
+        const qrCanvas = document.getElementById('qrCode');
+        try {
+            if (window.QRCode) {
+                // Limpiar canvas anterior
+                qrCanvas.getContext('2d').clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+                
+                // Generar QR
+                QRCode.toCanvas(qrCanvas, qrData, {
+                    errorCorrectionLevel: 'H',
+                    type: 'image/png',
+                    quality: 0.95,
+                    margin: 1,
+                    width: 200,
+                    color: {
+                        dark: '#000000',
+                        light: '#FFFFFF'
+                    }
+                }, (error) => {
+                    if (error) {
+                        console.error('Error generating QR:', error);
+                        Utils.showToast('Error al generar QR');
+                    } else {
+                        console.log('✓ QR generado correctamente');
+                    }
+                });
+            } else {
+                Utils.showToast('QRCode library no disponible');
+            }
+        } catch (err) {
+            console.error('Error en generateServerQR:', err);
+            Utils.showToast('Error al generar código QR');
+        }
+    },
+
+    /**
+     * Copiar información del servidor al portapapeles
+     */
+    copyServerInfo() {
+        const status = WebRTC.getStatus();
+        const text = `IP: ${status.localInfo.ip}\nID: ${status.localInfo.peerId}`;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            Utils.showToast('COPIADO AL PORTAPAPELES');
+        });
+    },
+
+    /**
+     * Conectar a servidor
+     */
+    connectToServer() {
+        const ip = document.getElementById('serverIpInput').value.trim();
+        const id = document.getElementById('serverIdInput').value.trim();
+
+        if (!ip) {
+            Utils.showToast('Ingresa IP del servidor');
+            return;
+        }
+
+        WebRTC.connectToServer(ip, id || 'unknown').then(() => {
+            Utils.closeAllPopups();
+            UI.renderNetworkStatus();
+            Utils.showToast('CONECTADO AL SERVIDOR');
+        }).catch(err => {
+            Utils.showToast('Error de conexión');
+            console.error(err);
+        });
+    },
+
+    /**
+     * Iniciar escáner QR
+     */
+    startQRScanner() {
+        const video = document.getElementById('qrScannerVideo');
+        let scanInterval = null;
+        let currentStream = null;
+
+        // Mostrar estado "Inicializando"
+        Utils.showToast('Inicializando cámara...');
+
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        })
+            .then(stream => {
+                currentStream = stream;
+                video.srcObject = stream;
+                video.play();
+                
+                // Esperar a que video esté listo
+                video.onloadedmetadata = () => {
+                    Utils.showToast('Apunta al código QR');
+                    
+                    // Crear canvas con las dimensiones del video
+                    const canvasElement = document.createElement('canvas');
+                    canvasElement.width = video.videoWidth;
+                    canvasElement.height = video.videoHeight;
+                    const canvas = canvasElement.getContext('2d');
+
+                    let qrDetectado = false;
+
+                    scanInterval = setInterval(() => {
+                        if (!video.paused && !video.ended) {
+                            try {
+                                canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                                const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                                
+                                if (window.jsQR) {
+                                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                                    if (code && !qrDetectado) {
+                                        qrDetectado = true;
+                                        clearInterval(scanInterval);
+                                        
+                                        console.log('✓ QR detectado:', code.data);
+                                        
+                                        try {
+                                            const qrData = JSON.parse(code.data);
+                                            
+                                            // Validar que sea un código válido
+                                            if (qrData.ip && qrData.id && qrData.type === 'server') {
+                                                document.getElementById('serverIpInput').value = qrData.ip;
+                                                document.getElementById('serverIdInput').value = qrData.id;
+                                                
+                                                // Detener video
+                                                if (currentStream) {
+                                                    currentStream.getTracks().forEach(track => track.stop());
+                                                }
+                                                
+                                                Utils.closeAllPopups();
+                                                Utils.openModal('clientConnectModal');
+                                                Utils.showToast('✓ QR ESCANEADO CORRECTAMENTE');
+                                            } else {
+                                                Utils.showToast('QR inválido - No es un código de servidor');
+                                                qrDetectado = false;
+                                            }
+                                        } catch (parseErr) {
+                                            console.error('Error parsing QR data:', parseErr);
+                                            Utils.showToast('QR inválido - No se pudo leer datos');
+                                            qrDetectado = false;
+                                        }
+                                    }
+                                } else {
+                                    console.error('jsQR no disponible');
+                                    Utils.showToast('Librería de escaneo no disponible');
+                                    clearInterval(scanInterval);
+                                }
+                            } catch (err) {
+                                console.error('Error en scanning:', err);
+                            }
+                        }
+                    }, 300);
+                };
+            })
+            .catch(err => {
+                console.error('Error accessing camera:', err);
+                
+                let errorMsg = 'No se pudo acceder a la cámara';
+                if (err.name === 'NotAllowedError') {
+                    errorMsg = 'Permiso de cámara denegado';
+                } else if (err.name === 'NotFoundError') {
+                    errorMsg = 'No hay cámara disponible';
+                } else if (err.name === 'NotReadableError') {
+                    errorMsg = 'La cámara está en uso por otra aplicación';
+                }
+                
+                Utils.showToast(errorMsg);
+                
+                // Mostrar alternativa manual
+                document.getElementById('clientConnectModal').style.display = 'block';
+                Utils.closeAllPopups();
+                Utils.openModal('clientConnectModal');
+            });
+    },
+
+    /**
+     * Detener escáner QR
+     */
+    stopQRScanner() {
+        const video = document.getElementById('qrScannerVideo');
+        if (video && video.srcObject) {
+            video.srcObject.getTracks().forEach(track => {
+                track.stop();
+            });
+            video.srcObject = null;
+        }
+    },
+
+    /**
+     * Sincronizar manualmente
+     */
+    manualSync() {
+        if (!WebRTC.isConnected) {
+            Utils.showToast('No conectado');
+            return;
+        }
+
+        if (WebRTC.isServer) {
+            Utils.showToast('Servidor sincronizado');
+        } else {
+            WebRTC.sendMessage({
+                type: 'SYNC_REQUEST',
+                from: WebRTC.localInfo.peerId,
+                to: WebRTC.localInfo.serverId
+            });
+            Utils.showToast('Sincronizando...');
+        }
+
+        Sync.setLastSync();
+        UI.renderNetworkStatus();
+    },
+
+    /**
+     * Desconectar de la red
+     */
+    disconnectNetwork() {
+        if (confirm('¿Desconectar de la red?')) {
+            WebRTC.disconnect();
+            UI.renderNetworkStatus();
+            Utils.showToast('DESCONECTADO');
+        }
+    },
+
+    /**
+     * Agregar fila de ingrediente en edición
+     */
+    addEditIngredientRow() {
+        Utils.addEditIngredientRow();
     }
 };
 

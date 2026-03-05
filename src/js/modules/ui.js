@@ -162,6 +162,54 @@ const UI = {
     },
 
     /**
+     * Renderizar estado de conexión de red
+     */
+    renderNetworkStatus() {
+        const status = WebRTC.getStatus();
+        const statusDiv = document.getElementById('networkStatus');
+        const infoDiv = document.getElementById('networkInfo');
+        const detailsDiv = document.getElementById('networkDetails');
+        const syncButton = document.getElementById('syncButton');
+        const disconnectButton = document.getElementById('disconnectButton');
+
+        if (!status.isConnected) {
+            statusDiv.innerHTML = '<span class="text-red-500 font-bold">● Desconectado</span>';
+            infoDiv.classList.add('hidden');
+            syncButton.classList.add('hidden');
+            disconnectButton.classList.add('hidden');
+        } else {
+            statusDiv.innerHTML = `<span class="text-green-500 font-bold">● Conectado (${status.isServer ? 'Servidor' : 'Cliente'})</span>`;
+            infoDiv.classList.remove('hidden');
+            syncButton.classList.remove('hidden');
+            disconnectButton.classList.remove('hidden');
+
+            // Mostrar detalles
+            if (status.localInfo) {
+                if (status.isServer) {
+                    detailsDiv.innerHTML = `
+                        <div>IP: ${status.localInfo.ip}</div>
+                        <div>ID: ${status.localInfo.peerId.substring(0, 20)}...</div>
+                        <div>Modo: Servidor</div>
+                    `;
+                } else {
+                    detailsDiv.innerHTML = `
+                        <div>Mi IP: ${status.localInfo.ip}</div>
+                        <div>Server: ${status.localInfo.serverIp}</div>
+                        <div>Modo: Cliente</div>
+                    `;
+                }
+            }
+
+            // Mostrar último sync
+            const lastSync = Sync.getLastSync();
+            if (lastSync) {
+                document.getElementById('syncStatus').classList.remove('hidden');
+                document.getElementById('lastSyncTime').innerText = new Date(lastSync).toLocaleString();
+            }
+        }
+    },
+
+    /**
      * Renderizar todas las vistas
      */
     renderAll() {

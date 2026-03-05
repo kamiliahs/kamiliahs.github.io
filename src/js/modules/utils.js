@@ -34,7 +34,9 @@ const Utils = {
             'pos': 'nav-pos',
             'inventory': 'nav-inventory',
             'recipes': 'nav-inventory',
-            'reports': 'nav-reports'
+            'reports': 'nav-reports',
+            'orders': 'nav-orders',
+            'network': 'nav-network'
         };
         document.getElementById(navMap[viewId])?.classList.add('active');
         
@@ -43,14 +45,18 @@ const Utils = {
             pos: 'TERMINAL',
             inventory: 'CATÁLOGO',
             recipes: 'FICHAS',
-            reports: 'REPORTES'
+            reports: 'REPORTES',
+            orders: 'PEDIDOS',
+            network: 'RED LOCAL'
         };
         
         const subtitles = {
             pos: 'OPERACIONES',
             inventory: 'INSUMOS',
             recipes: 'ESCANDALLOS',
-            reports: 'ESTADÍSTICAS'
+            reports: 'ESTADÍSTICAS',
+            orders: 'HISTÓRICO',
+            network: 'SINCRONIZACIÓN'
         };
         
         document.getElementById('viewTitle').innerText = titles[viewId] || 'TERMINAL';
@@ -66,6 +72,10 @@ const Utils = {
             UI.renderRecipes();
         } else if (viewId === 'reports') {
             UI.renderReports();
+        } else if (viewId === 'orders') {
+            UI.renderOrders();
+        } else if (viewId === 'network') {
+            UI.renderNetworkStatus();
         }
     },
 
@@ -132,6 +142,23 @@ const Utils = {
                 ${Data.ingredients.map(i => `<option value="${i.id}">${i.name}</option>`).join('')}
             </select>
             <input type="number" class="w-16 text-[10px] recipe-ing-qty" placeholder="CANT." min="0" step="0.01">
+            <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500">✕</button>
+        `;
+        container.appendChild(row);
+    },
+
+    /**
+     * Agregar fila de ingrediente a receta en modo edición
+     */
+    addEditIngredientRow() {
+        const container = document.getElementById('editRecipeBuilder');
+        const row = document.createElement('div');
+        row.className = "flex gap-2 items-center pb-2 line-border";
+        row.innerHTML = `
+            <select class="flex-1 text-[10px] font-bold uppercase border-none bg-transparent recipe-edit-ing-select">
+                ${Data.ingredients.map(i => `<option value="${i.id}">${i.name}</option>`).join('')}
+            </select>
+            <input type="number" class="w-16 text-[10px] recipe-edit-ing-qty" placeholder="CANT." min="0" step="0.01">
             <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500">✕</button>
         `;
         container.appendChild(row);
