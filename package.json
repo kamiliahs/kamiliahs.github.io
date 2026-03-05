@@ -1,0 +1,31 @@
+{
+  "name": "POS Minimalist",
+  "version": "1.0.0",
+  "description": "Sistema de gestión de puntos de venta PWA minimalista",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/kamiliahs.github.io.git"
+  },
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "keywords": [
+    "pos",
+    "pwa",
+    "punto-de-venta",
+    "gestión",
+    "minimalista",
+    "offline"
+  ],
+  "scripts": {
+    "start": "open ./index.html",
+    "build": "echo 'No build required - static PWA'",
+    "serve": "python -m http.server 8000"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "browserslist": [
+    "last 2 versions",
+    "> 1%",
+    "not dead"
+  ]
+}
