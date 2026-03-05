@@ -10,14 +10,14 @@ const APP = {
     init() {
         // Inicializar datos
         Data.init();
-        
+
         // Renderizar todas las vistas
         UI.renderAll();
         UI.updateCartUI();
-        
+
         // Configurar event listeners
         this.setupEventListeners();
-        
+
         console.log('POS Minimalist iniciado correctamente');
     },
 
@@ -74,7 +74,7 @@ const APP = {
      */
     updateIngredientCost(id, value) {
         const cost = parseFloat(value);
-        
+
         if (isNaN(cost) || cost < 0) {
             Utils.showToast('Costo inválido');
             return;
@@ -428,7 +428,7 @@ const APP = {
      */
     async selectServerRole() {
         const info = await WebRTC.startServer();
-        
+
         // Llenar modal de servidor iniciado
         document.getElementById('serverIP').innerText = info.ip;
         document.getElementById('serverID').innerText = info.peerId;
@@ -459,17 +459,17 @@ const APP = {
         // Verificar cada 2 segundos si hay nuevos clientes
         this.serverMonitoringInterval = setInterval(() => {
             const connectedClients = WebRTC.getConnectedClients();
-            
+
             connectedClients.forEach(client => {
                 const clientKey = `${client.clientPeerId}`;
-                
+
                 // Si es un cliente nuevo
                 if (!monitoredClients.has(clientKey)) {
                     monitoredClients.add(clientKey);
-                    
+
                     // Mostrar alerta
                     this.showClientConnectionAlert(client);
-                    
+
                     console.log(`🔔 Cliente conectado: IP=${client.clientIP}, ID=${client.clientPeerId}`);
                 }
             });
@@ -498,9 +498,9 @@ const APP = {
             max-width: 350px;
             animation: slideIn 0.3s ease-out;
         `;
-        
+
         const timestamp = new Date().toLocaleTimeString();
-        
+
         notification.innerHTML = `
             <div style="font-weight: bold; margin-bottom: 8px;">✅ Cliente Conectado</div>
             <div style="font-size: 12px; opacity: 0.9;">
@@ -509,12 +509,12 @@ const APP = {
                 <div><strong>Hora:</strong> ${timestamp}</div>
             </div>
         `;
-        
+
         document.body.appendChild(notification);
-        
+
         // También mostrar toast
         Utils.showToast(`Cliente conectado: ${clientInfo.clientIP}`);
-        
+
         // Remover notificación después de 8 segundos
         setTimeout(() => {
             notification.style.opacity = '0';
@@ -540,7 +540,7 @@ const APP = {
      */
     generateServerQR(serverInfo) {
         console.log('📱 Generando QR para servidor:', serverInfo);
-        
+
         const qrData = JSON.stringify({
             ip: serverInfo.ip,
             id: serverInfo.peerId,
@@ -549,14 +549,14 @@ const APP = {
         });
 
         const qrCanvas = document.getElementById('qrCode');
-        
+
         // Validar que el canvas existe
         if (!qrCanvas) {
             console.error('❌ Canvas QR no encontrado en el DOM');
             Utils.showToast('Error: Canvas QR no disponible');
             return;
         }
-        
+
         try {
             // Verificar que la librería está disponible
             if (!window.QRCode) {
@@ -565,28 +565,27 @@ const APP = {
                 this.loadQRCodeLibrary();
                 return;
             }
-            
+
             console.log('📊 Datos QR:', qrData);
-            
-            // Limpiar canvas completamente
-            const ctx = qrCanvas.getContext('2d');
-            
-            // Rellenar con blanco primero
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
-            
-            // Crear instancia nueva de QRCode
-            const qr = new window.QRCode(qrCanvas, {
-                text: qrData,
+
+            // Usar node-qr-code para generar en el canvas
+            window.QRCode.toCanvas(qrCanvas, qrData, {
                 width: 200,
-                height: 200,
-                colorDark: '#000000',
-                colorLight: '#FFFFFF',
-                correctLevel: window.QRCode.CorrectLevel.H
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                },
+                errorCorrectionLevel: 'H'
+            }, (error) => {
+                if (error) {
+                    console.error('❌ Error generando QR:', error);
+                    Utils.showToast('Error al generar código QR');
+                } else {
+                    console.log('✅ QR generado exitosamente');
+                }
             });
-            
-            console.log('✅ QR generado exitosamente');
-            
+
             // Forzar actualización visual
             setTimeout(() => {
                 qrCanvas.style.opacity = '0.99';
@@ -594,7 +593,7 @@ const APP = {
                     qrCanvas.style.opacity = '1';
                 }, 10);
             }, 100);
-            
+
         } catch (err) {
             console.error('❌ Error generando QR:', err);
             Utils.showToast('Error al generar código QR: ' + err.message);
@@ -606,7 +605,7 @@ const APP = {
      */
     loadQRCodeLibrary() {
         const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js';
+        script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
         script.onload = () => {
             console.log('✅ Librería QRCode cargada desde CDN');
             // Reintentar generar QR
@@ -628,7 +627,7 @@ const APP = {
     copyServerInfo() {
         const status = WebRTC.getStatus();
         const text = `IP: ${status.localInfo.ip}\nID: ${status.localInfo.peerId}`;
-        
+
         navigator.clipboard.writeText(text).then(() => {
             Utils.showToast('COPIADO AL PORTAPAPELES');
         });
@@ -641,7 +640,7 @@ const APP = {
      */
     handleServerDisconnection() {
         console.log('Servidor desconectado inesperadamente. Intentando promover cliente a servidor...');
-        
+
         // Solo proceder si somos cliente
         if (localStorage.getItem('networkRole') !== 'client') {
             return;
@@ -652,24 +651,24 @@ const APP = {
             try {
                 // Intentar convertirse en servidor
                 const info = await WebRTC.startServer();
-                
+
                 // Actualizar estado
                 localStorage.setItem('networkRole', 'server');
                 localStorage.setItem('networkConnected', 'true');
-                
+
                 // Generar nuevo QR
                 this.generateServerQR(info);
-                
+
                 // Notificar a otros clientes
                 SYNC.broadcastServerPromotion(info);
-                
+
                 Utils.showToast('¡Promovido a servidor! ✓');
                 console.log('Cliente promovido a servidor exitosamente');
-                
+
             } catch (error) {
                 console.error('Error al promover a servidor:', error);
                 Utils.showToast('Error al promover a servidor');
-                
+
                 // Intentar reconectar como cliente
                 this.attemptReconnection();
             }
@@ -681,7 +680,7 @@ const APP = {
      */
     attemptReconnection() {
         console.log('Intentando reconexión automática...');
-        
+
         // Buscar servidores activos en la red
         this.scanForActiveServers().then(servers => {
             if (servers.length > 0) {
@@ -704,27 +703,27 @@ const APP = {
      */
     async scanForActiveServers() {
         console.log('Escaneando servidores activos...');
-        
+
         // Primero intentar detectar por localStorage (mismo navegador)
         const localServers = WebRTC.detectServers();
-        
+
         if (localServers.length > 0) {
             console.log('Servidores detectados localmente:', localServers);
             return localServers;
         }
-        
+
         // Si no hay locales, intentar método alternativo (limitado por CORS)
         const servers = [];
         const localIP = await WebRTC.detectLocalIP();
         if (!localIP) return servers;
-        
+
         // Obtener el rango de IP (ej: 192.168.1.x)
         const ipParts = localIP.split('.');
         const baseIP = ipParts.slice(0, 3).join('.');
-        
+
         // Solo probar algunas IPs comunes (no podemos hacer fetch sin CORS)
         const commonIPs = ['100', '101', '102', '1', '10', '50'];
-        
+
         for (const ip of commonIPs) {
             const testIP = `${baseIP}.${ip}`;
             if (testIP !== localIP) {
@@ -745,7 +744,7 @@ const APP = {
                 }
             }
         }
-        
+
         console.log(`Encontrados ${servers.length} servidores activos`);
         return servers;
     },
@@ -761,10 +760,10 @@ const APP = {
                 mode: 'no-cors', // Para evitar CORS issues
                 signal: AbortSignal.timeout(1000) // Timeout de 1 segundo
             });
-            
+
             // Si llega aquí, hay algo respondiendo
             return { ip, id: 'unknown', status: 'active' };
-            
+
         } catch (error) {
             // No hay servidor en esta IP
             return null;
@@ -776,18 +775,18 @@ const APP = {
      */
     async scanForActiveServersUI() {
         Utils.showToast('Buscando servidores...');
-        
+
         try {
             const servers = await this.scanForActiveServers();
-            
+
             if (servers.length === 0) {
                 Utils.showToast('No se encontraron servidores activos');
                 return;
             }
-            
+
             // Mostrar modal con lista de servidores
             this.showServerListModal(servers);
-            
+
         } catch (error) {
             console.error('Error escaneando servidores:', error);
             Utils.showToast('Error al buscar servidores');
@@ -823,7 +822,7 @@ const APP = {
                 <button onclick="APP.openModal('clientConnectModal')" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Entrada Manual</button>
             </div>
         `;
-        
+
         // Agregar al DOM
         document.body.appendChild(modal);
         Utils.openModal('serverListModal');
@@ -855,7 +854,7 @@ const APP = {
         WebRTC.connectToServer(ip, id || 'unknown').then(() => {
             // Iniciar heartbeat para detectar desconexiones
             this.startServerHeartbeat();
-            
+
             Utils.closeAllPopups();
             UI.renderNetworkStatus();
             Utils.showToast('CONECTADO AL SERVIDOR');
@@ -870,7 +869,7 @@ const APP = {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
         }
-        
+
         this.heartbeatInterval = setInterval(async () => {
             if (localStorage.getItem('networkRole') === 'client') {
                 try {
@@ -911,22 +910,22 @@ const APP = {
         // Mostrar estado "Inicializando"
         Utils.showToast('Inicializando cámara...');
 
-        navigator.mediaDevices.getUserMedia({ 
-            video: { 
+        navigator.mediaDevices.getUserMedia({
+            video: {
                 facingMode: 'environment',
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
-            } 
+            }
         })
             .then(stream => {
                 currentStream = stream;
                 video.srcObject = stream;
                 video.play();
-                
+
                 // Esperar a que video esté listo
                 video.onloadedmetadata = () => {
                     Utils.showToast('Apunta al código QR');
-                    
+
                     // Crear canvas con las dimensiones del video
                     const canvasElement = document.createElement('canvas');
                     canvasElement.width = video.videoWidth;
@@ -940,29 +939,29 @@ const APP = {
                             try {
                                 canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
                                 const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                                
+
                                 if (window.jsQR) {
                                     const code = jsQR(imageData.data, imageData.width, imageData.height);
 
                                     if (code && !qrDetectado) {
                                         qrDetectado = true;
                                         clearInterval(scanInterval);
-                                        
+
                                         console.log('✓ QR detectado:', code.data);
-                                        
+
                                         try {
                                             const qrData = JSON.parse(code.data);
-                                            
+
                                             // Validar que sea un código válido
                                             if (qrData.ip && qrData.id && qrData.type === 'server') {
                                                 document.getElementById('serverIpInput').value = qrData.ip;
                                                 document.getElementById('serverIdInput').value = qrData.id;
-                                                
+
                                                 // Detener video
                                                 if (currentStream) {
                                                     currentStream.getTracks().forEach(track => track.stop());
                                                 }
-                                                
+
                                                 Utils.closeAllPopups();
                                                 Utils.openModal('clientConnectModal');
                                                 Utils.showToast('✓ QR ESCANEADO CORRECTAMENTE');
@@ -990,7 +989,7 @@ const APP = {
             })
             .catch(err => {
                 console.error('Error accessing camera:', err);
-                
+
                 let errorMsg = 'No se pudo acceder a la cámara';
                 if (err.name === 'NotAllowedError') {
                     errorMsg = 'Permiso de cámara denegado';
@@ -999,9 +998,9 @@ const APP = {
                 } else if (err.name === 'NotReadableError') {
                     errorMsg = 'La cámara está en uso por otra aplicación';
                 }
-                
+
                 Utils.showToast(errorMsg);
-                
+
                 // Mostrar alternativa manual
                 document.getElementById('clientConnectModal').style.display = 'block';
                 Utils.closeAllPopups();

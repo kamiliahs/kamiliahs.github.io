@@ -1,29 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <meta name="description" content="POS Minimalist - Sistema de gestión de puntos de venta con diseño editorial minimalista">
-    
+    <meta name="description"
+        content="POS Minimalist - Sistema de gestión de puntos de venta con diseño editorial minimalista">
+
     <!-- PWA Manifest -->
-    <link rel="manifest" href="./public/manifest.json">
-    <link rel="icon" type="image/png" href="./assets/icons/favicon-32x32.png" sizes="32x32">
-    <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
-    
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg">
+    <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.svg">
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="./src/css/main.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- QR Code Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js"></script>
-    
+    <!-- QR Code Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
     <title>POS Minimalist - Editorial Design</title>
 </head>
+
 <body>
     <!-- Toast Notification -->
     <div id="toast">CONFIRMADO</div>
-    
+
     <!-- Global Overlay -->
     <div class="overlay" id="globalOverlay" onclick="APP.closeAllPopups()"></div>
 
@@ -42,7 +47,8 @@
             </div>
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cerrar</button>
-                <button onclick="APP.saveIngredient()" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
+                <button onclick="APP.saveIngredient()"
+                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
             </div>
         </div>
     </div>
@@ -62,7 +68,8 @@
             </div>
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
-                <button onclick="APP.saveEditIngredient()" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Actualizar</button>
+                <button onclick="APP.saveEditIngredient()"
+                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Actualizar</button>
             </div>
         </div>
     </div>
@@ -75,13 +82,14 @@
                 <input type="text" id="newProdIcon" placeholder="Emoji (🍕)" class="w-1/4">
                 <input type="number" id="newProdPrice" placeholder="Precio Venta" class="flex-1">
             </div>
-            
+
             <div id="recipeBuilder" class="space-y-4 pt-4"></div>
             <button onclick="APP.addIngredientRow()" class="label-caps text-black underline"> + Añadir Insumo </button>
 
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps py-4">Cancelar</button>
-                <button onclick="APP.saveRecipe()" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Crear</button>
+                <button onclick="APP.saveRecipe()"
+                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Crear</button>
             </div>
         </div>
     </div>
@@ -95,13 +103,15 @@
                 <input type="text" id="editProdIcon" placeholder="Emoji (🍕)" class="w-1/4">
                 <input type="number" id="editProdPrice" placeholder="Precio Venta" class="flex-1">
             </div>
-            
+
             <div id="editRecipeBuilder" class="space-y-4 pt-4"></div>
-            <button onclick="APP.addEditIngredientRow()" class="label-caps text-black underline"> + Añadir Insumo </button>
+            <button onclick="APP.addEditIngredientRow()" class="label-caps text-black underline"> + Añadir Insumo
+            </button>
 
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps py-4">Cancelar</button>
-                <button onclick="APP.saveEditRecipe()" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Actualizar</button>
+                <button onclick="APP.saveEditRecipe()"
+                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Actualizar</button>
             </div>
         </div>
     </div>
@@ -118,7 +128,8 @@
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.deleteOrder()" class="w-1/2 label-caps text-red-500 py-4">Eliminar</button>
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
-                <button onclick="APP.saveOrderEdit()" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
+                <button onclick="APP.saveOrderEdit()"
+                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
             </div>
         </div>
     </div>
@@ -127,8 +138,12 @@
     <div id="networkRoleModal" class="modal">
         <p class="label-caps mb-8">Configuración de Red</p>
         <div class="space-y-6">
-            <button onclick="APP.selectServerRole()" class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest hover:bg-gray-800">Iniciar Servidor</button>
-            <button onclick="APP.openModal('clientConnectModal')" class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-gray-100">Conectar a Servidor</button>
+            <button onclick="APP.selectServerRole()"
+                class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest hover:bg-gray-800">Iniciar
+                Servidor</button>
+            <button onclick="APP.openModal('clientConnectModal')"
+                class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-gray-100">Conectar
+                a Servidor</button>
             <button onclick="APP.closeAllPopups()" class="w-full label-caps text-black py-4">Cerrar</button>
         </div>
     </div>
@@ -148,7 +163,9 @@
                 <canvas id="qrCode" width="200" height="200"></canvas>
             </div>
             <p class="text-xs text-center text-muted">Escanea este código desde otra aplicación</p>
-            <button onclick="APP.copyServerInfo()" class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Copiar Info</button>
+            <button onclick="APP.copyServerInfo()"
+                class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Copiar
+                Info</button>
             <button onclick="APP.closeAllPopups()" class="w-full label-caps text-black py-4">Entendido</button>
         </div>
     </div>
@@ -165,11 +182,16 @@
                 <input type="text" id="serverIdInput" placeholder="peer_xxx">
             </div>
             <p class="text-xs text-muted text-center">O escanea el código QR</p>
-            <button onclick="APP.scanForActiveServersUI()" class="w-full bg-gray-100 border-2 border-gray-300 py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-gray-200">🔍 Buscar Servidores</button>
-            <button onclick="APP.openModal('qrScannerModal')" class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold">📱 Escanear QR</button>
+            <button onclick="APP.scanForActiveServersUI()"
+                class="w-full bg-gray-100 border-2 border-gray-300 py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-gray-200">🔍
+                Buscar Servidores</button>
+            <button onclick="APP.openModal('qrScannerModal')"
+                class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold">📱 Escanear
+                QR</button>
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
-                <button onclick="APP.connectToServer()" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Conectar</button>
+                <button onclick="APP.connectToServer()"
+                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Conectar</button>
             </div>
         </div>
     </div>
@@ -183,30 +205,32 @@
                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
                     <svg style="width: 100%; height: 100%;" viewBox="0 0 400 400">
                         <!-- Esquinas -->
-                        <path d="M 40 40 L 40 100 L 100 100" stroke="#00ff00" stroke-width="2" fill="none"/>
-                        <path d="M 360 40 L 360 100 L 300 100" stroke="#00ff00" stroke-width="2" fill="none"/>
-                        <path d="M 40 360 L 40 300 L 100 300" stroke="#00ff00" stroke-width="2" fill="none"/>
-                        <path d="M 360 360 L 360 300 L 300 300" stroke="#00ff00" stroke-width="2" fill="none"/>
+                        <path d="M 40 40 L 40 100 L 100 100" stroke="#00ff00" stroke-width="2" fill="none" />
+                        <path d="M 360 40 L 360 100 L 300 100" stroke="#00ff00" stroke-width="2" fill="none" />
+                        <path d="M 40 360 L 40 300 L 100 300" stroke="#00ff00" stroke-width="2" fill="none" />
+                        <path d="M 360 360 L 360 300 L 300 300" stroke="#00ff00" stroke-width="2" fill="none" />
                         <!-- Cruz central -->
-                        <line x1="200" y1="150" x2="200" y2="250" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
-                        <line x1="150" y1="200" x2="250" y2="200" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+                        <line x1="200" y1="150" x2="200" y2="250" stroke="#ffffff" stroke-width="1" opacity="0.5" />
+                        <line x1="150" y1="200" x2="250" y2="200" stroke="#ffffff" stroke-width="1" opacity="0.5" />
                     </svg>
                 </div>
             </div>
-            
+
             <p class="text-xs text-center text-muted">
                 Centra el código QR dentro del recuadro verde
             </p>
-            
+
             <div class="flex gap-4">
-                <button onclick="APP.startQRScanner()" class="flex-1 bg-black text-white font-bold py-3 uppercase text-[10px] tracking-widest">
+                <button onclick="APP.startQRScanner()"
+                    class="flex-1 bg-black text-white font-bold py-3 uppercase text-[10px] tracking-widest">
                     📷 Iniciar
                 </button>
-                <button onclick="APP.stopQRScanner()" class="flex-1 border-2 border-black py-3 uppercase text-[10px] tracking-widest font-bold">
+                <button onclick="APP.stopQRScanner()"
+                    class="flex-1 border-2 border-black py-3 uppercase text-[10px] tracking-widest font-bold">
                     ⊗ Detener
                 </button>
             </div>
-            
+
             <div style="background: #f9f9f9; padding: 12px; border-radius: 4px; font-size: 12px;">
                 <p class="font-bold mb-2">💡 Consejos:</p>
                 <ul style="margin: 0; padding-left: 20px; font-size: 11px; line-height: 1.5;">
@@ -216,8 +240,9 @@
                     <li>Si no funciona, ingresa la IP manualmente</li>
                 </ul>
             </div>
-            
-            <button onclick="APP.closeAllPopups(); Utils.openModal('clientConnectModal')" class="w-full label-caps text-black py-4">
+
+            <button onclick="APP.closeAllPopups(); Utils.openModal('clientConnectModal')"
+                class="w-full label-caps text-black py-4">
                 ← Volver a Conexión Manual
             </button>
         </div>
@@ -267,7 +292,8 @@
             <div id="cartItems" class="text-[11px] font-medium space-y-1 opacity-80 mb-6"></div>
             <div class="flex justify-between items-center">
                 <span id="cartTotal" class="heading-lg">0.00</span>
-                <button onclick="APP.checkout()" class="bg-white text-black px-8 py-3 font-black text-[10px] uppercase tracking-tighter">Cobrar</button>
+                <button onclick="APP.checkout()"
+                    class="bg-white text-black px-8 py-3 font-black text-[10px] uppercase tracking-tighter">Cobrar</button>
             </div>
         </div>
     </div>
@@ -297,7 +323,7 @@
             <div class="heading-xl mb-2" id="repNetProfit">0.00</div>
             <p class="text-xs font-bold text-muted" id="repMarginAvg">0% de margen neto</p>
         </div>
-        
+
         <div class="grid grid-cols-2 gap-8 line-border pb-8 mb-8">
             <div>
                 <p class="label-caps mb-2">Ventas</p>
@@ -330,12 +356,13 @@
             <h3 class="heading-lg mb-2">RED LOCAL</h3>
             <div id="networkStatus" class="text-sm text-muted">Desconectado</div>
         </div>
-        
+
         <div class="space-y-6">
-            <button onclick="APP.openModal('networkRoleModal')" class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">
+            <button onclick="APP.openModal('networkRoleModal')"
+                class="w-full bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">
                 ⚙️ Configurar Conexión
             </button>
-            
+
             <div id="networkInfo" class="bg-gray-50 p-4 rounded hidden">
                 <p class="label-caps mb-2">Información</p>
                 <div id="networkDetails" class="text-xs space-y-1 font-medium"></div>
@@ -346,11 +373,15 @@
                 <p id="lastSyncTime" class="text-xs font-medium">---</p>
             </div>
 
-            <button onclick="APP.manualSync()" class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold hidden" id="syncButton">
+            <button onclick="APP.manualSync()"
+                class="w-full border-2 border-black py-4 uppercase text-[10px] tracking-widest font-bold hidden"
+                id="syncButton">
                 🔄 Sincronizar Ahora
             </button>
 
-            <button onclick="APP.disconnectNetwork()" class="w-full text-red-500 py-4 uppercase text-[10px] tracking-widest font-bold border-2 border-red-500 hidden" id="disconnectButton">
+            <button onclick="APP.disconnectNetwork()"
+                class="w-full text-red-500 py-4 uppercase text-[10px] tracking-widest font-bold border-2 border-red-500 hidden"
+                id="disconnectButton">
                 ✕ Desconectar
             </button>
         </div>
@@ -358,7 +389,8 @@
         <div class="mt-12 pt-6 line-border">
             <p class="label-caps mb-4">Documentación</p>
             <p class="text-xs text-muted leading-relaxed">
-                Modo Servidor: Actúa como punto central de sincronización. Solo el servidor puede eliminar pedidos confirmados.
+                Modo Servidor: Actúa como punto central de sincronización. Solo el servidor puede eliminar pedidos
+                confirmados.
                 <br><br>
                 Modo Cliente: Se sincroniza con el servidor. Los datos locales se respalddan automáticamente.
             </p>
@@ -383,35 +415,38 @@
     <script src="./src/js/modules/webrtc.js"></script>
     <script src="./src/js/modules/sync.js"></script>
     <script src="./src/js/app.js"></script>
-    
+
     <!-- Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./public/sw.js').catch(err => {
+            navigator.serviceWorker.register('./sw.js').catch(err => {
                 console.log('Service Worker registration failed: ', err);
             });
         }
     </script>
-    
+
     <!-- PWA Install Banner -->
-    <div id="installBanner" class="fixed bottom-4 left-4 right-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white p-5 rounded-lg shadow-2xl z-50 hidden">
+    <div id="installBanner"
+        class="fixed bottom-4 left-4 right-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white p-5 rounded-lg shadow-2xl z-50 hidden">
         <div class="flex items-center justify-between gap-4">
             <div class="flex-1">
                 <h3 class="font-bold text-base mb-1">📱 Instalar POS Minimalist</h3>
                 <p class="text-sm opacity-95">Agrega a tu pantalla de inicio para acceso rápido</p>
             </div>
             <div class="flex gap-3 flex-shrink-0">
-                <button id="installBtn" class="bg-white text-blue-600 px-5 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition">Instalar</button>
-                <button id="dismissBtn" class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg text-sm transition">✕</button>
+                <button id="installBtn"
+                    class="bg-white text-blue-600 px-5 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition">Instalar</button>
+                <button id="dismissBtn"
+                    class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg text-sm transition">✕</button>
             </div>
         </div>
     </div>
-    
+
     <script>
         let deferredPrompt = null;
         const installBannerDismissedKey = 'pwa_installBannerDismissed';
         const installCheckInterval = 'pwa_installCheckInterval';
-        
+
         // Función para mostrar banner
         function showInstallBanner() {
             const banner = document.getElementById('installBanner');
@@ -420,7 +455,7 @@
                 banner.style.animation = 'slideInUp 0.3s ease-out';
             }
         }
-        
+
         // Función para ocultar banner
         function hideInstallBanner() {
             const banner = document.getElementById('installBanner');
@@ -428,39 +463,39 @@
                 banner.classList.add('hidden');
             }
         }
-        
+
         // Verificar si la app está instalada
         function isAppInstalled() {
             // Verificación 1: display-mode standalone
             if (window.matchMedia('(display-mode: standalone)').matches) {
                 return true;
             }
-            
+
             // Verificación 2: navigator.standalone (Safari iOS)
             if (navigator.standalone === true) {
                 return true;
             }
-            
+
             // Verificación 3: fullscreen mode
             if (window.matchMedia('(display-mode: fullscreen)').matches) {
                 return true;
             }
-            
+
             return false;
         }
-        
+
         // Event: beforeinstallprompt (navegadores que lo soportan)
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             console.log('beforeinstallprompt detectado');
-            
+
             // Mostrar banner si no está instalado
             if (!isAppInstalled() && localStorage.getItem(installBannerDismissedKey) !== 'true') {
                 showInstallBanner();
             }
         });
-        
+
         // Event: appinstalled
         window.addEventListener('appinstalled', () => {
             console.log('✅ PWA instalada');
@@ -468,12 +503,12 @@
             localStorage.setItem(installBannerDismissedKey, 'true');
             deferredPrompt = null;
         });
-        
+
         // Botón de instalar
         document.addEventListener('DOMContentLoaded', () => {
             const installBtn = document.getElementById('installBtn');
             const dismissBtn = document.getElementById('dismissBtn');
-            
+
             if (installBtn) {
                 installBtn.addEventListener('click', async () => {
                     if (deferredPrompt) {
@@ -487,14 +522,14 @@
                     }
                 });
             }
-            
+
             if (dismissBtn) {
                 dismissBtn.addEventListener('click', () => {
                     localStorage.setItem(installBannerDismissedKey, 'true');
                     hideInstallBanner();
                 });
             }
-            
+
             // Mostrar banner si aplica
             if (!isAppInstalled() && localStorage.getItem(installBannerDismissedKey) !== 'true') {
                 // Si no hay beforeinstallprompt pero no está instalado, esperar un poco y mostrar
@@ -505,7 +540,7 @@
                 }, 2000);
             }
         });
-        
+
         // Mostrar instrucciones alternativas
         function showAlternativeInstallInstructions() {
             const message = `
@@ -526,7 +561,7 @@ O
             `;
             alert(message);
         }
-        
+
         // Estilos de animación
         const style = document.createElement('style');
         style.textContent = `
@@ -544,4 +579,5 @@ O
         document.head.appendChild(style);
     </script>
 </body>
+
 </html>

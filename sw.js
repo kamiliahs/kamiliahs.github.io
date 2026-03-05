@@ -3,7 +3,7 @@
  * Proporciona funcionalidad offline y caché de recursos
  */
 
-const CACHE_NAME = 'pos-minimalist-v2';
+const CACHE_NAME = 'pos-minimalist-v3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -15,10 +15,10 @@ const ASSETS_TO_CACHE = [
     './src/js/modules/webrtc.js',
     './src/js/modules/sync.js',
     './src/js/app.js',
-    './public/manifest.json',
+    './manifest.json',
     'https://cdn.tailwindcss.com',
     'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.5.3/qrcode.min.js'
+    'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'
 ];
 
 // Instalación del Service Worker
