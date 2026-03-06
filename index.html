@@ -21,10 +21,13 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
-    <title>POS Minimalist - Editorial Design</title>
+    <title>Kamiliahs - Editorial Design</title>
 </head>
 
 <body>
+    <!-- Splash Screen -->
+    <div id="splashScreen">KAMILIAHS</div>
+
     <!-- Toast Notification -->
     <div id="toast">CONFIRMADO</div>
 
@@ -43,6 +46,10 @@
                     <option value="ml">ML</option>
                     <option value="pza">PZA</option>
                 </select>
+            </div>
+            <div class="flex gap-4 items-center">
+                <input type="number" id="newIngPackQty" placeholder="Unidades por Pack" value="1" class="w-1/2">
+                <p class="text-[10px] text-muted uppercase font-bold">Unidades por Pack</p>
             </div>
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cerrar</button>
@@ -64,6 +71,10 @@
                     <option value="ml">ML</option>
                     <option value="pza">PZA</option>
                 </select>
+            </div>
+            <div class="flex gap-4 items-center">
+                <input type="number" id="editIngPackQty" placeholder="Unidades por Pack" value="1" class="w-1/2">
+                <p class="text-[10px] text-muted uppercase font-bold">Insumo por Pack/Caja</p>
             </div>
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cancelar</button>
@@ -182,6 +193,10 @@
     <!-- VIEWS -->
     <!-- POS View -->
     <div id="posView" class="view-container">
+        <div class="px-6 mb-4">
+            <input type="text" id="posSearch" placeholder="Buscar plato..." class="search-input"
+                oninput="APP.filterPOS()">
+        </div>
         <div id="productGrid" class="px-6"></div>
         <div class="cart-bar shadow-2xl transition-all" id="cartBar">
             <div class="flex justify-between items-center mb-4">
@@ -197,12 +212,15 @@
         </div>
     </div>
 
-    <!-- Inventory View -->
     <div id="inventoryView" class="view-container hidden-view p-6">
-        <div class="flex justify-between items-center mb-10">
+        <div class="flex justify-between items-center mb-6">
             <h3 class="heading-lg">CATÁLOGO</h3>
             <button onclick="APP.openModal('ingridientModal')" class="label-caps underline hover:text-teal">+
                 Nuevo</button>
+        </div>
+        <div class="mb-6">
+            <input type="text" id="inventorySearch" placeholder="Buscar insumo..." class="search-input"
+                oninput="APP.filterInventory()">
         </div>
         <div id="inventoryBody" class="space-y-6"></div>
     </div>
@@ -250,6 +268,27 @@
             </div>
         </div>
 
+        <!-- RESPALDO Y DATOS -->
+        <div class="mb-8 pb-8 line-border">
+            <p class="label-caps mb-4 text-teal">Respaldo y Datos (Backup)</p>
+            <div class="space-y-4">
+                <button onclick="APP.exportAppData()"
+                    class="w-full label-caps underline hover:text-teal font-black text-left text-[10px] uppercase tracking-widest transition-colors">
+                    ⬇ EXPORTAR BACKUP (.JSON)
+                </button>
+                <div class="relative">
+                    <input type="file" id="importFile" class="hidden" accept=".json"
+                        onchange="APP.importAppData(event)">
+                    <button onclick="document.getElementById('importFile').click()"
+                        class="w-full label-caps underline hover:text-teal font-black text-left text-[10px] uppercase tracking-widest transition-colors">
+                        ⬆ IMPORTAR BACKUP (SELECCIONAR)
+                    </button>
+                </div>
+                <p class="text-[8px] text-muted opacity-60 uppercase font-black tracking-wider shadow-sm">Atención: La
+                    importación sobrescribirá toda la información actual.</p>
+            </div>
+        </div>
+
         <!-- BOTONES -->
         <div class="flex gap-4">
             <button onclick="APP.saveSettings()"
@@ -260,9 +299,13 @@
 
     <!-- Recipes View -->
     <div id="recipesView" class="view-container hidden-view p-6">
-        <div class="flex justify-between items-center mb-10">
+        <div class="flex justify-between items-center mb-6">
             <h3 class="heading-lg">FICHAS</h3>
             <button onclick="APP.openModal('recipeModal')" class="label-caps underline hover:text-teal">+ Nueva</button>
+        </div>
+        <div class="mb-6">
+            <input type="text" id="recipeSearch" placeholder="Buscar receta..." class="search-input"
+                oninput="APP.filterRecipes()">
         </div>
         <div id="recipesContainer" class="space-y-12"></div>
     </div>
@@ -292,11 +335,23 @@
         </div>
     </div>
 
-    <!-- Orders View -->
     <div id="ordersView" class="view-container hidden-view p-6">
-        <div class="flex justify-between items-center mb-10">
+        <div class="flex justify-between items-center mb-6">
             <h3 class="heading-lg">PEDIDOS</h3>
-            <button onclick="APP.exportOrders()" class="label-caps underline hover:text-teal">⬇ Exportar</button>
+            <div class="flex gap-4">
+                <button onclick="APP.exportOrders()" class="label-caps underline hover:text-teal">Exportar</button>
+                <button onclick="APP.clearOrders()"
+                    class="label-caps underline text-red-500 hover:text-red-700">Vaciar</button>
+            </div>
+        </div>
+        <div class="mb-6">
+            <input type="text" id="orderSearch" placeholder="Buscar ID o fecha..." class="search-input"
+                oninput="APP.filterOrders()">
+            <div class="flex flex-wrap" id="orderFilters">
+                <span class="tag-filter active" onclick="APP.filterOrdersByPaid('all', this)">Todos</span>
+                <span class="tag-filter" onclick="APP.filterOrdersByPaid('paid', this)">Pagados</span>
+                <span class="tag-filter" onclick="APP.filterOrdersByPaid('unpaid', this)">Pendientes</span>
+            </div>
         </div>
         <div id="ordersContainer" class="space-y-4"></div>
     </div>
@@ -332,7 +387,7 @@
         class="fixed bottom-4 left-4 right-4 text-white p-5 rounded-lg shadow-2xl z-50 hidden transition-all duration-300">
         <div class="flex items-center justify-between gap-4">
             <div class="flex-1">
-                <h3 class="font-bold text-base mb-1">📱 Instalar POS Minimalist</h3>
+                <h3 class="font-bold text-base mb-1">📱 Instalar Kamiliahs</h3>
                 <p class="text-sm opacity-95">Agrega a tu pantalla de inicio para acceso rápido</p>
             </div>
             <div class="flex gap-3 flex-shrink-0">
@@ -458,7 +513,7 @@ Para instalar esta app:
 🖥️ Desktop (Chrome/Edge):
 1. Toca el ícono de instalación (⊞) en la barra
 O
-1. Menú (⋮) → "Instalar POS Minimalist"
+1. Menú (⋮) → "Instalar Kamiliahs"
             `;
             alert(message);
         }

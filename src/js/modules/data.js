@@ -8,14 +8,14 @@ const Data = {
     salesHistory: [],
     stock: {}, // Inventario de insumos
     cart: [],
-    settings: { 
-        theme: 'system', 
-        units: [ 
+    settings: {
+        theme: 'system',
+        units: [
             { symbol: 'gr', name: 'Gramo' },
             { symbol: 'ml', name: 'Mililitro' },
             { symbol: 'pza', name: 'Pieza' }
         ],
-        equivalences: {} 
+        equivalences: {}
     },
 
     /**
@@ -48,17 +48,15 @@ const Data = {
     /**
      * Agregar ingrediente
      */
-    addIngredient(name, cost, unit, quantity = 0) {
+    addIngredient(name, cost, unit, packQty = 1) {
         const ingredient = {
             id: 'ing_' + Date.now(),
             name: name.toUpperCase(),
             cost: parseFloat(cost),
-            unit: unit
+            unit: unit,
+            packQty: parseFloat(packQty) || 1
         };
         this.ingredients.push(ingredient);
-        if (quantity > 0) {
-            this.stock[ingredient.id] = parseFloat(quantity);
-        }
         this.saveAll();
         return ingredient;
     },
@@ -66,12 +64,13 @@ const Data = {
     /**
      * Actualizar ingrediente completo
      */
-    updateIngredient(id, name, cost, unit) {
+    updateIngredient(id, name, cost, unit, packQty = 1) {
         const ingredient = this.ingredients.find(i => i.id === id);
         if (ingredient) {
             ingredient.name = name.toUpperCase();
             ingredient.cost = parseFloat(cost);
             ingredient.unit = unit;
+            ingredient.packQty = parseFloat(packQty) || 1;
             this.saveAll();
             return true;
         }
@@ -190,7 +189,7 @@ const Data = {
             // Si hay equivalencias definidas, usar convertUnit
             const unitCost = ingredient.cost;
             const quantity = item.qty;
-            
+
             // Si el costo está en una unidad diferente a la del ingrediente, convertir
             // Por ahora: costo * cantidad (sin conversión automática, solo si usuario lo especifica)
             return total + (unitCost * quantity);
@@ -338,6 +337,15 @@ const Data = {
             return true;
         }
         return false;
+    },
+
+    /**
+     * Vaciar historial de ventas
+     */
+    clearSales() {
+        this.salesHistory = [];
+        this.saveAll();
+        return true;
     },
 
     /**
@@ -553,6 +561,37 @@ const Data = {
             return true;
         }
         return false;
+    },
+
+    /**
+     * Obtener objeto completo con todos los datos del sistema para backup
+     */
+    getFullAppData() {
+        return {
+            ingredients: this.ingredients,
+            products: this.products,
+            salesHistory: this.salesHistory,
+            stock: this.stock,
+            settings: this.settings,
+            exportDate: new Date().toISOString(),
+            appName: 'Kamiliahs'
+        };
+    },
+
+    /**
+     * Importar datos desde un objeto de backup
+     */
+    importFullAppData(data) {
+        if (!data || !data.ingredients || !data.products) return false;
+
+        this.ingredients = data.ingredients || [];
+        this.products = data.products || [];
+        this.salesHistory = data.salesHistory || [];
+        this.stock = data.stock || {};
+        this.settings = data.settings || this.settings;
+
+        this.saveAll();
+        return true;
     }
 };
 

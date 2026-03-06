@@ -6,9 +6,16 @@ const UI = {
     /**
      * Renderizar vista POS
      */
-    renderPOS() {
+    renderPOS(searchQuery = '') {
         const grid = document.getElementById('productGrid');
-        grid.innerHTML = Data.products.map(p => `
+        if (!grid) return;
+        const query = searchQuery.toLowerCase();
+        const filtered = Data.products.filter(p =>
+            p.name.toLowerCase().includes(query) ||
+            (p.icon && p.icon.toLowerCase().includes(query))
+        );
+
+        grid.innerHTML = filtered.map(p => `
             <div class="product-card flex justify-between items-center cursor-pointer" onclick="APP.addToCart('${p.id}')">
                 <div>
                     <p class="label-caps mb-1">${p.icon} RECETA</p>
@@ -19,34 +26,47 @@ const UI = {
                     <p class="text-[9px] font-bold text-muted uppercase">SRD</p>
                 </div>
             </div>
-        `).join('');
+        `).join('') || '<p class="text-muted text-sm px-6">No se encontraron platos</p>';
     },
 
     /**
      * Renderizar vista de inventario
      */
-    renderInventory() {
+    renderInventory(searchQuery = '') {
         const body = document.getElementById('inventoryBody');
-        body.innerHTML = Data.ingredients.map(ing => `
+        if (!body) return;
+        const query = searchQuery.toLowerCase();
+        const filtered = Data.ingredients.filter(ing =>
+            ing.name.toLowerCase().includes(query)
+        );
+
+        body.innerHTML = filtered.map(ing => `
             <div class="flex justify-between items-end pb-4 line-border">
                 <div>
                     <p class="label-caps mb-1">Costo/${ing.unit}</p>
                     <p class="font-black text-sm">${ing.name}</p>
+                    ${ing.packQty > 1 ? `<p class="text-[8px] text-muted uppercase">Pack de ${ing.packQty}</p>` : ''}
                 </div>
                 <div class="flex items-center gap-4">
                     <input type="number" value="${ing.cost}" onchange="APP.updateIngredientCost('${ing.id}', this.value)" class="w-20 text-right !p-0">
+                    <button onclick="APP.editIngredient('${ing.id}')" class="text-teal text-[10px] cursor-pointer font-bold">EDITAR</button>
                     <button onclick="APP.deleteIngredient('${ing.id}')" class="text-muted text-[10px] cursor-pointer hover:text-red-500">✕</button>
                 </div>
             </div>
-        `).join('');
+        `).join('') || '<p class="text-muted text-sm">No se encontraron insumos</p>';
     },
 
     /**
      * Renderizar vista de recetas
      */
-    renderRecipes() {
+    renderRecipes(searchQuery = '') {
         const container = document.getElementById('recipesContainer');
-        container.innerHTML = Data.products.map(p => {
+        const query = searchQuery.toLowerCase();
+        const filtered = Data.products.filter(p =>
+            p.name.toLowerCase().includes(query)
+        );
+
+        container.innerHTML = filtered.map(p => {
             const cost = Data.calculateProductCost(p.id);
             const computedMargin = p.price > 0 ? (((p.price - cost) / p.price) * 100).toFixed(0) : 0;
             const margin = p.marginPct != null ? p.marginPct : computedMargin;
@@ -77,13 +97,9 @@ const UI = {
                             <p class="font-bold">${margin}%</p>
                         </div>
                     </div>
-                    <div class="mt-4 text-sm text-muted">
-                        <p>Servicio: ${service}%</p>
-                        <p>Margen aplicado: ${margin}%</p>
-                    </div>
                 </div>
             `;
-        }).join('');
+        }).join('') || '<p class="text-muted text-sm">No se encontraron recetas</p>';
     },
 
     /**
@@ -141,9 +157,9 @@ const UI = {
                 return `
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-2">
-                        <button class="bg-card px-2 rounded" onclick="APP.changeCartQty('${id}',-1)">-</button>
+                        <button class="cart-bar-btn" onclick="APP.changeCartQty('${id}',-1)">-</button>
                         <span>${info.name} x${info.count}</span>
-                        <button class="bg-card px-2 rounded" onclick="APP.changeCartQty('${id}',1)">+</button>
+                        <button class="cart-bar-btn" onclick="APP.changeCartQty('${id}',1)">+</button>
                     </div>
                     <span>${lineTotal}</span>
                 </div>`;
@@ -163,26 +179,35 @@ const UI = {
     /**
      * Renderizar vista de pedidos
      */
-    renderOrders() {
+    renderOrders(searchQuery = '', paidFilter = 'all') {
         const container = document.getElementById('ordersContainer');
         const sales = Data.getAllSales();
 
-        if (sales.length === 0) {
-            container.innerHTML = '<p class="text-muted text-sm">Sin pedidos aún</p>';
+        const query = searchQuery.toLowerCase();
+        const filtered = sales.filter(sale => {
+            const matchesSearch = sale.id.toLowerCase().includes(query) ||
+                new Date(sale.timestamp).toLocaleString().toLowerCase().includes(query);
+            const matchesPaid = paidFilter === 'all' ||
+                (paidFilter === 'paid' && sale.paid) ||
+                (paidFilter === 'unpaid' && !sale.paid);
+            return matchesSearch && matchesPaid;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<p class="text-muted text-sm">No se encontraron pedidos</p>';
             return;
         }
 
-        container.innerHTML = sales.map(sale => `
+        container.innerHTML = filtered.reverse().map(sale => `
             <div class="pb-4 line-border cursor-pointer hover:bg-card p-4 -mx-6 px-6 transition" onclick="APP.viewOrderDetail('${sale.id}')">
                 <div class="flex justify-between items-center">
                     <div>
-                        <p class="label-caps mb-1">ID: ${sale.id}</p>
-                        <p class="font-bold">${new Date(sale.timestamp).toLocaleString()}</p>
+                        <p class="label-caps mb-1">ID: ${sale.id.slice(-6)}</p>
+                        <p class="font-bold text-xs">${new Date(sale.timestamp).toLocaleString()}</p>
                     </div>
                     <div class="text-right">
-                        <p class="heading-lg">SRD ${sale.total.toFixed(2)}</p>
-                        <p class="text-[9px] font-bold text-muted">${sale.items.length} items</p>
-                        <p class="text-[9px] ${sale.paid ? 'text-green-600' : 'text-red-500'}">${sale.paid ? 'Pagado' : 'Pendiente'}</p>
+                        <p class="font-black text-sm">SRD ${sale.total.toFixed(2)}</p>
+                        <p class="text-[9px] ${sale.paid ? 'text-teal font-bold' : 'text-red-500'}">${sale.paid ? 'PAGADO' : 'PENDIENTE'}</p>
                     </div>
                 </div>
             </div>

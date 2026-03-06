@@ -1,5 +1,5 @@
 /**
- * POS Minimalist - Aplicación Principal
+ * Kamiliahs - Aplicación Principal
  * Sistema de gestión de puntos de venta con PWA
  */
 
@@ -21,7 +21,16 @@ const APP = {
         // Configurar event listeners
         this.setupEventListeners();
 
-        console.log('POS Minimalist iniciado correctamente');
+        console.log('Kamiliahs iniciado correctamente');
+
+        // Ocultar Splash Screen
+        setTimeout(() => {
+            const splash = document.getElementById('splashScreen');
+            if (splash) {
+                splash.classList.add('hide');
+                setTimeout(() => splash.remove(), 800); // match CSS duration
+            }
+        }, 1500);
     },
 
     /**
@@ -53,23 +62,33 @@ const APP = {
      */
     saveIngredient() {
         const name = document.getElementById('newIngName').value.trim();
-        const cost = parseFloat(document.getElementById('newIngCost').value);
+        const packCost = parseFloat(document.getElementById('newIngCost').value);
         const unit = document.getElementById('newIngUnit').value;
+        const packQtyInput = document.getElementById('newIngPackQty');
+        const packQty = packQtyInput ? parseFloat(packQtyInput.value) || 1 : 1;
 
         if (!name) {
             Utils.showToast('Nombre requerido');
             return;
         }
 
-        if (isNaN(cost) || cost < 0) {
+        if (isNaN(packCost) || packCost < 0) {
             Utils.showToast('Costo inválido');
             return;
         }
 
-        Data.addIngredient(name, cost, unit);
+        // Calcular costo unitario
+        const unitCost = packCost / packQty;
+
+        Data.addIngredient(name, unitCost, unit, packQty);
         UI.renderInventory();
         Utils.closeAllPopups();
         Utils.showToast('INSUMO GUARDADO');
+
+        // Limpiar campos
+        document.getElementById('newIngName').value = '';
+        document.getElementById('newIngCost').value = '';
+        if (packQtyInput) packQtyInput.value = '1';
     },
 
     /**
@@ -168,8 +187,10 @@ const APP = {
 
         document.getElementById('editIngId').value = id;
         document.getElementById('editIngName').value = ing.name;
-        document.getElementById('editIngCost').value = ing.cost;
+        document.getElementById('editIngCost').value = (ing.cost * (ing.packQty || 1)).toFixed(2);
         document.getElementById('editIngUnit').value = ing.unit;
+        const packQtyInput = document.getElementById('editIngPackQty');
+        if (packQtyInput) packQtyInput.value = ing.packQty || 1;
 
         Utils.openModal('editIngridientModal');
     },
@@ -180,20 +201,24 @@ const APP = {
     saveEditIngredient() {
         const id = document.getElementById('editIngId').value;
         const name = document.getElementById('editIngName').value.trim();
-        const cost = parseFloat(document.getElementById('editIngCost').value);
+        const packCost = parseFloat(document.getElementById('editIngCost').value);
         const unit = document.getElementById('editIngUnit').value;
+        const packQtyInput = document.getElementById('editIngPackQty');
+        const packQty = packQtyInput ? parseFloat(packQtyInput.value) || 1 : 1;
 
         if (!name) {
             Utils.showToast('Nombre requerido');
             return;
         }
 
-        if (isNaN(cost) || cost < 0) {
+        if (isNaN(packCost) || packCost < 0) {
             Utils.showToast('Costo inválido');
             return;
         }
 
-        Data.updateIngredient(id, name, cost, unit);
+        const unitCost = packCost / packQty;
+
+        Data.updateIngredient(id, name, unitCost, unit, packQty);
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('INSUMO ACTUALIZADO');
@@ -472,10 +497,10 @@ const APP = {
             return;
         }
 
-        let csv = 'ID,Fecha,Total,Items\n';
+        let csv = 'ID,Fecha,Total,Items,Estado\n';
         sales.forEach(sale => {
             const itemList = sale.items.map(i => i.name).join(';');
-            csv += `"${sale.id}","${new Date(sale.timestamp).toLocaleString()}","${sale.total.toFixed(2)}","${itemList}"\n`;
+            csv += `"${sale.id.slice(-6)}","${new Date(sale.timestamp).toLocaleString()}","${sale.total.toFixed(2)}","${itemList}","${sale.paid ? 'Pagado' : 'Pendiente'}"\n`;
         });
 
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -486,6 +511,95 @@ const APP = {
         a.click();
         window.URL.revokeObjectURL(url);
         Utils.showToast('EXPORTADO');
+    },
+
+    /**
+     * Vaciar listado de pedidos
+     */
+    clearOrders() {
+        if (confirm('¿Vaciar todo el historial de pedidos? Esta acción no se puede deshacer.')) {
+            Data.clearSales();
+            this.switchView('orders');
+            Utils.showToast('HISTORIAL VACIADO');
+        }
+    },
+
+    // ========== FILTRADO ==========
+
+    filterPOS() {
+        const query = document.getElementById('posSearch').value;
+        UI.renderPOS(query);
+    },
+
+    filterInventory() {
+        const query = document.getElementById('inventorySearch').value;
+        UI.renderInventory(query);
+    },
+
+    filterRecipes() {
+        const query = document.getElementById('recipeSearch').value;
+        UI.renderRecipes(query);
+    },
+
+    filterOrders() {
+        const queryInput = document.getElementById('orderSearch');
+        const query = queryInput ? queryInput.value : '';
+        const paidFilter = this._lastPaidFilter || 'all';
+        UI.renderOrders(query, paidFilter);
+    },
+
+    filterOrdersByPaid(status, el) {
+        // Update tag styles
+        document.querySelectorAll('#orderFilters .tag-filter').forEach(tag => tag.classList.remove('active'));
+        el.classList.add('active');
+
+        this._lastPaidFilter = status;
+        this.filterOrders();
+    },
+
+    /**
+     * Exportar todos los datos a un archivo JSON
+     */
+    exportAppData() {
+        const data = Data.getFullAppData();
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backup-kamiliahs-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        Utils.showToast('BACKUP GENERADO');
+    },
+
+    /**
+     * Importar datos desde un archivo JSON local
+     */
+    importAppData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (confirm('¿Importar respaldo? Los datos actuales serán reemplazados por completo.')) {
+                    if (Data.importFullAppData(data)) {
+                        Utils.showToast('RESTORE COMPLETADO');
+                        // Reiniciar app para refrescar todo
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        Utils.showToast('Archivo incompatible');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                Utils.showToast('Error de lectura JSON');
+            }
+            event.target.value = ''; // permitir re-importar el mismo archivo
+        };
+        reader.readAsText(file);
     },
 
     // ========== NAVEGACIÓN ==========
