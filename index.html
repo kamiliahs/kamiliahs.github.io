@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <meta name="description"
-        content="Kamiliahs">
+    <meta name="description" content="Kamiliahs">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json">
@@ -46,9 +45,9 @@
                 </select>
             </div>
             <div class="flex gap-4 pt-10">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cerrar</button>
+                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cerrar</button>
                 <button onclick="APP.saveIngredient()"
-                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
+                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
             </div>
         </div>
     </div>
@@ -67,9 +66,9 @@
                 </select>
             </div>
             <div class="flex gap-4 pt-10">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
+                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cancelar</button>
                 <button onclick="APP.saveEditIngredient()"
-                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Actualizar</button>
+                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest">Actualizar</button>
             </div>
         </div>
     </div>
@@ -88,12 +87,13 @@
             </div>
 
             <div id="recipeBuilder" class="space-y-4 pt-4"></div>
-            <button onclick="APP.addIngredientRow()" class="label-caps text-black underline"> + Añadir Insumo </button>
+            <button onclick="APP.addIngredientRow()" class="label-caps underline hover:text-teal"> + Añadir Insumo
+            </button>
 
             <div class="flex gap-4 pt-10">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps py-4">Cancelar</button>
+                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cancelar</button>
                 <button onclick="APP.saveRecipe()"
-                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Crear</button>
+                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest">Crear</button>
             </div>
         </div>
     </div>
@@ -113,13 +113,13 @@
             </div>
 
             <div id="editRecipeBuilder" class="space-y-4 pt-4"></div>
-            <button onclick="APP.addEditIngredientRow()" class="label-caps text-black underline"> + Añadir Insumo
+            <button onclick="APP.addEditIngredientRow()" class="label-caps underline hover:text-teal"> + Añadir Insumo
             </button>
 
             <div class="flex gap-4 pt-10">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps py-4">Cancelar</button>
+                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cancelar</button>
                 <button onclick="APP.saveEditRecipe()"
-                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Actualizar</button>
+                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest">Actualizar</button>
             </div>
         </div>
     </div>
@@ -128,26 +128,28 @@
         <p class="label-caps mb-8">Detalle del Pedido</p>
         <div class="space-y-6 max-h-[60vh] overflow-y-auto">
             <div>
-                <p class="label-caps text-black/50 mb-1">Total Original</p>
+                <p class="label-caps opacity-50 mb-1">Total Original</p>
                 <p class="heading-lg" id="orderDetailTotal">0.00</p>
             </div>
             <input type="number" id="orderEditPrice" placeholder="Nuevo Total (opcional)">
             <div class="flex justify-between items-center mb-4">
                 <span id="orderPaidStatus" class="text-xs font-medium text-muted">Estado: --</span>
-                <button id="markPaidBtn" onclick="APP.toggleOrderPaid()" class="label-caps text-[10px] underline">Marcar pagado</button>
+                <button id="markPaidBtn" onclick="APP.toggleOrderPaid()" class="label-caps text-[10px] underline">Marcar
+                    pagado</button>
             </div>
             <div class="mb-4">
                 <select id="addItemSelect" class="w-full border">
                     <option value="">-- Añadir producto --</option>
                 </select>
-                <button onclick="APP.addItemToOrder()" class="w-full label-caps text-black mt-2">Añadir</button>
+                <button onclick="APP.addItemToOrder()"
+                    class="w-full label-caps underline hover:text-teal mt-2">Añadir</button>
             </div>
             <div id="orderDetailItems" class="space-y-2 text-sm py-4"></div>
             <div class="flex gap-4 pt-10">
                 <button onclick="APP.deleteOrder()" class="w-1/2 label-caps text-red-500 py-4">Eliminar</button>
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps text-black py-4">Cancelar</button>
+                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cancelar</button>
                 <button onclick="APP.saveOrderEdit()"
-                    class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
+                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
             </div>
         </div>
     </div>
@@ -190,7 +192,7 @@
             <div class="flex justify-between items-center">
                 <span id="cartTotal" class="heading-lg">0.00</span>
                 <button onclick="APP.checkout()"
-                    class="bg-white text-black px-8 py-3 font-black text-[10px] uppercase tracking-tighter">Cobrar</button>
+                    class="bg-white text-black px-8 py-3 font-black text-[10px] uppercase tracking-tighter hover:bg-opacity-90 transition-all">Cobrar</button>
             </div>
         </div>
     </div>
@@ -199,7 +201,8 @@
     <div id="inventoryView" class="view-container hidden-view p-6">
         <div class="flex justify-between items-center mb-10">
             <h3 class="heading-lg">CATÁLOGO</h3>
-            <button onclick="APP.openModal('ingridientModal')" class="label-caps text-black underline">+ Nuevo</button>
+            <button onclick="APP.openModal('ingridientModal')" class="label-caps underline hover:text-teal">+
+                Nuevo</button>
         </div>
         <div id="inventoryBody" class="space-y-6"></div>
     </div>
@@ -207,7 +210,7 @@
     <!-- Configuración View -->
     <div id="configView" class="view-container hidden-view p-6">
         <h3 class="heading-lg mb-4">Configuración</h3>
-        
+
         <!-- TEMA -->
         <div class="mb-8 pb-8 line-border">
             <p class="label-caps mb-3">Tema</p>
@@ -225,7 +228,8 @@
             <div class="space-y-2 mb-4">
                 <input type="text" id="newUnitSymbol" placeholder="Símbolo (kg, l, etc)" class="w-full">
                 <input type="text" id="newUnitName" placeholder="Nombre (Kilogramo, Litro, etc)" class="w-full">
-                <button onclick="APP.addUnit()" class="w-full label-caps text-black underline">+ Agregar Unidad</button>
+                <button onclick="APP.addUnit()" class="w-full label-caps underline hover:text-teal">+ Agregar
+                    Unidad</button>
             </div>
         </div>
 
@@ -241,14 +245,16 @@
                 <select id="eqToUnit" class="w-full border">
                     <option value="">A --</option>
                 </select>
-                <button onclick="APP.addEquivalence()" class="w-full label-caps text-black underline">Crear Equivalencia</button>
+                <button onclick="APP.addEquivalence()" class="w-full label-caps underline hover:text-teal">Crear
+                    Equivalencia</button>
             </div>
         </div>
 
         <!-- BOTONES -->
         <div class="flex gap-4">
-            <button onclick="APP.saveSettings()" class="w-1/2 bg-black text-white font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
-            <button onclick="APP.switchView('pos')" class="w-1/2 label-caps py-4">Cancelar</button>
+            <button onclick="APP.saveSettings()"
+                class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
+            <button onclick="APP.switchView('pos')" class="w-1/2 label-caps btn-secondary py-4">Cancelar</button>
         </div>
     </div>
 
@@ -256,7 +262,7 @@
     <div id="recipesView" class="view-container hidden-view p-6">
         <div class="flex justify-between items-center mb-10">
             <h3 class="heading-lg">FICHAS</h3>
-            <button onclick="APP.openModal('recipeModal')" class="label-caps text-black underline">+ Nueva</button>
+            <button onclick="APP.openModal('recipeModal')" class="label-caps underline hover:text-teal">+ Nueva</button>
         </div>
         <div id="recipesContainer" class="space-y-12"></div>
     </div>
@@ -264,7 +270,7 @@
     <!-- Reports View -->
     <div id="reportsView" class="view-container hidden-view p-6">
         <div class="mb-12">
-            <p class="label-caps mb-4 text-black">Balance General</p>
+            <p class="label-caps mb-4">Balance General</p>
             <div class="heading-xl mb-2" id="repNetProfit">0.00</div>
             <p class="text-xs font-bold text-muted" id="repMarginAvg">0% de margen neto</p>
         </div>
@@ -290,7 +296,7 @@
     <div id="ordersView" class="view-container hidden-view p-6">
         <div class="flex justify-between items-center mb-10">
             <h3 class="heading-lg">PEDIDOS</h3>
-            <button onclick="APP.exportOrders()" class="label-caps text-black underline">⬇ Exportar</button>
+            <button onclick="APP.exportOrders()" class="label-caps underline hover:text-teal">⬇ Exportar</button>
         </div>
         <div id="ordersContainer" class="space-y-4"></div>
     </div>
@@ -323,7 +329,7 @@
 
     <!-- PWA Install Banner -->
     <div id="installBanner"
-        class="fixed bottom-4 left-4 right-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white p-5 rounded-lg shadow-2xl z-50 hidden">
+        class="fixed bottom-4 left-4 right-4 text-white p-5 rounded-lg shadow-2xl z-50 hidden transition-all duration-300">
         <div class="flex items-center justify-between gap-4">
             <div class="flex-1">
                 <h3 class="font-bold text-base mb-1">📱 Instalar POS Minimalist</h3>
@@ -331,9 +337,8 @@
             </div>
             <div class="flex gap-3 flex-shrink-0">
                 <button id="installBtn"
-                    class="bg-white text-blue-600 px-5 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition">Instalar</button>
-                <button id="dismissBtn"
-                    class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg text-sm transition">✕</button>
+                    class="bg-white btn-primary px-5 py-2 rounded-lg font-bold text-sm hover:opacity-90 transition">Instalar</button>
+                <button id="dismissBtn" class="px-5 py-2 rounded-lg text-sm transition">✕</button>
             </div>
         </div>
     </div>

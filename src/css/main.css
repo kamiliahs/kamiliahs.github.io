@@ -2,27 +2,34 @@
 
 :root {
     --bg: #ffffff;
+    --card-bg: #f9fafb;
     --text-main: #000000;
-    --text-muted: #888888;
-    --border: #eeeeee;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
     --accent: #000000;
+    --teal: #0d9488;
+    --overlay-bg: rgba(255, 255, 255, 0.7);
 }
 
 /* explicit theme override */
 [data-theme="light"] {
     --bg: #ffffff;
+    --card-bg: #f9fafb;
     --text-main: #000000;
-    --text-muted: #888888;
-    --border: #eeeeee;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
     --accent: #000000;
 }
 
 [data-theme="dark"] {
-    --bg: #1a1a1a;
+    --bg: #0a0a0a;
+    --card-bg: #171717;
     --text-main: #ffffff;
-    --text-muted: #888888;
-    --border: #333333;
-    --accent: #ffffff;
+    --text-muted: #a3a3a3;
+    --border: #262626;
+    --accent: #2dd4bf;
+    --teal: #2dd4bf;
+    --overlay-bg: rgba(0, 0, 0, 0.85);
 }
 
 * {
@@ -34,12 +41,14 @@ body {
     background-color: var(--bg);
     color: var(--text-main);
     margin: 0;
-    padding-bottom: 130px; /* espacio extra para evitar que el nav cubra contenido */
+    padding-bottom: 130px;
+    /* espacio extra para evitar que el nav cubra contenido */
     letter-spacing: -0.02em;
 }
 
 .view-container {
-    padding-bottom: 130px; /* asegura scroll visible debajo del nav */
+    padding-bottom: 130px;
+    /* asegura scroll visible debajo del nav */
 }
 
 /* Tipografía Editorial */
@@ -62,6 +71,13 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--text-muted);
+    transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .label-caps {
+    color: var(--teal);
+    opacity: 0.9;
+    text-shadow: 0 0 8px rgba(45, 212, 191, 0.25);
 }
 
 /* Componentes Minimalistas */
@@ -86,7 +102,7 @@ body {
     width: 85%;
     max-width: 360px;
     height: 100%;
-    background: white;
+    background: var(--bg);
     z-index: 2000;
     transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     padding: 40px 24px;
@@ -102,7 +118,7 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: white;
+    background: var(--bg);
     display: flex;
     border-top: 1px solid var(--border);
     z-index: 1000;
@@ -111,7 +127,8 @@ body {
 
 /* Banner should float above bottom navigation */
 #installBanner {
-    bottom: 70px; /* desplaza hacia arriba para evitar la nav */
+    bottom: 70px;
+    /* desplaza hacia arriba para evitar la nav */
     z-index: 2000;
 }
 
@@ -141,11 +158,11 @@ body {
     bottom: -100%;
     left: 0;
     width: 100%;
-    background: white;
+    background: var(--bg);
     z-index: 3000;
     transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     padding: 30px 20px;
-    border-top: 2px solid black;
+    border-top: 2px solid var(--accent);
     max-height: 90vh;
     overflow-y: auto;
 }
@@ -160,7 +177,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--overlay-bg);
     backdrop-filter: blur(4px);
     z-index: 1500;
     display: none;
@@ -190,23 +207,25 @@ input::placeholder {
 }
 
 input:focus {
-    border-bottom-color: black;
+    border-bottom-color: var(--accent);
 }
 
 input[type="number"] {
     font-size: 1rem;
 }
 
-input:disabled, select:disabled {
+input:disabled,
+select:disabled {
     opacity: 0.5;
     pointer-events: none;
 }
 
 .cart-bar {
-    background: black;
-    color: white;
+    background: var(--accent);
+    color: var(--bg);
     margin: 15px;
-    margin-bottom: 100px; /* evita tapar con la barra inferior */
+    margin-bottom: 100px;
+    /* evita tapar con la barra inferior */
     padding: 20px;
     border-radius: 4px;
     cursor: pointer;
@@ -217,8 +236,8 @@ input:disabled, select:disabled {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: black;
-    color: white;
+    background: var(--accent);
+    color: var(--bg);
     font-weight: 700;
     font-size: 0.7rem;
     text-transform: uppercase;
@@ -273,6 +292,7 @@ input:disabled, select:disabled {
 
 /* Print Styles */
 @media print {
+
     .bottom-nav,
     .sidebar,
     .modal,
@@ -287,29 +307,89 @@ input:disabled, select:disabled {
 
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
-    :root {
-        --bg: #1a1a1a;
+    :root:not([data-theme="light"]) {
+        --bg: #0a0a0a;
+        --card-bg: #171717;
         --text-main: #ffffff;
-        --text-muted: #888888;
-        --border: #333333;
-        --accent: #ffffff;
+        --text-muted: #a3a3a3;
+        --border: #262626;
+        --accent: #2dd4bf;
+        --teal: #2dd4bf;
+        --overlay-bg: rgba(0, 0, 0, 0.85);
     }
 
     .sidebar,
     .modal,
     .bottom-nav {
-        background: #1a1a1a;
-        border-color: #333333;
+        background: var(--bg);
+        border-color: var(--border);
     }
 
     input,
     select {
-        background: #1a1a1a;
-        color: #ffffff;
-        border-bottom-color: #333333;
+        background: transparent;
+        color: var(--text-main);
+        border-bottom-color: var(--border);
     }
 
     input:focus {
-        border-bottom-color: #ffffff;
+        border-bottom-color: var(--accent);
     }
+}
+
+.text-teal {
+    color: var(--teal) !important;
+}
+
+.bg-teal {
+    background-color: var(--teal) !important;
+}
+
+.border-teal {
+    border-color: var(--teal) !important;
+}
+
+.bg-card {
+    background-color: var(--card-bg) !important;
+}
+
+.btn-primary {
+    background-color: var(--accent) !important;
+    color: var(--bg) !important;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    color: var(--text-main) !important;
+    background: transparent;
+    opacity: 0.7;
+}
+
+.btn-secondary:hover {
+    opacity: 1;
+}
+
+#installBanner {
+    background: var(--accent) !important;
+    color: var(--bg) !important;
+}
+
+#installBanner button#installBtn {
+    background: var(--bg) !important;
+    color: var(--accent) !important;
+}
+
+#installBanner button#dismissBtn {
+    background: rgba(0, 0, 0, 0.1) !important;
+    color: var(--bg) !important;
+}
+
+[data-theme="dark"] #installBanner button#dismissBtn {
+    background: rgba(255, 255, 255, 0.1) !important;
 }

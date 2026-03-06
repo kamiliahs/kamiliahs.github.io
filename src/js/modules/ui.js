@@ -35,7 +35,7 @@ const UI = {
                 </div>
                 <div class="flex items-center gap-4">
                     <input type="number" value="${ing.cost}" onchange="APP.updateIngredientCost('${ing.id}', this.value)" class="w-20 text-right !p-0">
-                    <button onclick="APP.deleteIngredient('${ing.id}')" class="text-muted text-[10px] cursor-pointer hover:text-black">✕</button>
+                    <button onclick="APP.deleteIngredient('${ing.id}')" class="text-muted text-[10px] cursor-pointer hover:text-red-500">✕</button>
                 </div>
             </div>
         `).join('');
@@ -51,29 +51,29 @@ const UI = {
             const computedMargin = p.price > 0 ? (((p.price - cost) / p.price) * 100).toFixed(0) : 0;
             const margin = p.marginPct != null ? p.marginPct : computedMargin;
             const service = p.servicePct != null ? p.servicePct : 0;
-            
+
             return `
                 <div>
                     <div class="flex justify-between items-end mb-4">
                         <h4 class="heading-lg">${p.name}</h4>
                         <div class="space-x-4 flex">
-                            <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-black">Editar</button>
-                            <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-black">Borrar</button>
+                            <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal">Editar</button>
+                            <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-red-500">Borrar</button>
                         </div>
                     </div>
                     <div class="space-y-1 mb-4">
                         ${p.recipe.map(r => {
-                            const ing = Data.ingredients.find(i => i.id === r.id);
-                            return `<p class="text-[10px] text-muted font-medium uppercase tracking-wider">${r.qty}${ing?.unit || ''} ${ing?.name || '---'}</p>`;
-                        }).join('')}
+                const ing = Data.ingredients.find(i => i.id === r.id);
+                return `<p class="text-[10px] text-muted font-medium uppercase tracking-wider">${r.qty}${ing?.unit || ''} ${ing?.name || '---'}</p>`;
+            }).join('')}
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-gray-50">
+                        <div class="p-4 bg-card">
                             <p class="label-caps mb-1">Costo Prod.</p>
                             <p class="font-bold">SRD ${cost.toFixed(2)}</p>
                         </div>
-                        <div class="p-4 bg-black text-white">
-                            <p class="label-caps text-white/50 mb-1">Margen %</p>
+                        <div class="p-4 btn-primary">
+                            <p class="label-caps opacity-50 mb-1">Margen %</p>
                             <p class="font-bold">${margin}%</p>
                         </div>
                     </div>
@@ -141,9 +141,9 @@ const UI = {
                 return `
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-2">
-                        <button class="text-white bg-gray-700 px-2" onclick="APP.changeCartQty('${id}',-1)">-</button>
+                        <button class="bg-card px-2 rounded" onclick="APP.changeCartQty('${id}',-1)">-</button>
                         <span>${info.name} x${info.count}</span>
-                        <button class="text-white bg-gray-700 px-2" onclick="APP.changeCartQty('${id}',1)">+</button>
+                        <button class="bg-card px-2 rounded" onclick="APP.changeCartQty('${id}',1)">+</button>
                     </div>
                     <span>${lineTotal}</span>
                 </div>`;
@@ -166,14 +166,14 @@ const UI = {
     renderOrders() {
         const container = document.getElementById('ordersContainer');
         const sales = Data.getAllSales();
-        
+
         if (sales.length === 0) {
             container.innerHTML = '<p class="text-muted text-sm">Sin pedidos aún</p>';
             return;
         }
-        
+
         container.innerHTML = sales.map(sale => `
-            <div class="pb-4 line-border cursor-pointer hover:bg-gray-50 p-4 -mx-6 px-6 transition" onclick="APP.viewOrderDetail('${sale.id}')">
+            <div class="pb-4 line-border cursor-pointer hover:bg-card p-4 -mx-6 px-6 transition" onclick="APP.viewOrderDetail('${sale.id}')">
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="label-caps mb-1">ID: ${sale.id}</p>
@@ -194,14 +194,14 @@ const UI = {
      */
     renderConfig() {
         const s = Data.settings || {};
-        
+
         // Theme
         document.getElementById('configTheme').value = s.theme || 'system';
-        
+
         // Units list with edit/delete
         const unitsList = document.getElementById('unitsList');
         unitsList.innerHTML = (s.units || []).map(u => `
-            <div class="flex justify-between items-center text-sm p-2 bg-gray-50 rounded">
+            <div class="flex justify-between items-center text-sm p-4 bg-card rounded">
                 <div class="flex-1">
                     <input type="text" class="text-xs w-24 border-0 bg-transparent font-bold" value="${u.symbol}" readonly data-unit-symbol="${u.symbol}" class="unitSymbolInput">
                     <span class="text-xs text-muted ml-2">${u.name}</span>
@@ -221,7 +221,7 @@ const UI = {
                 displayed.add(key.split('_to_')[0]);
                 const parts = key.split('_to_');
                 return `
-                    <div class="flex justify-between items-center text-xs p-2 bg-gray-50 rounded">
+                    <div class="flex justify-between items-center text-xs p-4 bg-card rounded">
                         <span>1 ${parts[0]} = ${val} ${parts[1]}</span>
                         <button class="text-red-500 text-xs" onclick="APP.removeEquivalence('${key}')">✕</button>
                     </div>
@@ -232,7 +232,7 @@ const UI = {
         const fromSelect = document.getElementById('eqFromUnit');
         const toSelect = document.getElementById('eqToUnit');
         const options = (s.units || []).map(u => `<option value="${u.symbol}">${u.symbol.toUpperCase()} (${u.name})</option>`).join('');
-        
+
         fromSelect.innerHTML = '<option value="">De --</option>' + options;
         toSelect.innerHTML = '<option value="">A --</option>' + options;
     },
