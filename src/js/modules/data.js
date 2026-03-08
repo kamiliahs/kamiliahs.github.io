@@ -126,7 +126,7 @@ const Data = {
     /**
      * Agregar producto (receta)
      */
-    addProduct(name, icon, price, recipe, servicePct = 0, marginPct = 0) {
+    addProduct(name, icon, price, recipe, servicePct = 0, marginPct = 0, portions = 1) {
         const product = {
             id: 'p' + Date.now(),
             name: name.toUpperCase(),
@@ -134,7 +134,8 @@ const Data = {
             price: parseFloat(price),
             recipe: recipe,
             servicePct: parseFloat(servicePct) || 0,
-            marginPct: parseFloat(marginPct) || 0
+            marginPct: parseFloat(marginPct) || 0,
+            portions: parseFloat(portions) || 1
         };
         this.products.push(product);
         this.saveAll();
@@ -144,7 +145,7 @@ const Data = {
     /**
      * Actualizar producto completo
      */
-    updateProduct(id, name, icon, price, recipe, servicePct = 0, marginPct = 0) {
+    updateProduct(id, name, icon, price, recipe, servicePct = 0, marginPct = 0, portions = 1) {
         const product = this.products.find(p => p.id === id);
         if (product) {
             product.name = name.toUpperCase();
@@ -153,6 +154,7 @@ const Data = {
             product.recipe = recipe;
             product.servicePct = parseFloat(servicePct) || 0;
             product.marginPct = parseFloat(marginPct) || 0;
+            product.portions = parseFloat(portions) || 1;
             this.saveAll();
             return true;
         }
@@ -203,9 +205,12 @@ const Data = {
     /**
      * Agregar artículo al carrito
      */
-    addToCart(productId) {
+    addToCart(productId, asPortion = false) {
         const product = this.products.find(p => p.id === productId);
         if (!product) return null;
+
+        const isPortion = asPortion && product.portions > 1;
+        const portions = parseFloat(product.portions) || 1;
 
         // compute effective price including service charge
         const basePrice = parseFloat(product.price);
@@ -214,9 +219,13 @@ const Data = {
 
         const cartItem = {
             ...product,
-            costAtSale: this.calculateProductCost(productId),
-            price: effectivePrice,    // override price with service applied
-            basePrice: basePrice      // preserve original
+            id: isPortion ? product.id + '_portion' : product.id,
+            productId: product.id,
+            name: isPortion ? product.name + ' (PORCIÓN)' : product.name,
+            costAtSale: isPortion ? this.calculateProductCost(productId) / portions : this.calculateProductCost(productId),
+            price: isPortion ? effectivePrice / portions : effectivePrice,
+            basePrice: isPortion ? basePrice / portions : basePrice,
+            isPortion: isPortion
         };
         this.cart.push(cartItem);
         return cartItem;
@@ -225,8 +234,8 @@ const Data = {
     /**
      * Remove a single instance of a product from the cart
      */
-    removeOneFromCart(productId) {
-        const idx = this.cart.findIndex(i => i.id === productId);
+    removeOneFromCart(cartItemId) {
+        const idx = this.cart.findLastIndex(i => i.id === cartItemId);
         if (idx !== -1) {
             this.cart.splice(idx, 1);
             this.saveAll();
@@ -238,15 +247,17 @@ const Data = {
     /**
      * Adjust quantity by delta (positive will add, negative will remove)
      */
-    changeCartQty(productId, delta) {
+    changeCartQty(cartItemId, delta) {
+        const existing = this.cart.find(item => item.id === cartItemId);
+        if (!existing) return;
+
         if (delta > 0) {
-            // simply add copies
             for (let i = 0; i < delta; i++) {
-                this.addToCart(productId);
+                this.addToCart(existing.productId, existing.isPortion);
             }
         } else if (delta < 0) {
             for (let i = 0; i < Math.abs(delta); i++) {
-                if (!this.removeOneFromCart(productId)) break;
+                if (!this.removeOneFromCart(cartItemId)) break;
             }
         }
     },

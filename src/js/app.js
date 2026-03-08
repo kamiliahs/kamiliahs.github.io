@@ -58,7 +58,8 @@ const APP = {
         ['new', 'edit'].forEach(prefix => {
             const inputs = [
                 `${prefix}ProdPrice`,
-                `${prefix}ProdService`
+                `${prefix}ProdService`,
+                `${prefix}ProdPortions`
             ];
             inputs.forEach(id => {
                 const el = document.getElementById(id);
@@ -184,8 +185,9 @@ const APP = {
 
         const service = parseFloat(document.getElementById('newProdService').value) || 0;
         const margin = parseFloat(document.getElementById('newProdMargin').value) || 0;
+        const portions = parseFloat(document.getElementById('newProdPortions').value) || 1;
 
-        const product = Data.addProduct(name, icon, price, recipe, service, margin);
+        const product = Data.addProduct(name, icon, price, recipe, service, margin, portions);
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('RECETA CREADA');
@@ -262,6 +264,7 @@ const APP = {
         document.getElementById('editProdPrice').value = product.price;
         document.getElementById('editProdService').value = product.servicePct || 0;
         document.getElementById('editProdMargin').value = product.marginPct || 0;
+        document.getElementById('editProdPortions').value = product.portions || 1;
 
         const builder = document.getElementById('editRecipeBuilder');
         builder.innerHTML = ''; // Limpiar antes de poblar
@@ -315,7 +318,8 @@ const APP = {
 
         const service = parseFloat(document.getElementById('editProdService').value) || 0;
         const margin = parseFloat(document.getElementById('editProdMargin').value) || 0;
-        Data.updateProduct(id, name, icon, price, recipe, service, margin);
+        const portions = parseFloat(document.getElementById('editProdPortions').value) || 1;
+        Data.updateProduct(id, name, icon, price, recipe, service, margin, portions);
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('RECETA ACTUALIZADA');
@@ -348,10 +352,12 @@ const APP = {
 
         const sellingPrice = price * (1 + service / 100);
         const margin = sellingPrice > 0 ? (((sellingPrice - totalCost) / sellingPrice) * 100).toFixed(1) : 0;
+        const portions = parseFloat(document.getElementById(`${prefix}ProdPortions`).value) || 1;
+        const pricePerPortion = portions > 0 ? (sellingPrice / portions).toFixed(2) : 0;
 
         const previewEl = document.getElementById(`${isEdit ? 'edit' : 'new'}RecipeMarginPreview`);
         if (previewEl) {
-            previewEl.innerText = `Costo Est: SRD ${totalCost.toFixed(2)} | Margen Est: ${margin}%`;
+            previewEl.innerText = `Costo Est: SRD ${totalCost.toFixed(2)} | Margen Est: ${margin}% | Porción: SRD ${pricePerPortion}`;
         }
     },
 
@@ -360,8 +366,8 @@ const APP = {
     /**
      * Agregar producto al carrito
      */
-    addToCart(productId) {
-        const item = Data.addToCart(productId);
+    addToCart(productId, asPortion = false) {
+        const item = Data.addToCart(productId, asPortion);
         if (item) {
             UI.updateCartUI();
             Utils.showToast(`${item.name} AGREGADO`);
@@ -431,8 +437,15 @@ const APP = {
 
         // populate product select
         const select = document.getElementById('addItemSelect');
-        select.innerHTML = '<option value="">-- Añadir producto --</option>' +
-            Data.products.map(p => `<option value="${p.id}">${p.name} - SRD ${p.price.toFixed(2)}</option>`).join('');
+        let options = '<option value="">-- Añadir producto --</option>';
+        Data.products.forEach(p => {
+            options += `<option value="${p.id}">${p.name} - SRD ${p.price.toFixed(2)}</option>`;
+            if (p.portions > 1) {
+                const portionPrice = (p.price * (1 + (p.servicePct || 0) / 100)) / p.portions;
+                options += `<option value="${p.id}_portion">${p.name} (POR.) - SRD ${portionPrice.toFixed(2)}</option>`;
+            }
+        });
+        select.innerHTML = options;
 
         const itemsDiv = document.getElementById('orderDetailItems');
         itemsDiv.innerHTML = sale.items.map((item, idx) => `
@@ -512,18 +525,33 @@ const APP = {
      */
     addItemToOrder() {
         const saleId = document.getElementById('orderDetailModal').dataset.saleId;
-        const prodId = document.getElementById('addItemSelect').value;
-        if (!prodId) return;
+        const cartItemId = document.getElementById('addItemSelect').value;
+        if (!cartItemId) return;
         const sale = Data.getSale(saleId);
-        const product = Data.getProduct(prodId);
-        if (sale && product) {
+        if (!sale) return;
+
+        const isPortion = cartItemId.endsWith('_portion');
+        const productId = isPortion ? cartItemId.replace('_portion', '') : cartItemId;
+        const product = Data.getProduct(productId);
+
+        if (product) {
+            const portions = parseFloat(product.portions) || 1;
+            const servicePct = parseFloat(product.servicePct) || 0;
+            const basePrice = parseFloat(product.price);
+            const effectivePrice = basePrice * (1 + servicePct / 100);
+
+            const itemPrice = isPortion ? effectivePrice / portions : effectivePrice;
+            const itemCost = isPortion ? Data.calculateProductCost(productId) / portions : Data.calculateProductCost(productId);
+
             sale.items.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                cost: Data.calculateProductCost(product.id)
+                id: cartItemId,
+                name: isPortion ? product.name + ' (PORCIÓN)' : product.name,
+                price: itemPrice,
+                cost: itemCost,
+                servicePct: servicePct,
+                basePrice: isPortion ? basePrice / portions : basePrice
             });
-            sale.total += product.price;
+            sale.total += itemPrice;
             Data.saveAll();
             this.viewOrderDetail(saleId);
         }

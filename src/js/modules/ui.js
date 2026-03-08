@@ -21,9 +21,16 @@ const UI = {
                     <p class="label-caps mb-1">${p.icon} RECETA</p>
                     <h4 class="font-black text-lg leading-none">${p.name}</h4>
                 </div>
-                <div class="text-right">
-                    <p class="font-black text-xl">${p.price.toFixed(0)}</p>
-                    <p class="text-[9px] font-bold text-muted uppercase">SRD</p>
+                <div class="text-right flex items-center gap-3">
+                    ${p.portions > 1 ? `
+                    <button onclick="event.stopPropagation(); APP.addToCart('${p.id}', true)" 
+                            class="bg-teal/10 hover:bg-teal/20 text-teal text-[8px] font-black px-2 py-1 rounded border border-teal/20 transition-all">
+                        + PORCIÓN
+                    </button>` : ''}
+                    <div>
+                        <p class="font-black text-xl">${p.price.toFixed(0)}</p>
+                        <p class="text-[9px] font-bold text-muted uppercase">SRD</p>
+                    </div>
                 </div>
             </div>
         `).join('') || '<p class="text-muted text-sm px-6">No se encontraron platos</p>';
@@ -98,7 +105,7 @@ const UI = {
                 return `<p class="text-[10px] text-muted font-medium uppercase tracking-wider">${r.qty} ${unit} ${ing?.name || '---'}</p>`;
             }).join('')}
                     </div>
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="p-3 bg-card border-l-2 border-teal">
                             <p class="label-caps mb-1 opacity-50">Costo / Margen Esperado</p>
                             <p class="font-bold text-[11px]">SRD ${cost.toFixed(2)} / ${expectedMargin}%</p>
@@ -107,12 +114,16 @@ const UI = {
                             <p class="label-caps mb-1 opacity-50">Gasto Servicio</p>
                             <p class="font-bold text-[11px]">${servicePct}% (SRD ${(p.price * servicePct / 100).toFixed(2)})</p>
                         </div>
+                        <div class="p-3 bg-card border-l-2 border-purple-400">
+                            <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? 'Precio por Porción' : 'Sin Porciones'}</p>
+                            <p class="font-bold text-[11px]">${p.portions > 1 ? `SRD ${((p.price * (1 + servicePct / 100)) / p.portions).toFixed(2)}` : '---'}</p>
+                        </div>
                         <div class="p-3 bg-card border-l-2 border-blue-400">
                             <p class="label-caps mb-1 opacity-50">Precio Recomendado</p>
                             <p class="font-bold text-[11px]">SRD ${recommendedPrice.toFixed(2)}</p>
                         </div>
                         <div class="p-3 ${actualProfit > 0 ? 'btn-primary' : 'bg-red-500 text-white'}">
-                            <p class="label-caps mb-1 opacity-50">Precio Actual / Margen Real</p>
+                            <p class="label-caps mb-1 opacity-50">Precio Total / Margen Real</p>
                             <p class="font-bold text-[11px]">SRD ${p.price.toFixed(2)} / ${actualMargin}%</p>
                         </div>
                     </div>
