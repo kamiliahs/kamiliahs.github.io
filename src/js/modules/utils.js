@@ -10,7 +10,7 @@ const Utils = {
         const toast = document.getElementById('toast');
         toast.innerText = message;
         toast.classList.add('show');
-        
+
         setTimeout(() => {
             toast.classList.remove('show');
         }, duration);
@@ -22,13 +22,13 @@ const Utils = {
     switchView(viewId) {
         // Ocultar todas las vistas
         document.querySelectorAll('.view-container').forEach(v => v.classList.add('hidden-view'));
-        
+
         // Remover clase active de todos los items de navegación
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        
+
         // Mostrar vista seleccionada
         document.getElementById(viewId + 'View')?.classList.remove('hidden-view');
-        
+
         // Actualizar navegación activa
         const navMap = {
             'pos': 'nav-pos',
@@ -41,7 +41,7 @@ const Utils = {
         if (navMap[viewId]) {
             document.getElementById(navMap[viewId])?.classList.add('active');
         }
-        
+
         // Actualizar títulos
         const titles = {
             pos: 'TERMINAL',
@@ -51,7 +51,7 @@ const Utils = {
             orders: 'PEDIDOS',
             config: 'CONFIGURACIÓN'
         };
-        
+
         const subtitles = {
             pos: 'OPERACIONES',
             inventory: 'INSUMOS',
@@ -60,15 +60,15 @@ const Utils = {
             orders: 'HISTÓRICO',
             config: 'AJUSTES'
         };
-        
+
         document.getElementById('viewTitle').innerText = titles[viewId] || 'TERMINAL';
         document.getElementById('viewSubtitle').innerText = subtitles[viewId] || 'OPERACIONES';
-        
+
         // Cerrar menú si está abierto
         if (document.getElementById('sidebar').classList.contains('open')) {
             this.toggleMenu();
         }
-        
+
         // Re-renderizar vistas
         if (viewId === 'recipes') {
             UI.renderRecipes();
@@ -87,7 +87,7 @@ const Utils = {
     toggleMenu() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('globalOverlay');
-        
+
         sidebar.classList.toggle('open');
         overlay.classList.toggle('visible');
     },
@@ -98,23 +98,23 @@ const Utils = {
     openModal(modalId) {
         const modal = document.getElementById(modalId);
         const overlay = document.getElementById('globalOverlay');
-        
+
         modal.classList.add('visible');
         overlay.classList.add('visible');
-        
+
         // Inicializar recipeModal si es necesario
         if (modalId === 'recipeModal') {
             document.getElementById('recipeBuilder').innerHTML = '';
             this.addIngredientRow();
         }
-        
+
         // Limpiar campos de ingredientes
         if (modalId === 'ingridientModal') {
             document.getElementById('newIngName').value = '';
             document.getElementById('newIngCost').value = '';
-            document.getElementById('newIngUnit').value = 'gr';
+            UI.populateUnitSelect(document.getElementById('newIngUnit'), 'gr');
         }
-        
+
         // Limpiar campos de receta
         if (modalId === 'recipeModal') {
             document.getElementById('newProdName').value = '';
@@ -135,37 +135,85 @@ const Utils = {
     },
 
     /**
+     * Actualiza las opciones de unidad para un ingrediente específico en una receta
+     */
+    updateCompatibleUnitOptions(ingSelect, unitSelect, selectedUnit = null) {
+        const ingId = ingSelect.value;
+        const ingredient = Data.ingredients.find(i => i.id === ingId);
+        if (!ingredient) return;
+
+        const compatibleUnits = Data.getCompatibleUnits(ingredient.unit);
+        unitSelect.innerHTML = compatibleUnits.map(symbol =>
+            `<option value="${symbol}" ${selectedUnit === symbol ? 'selected' : ''}>${symbol}</option>`
+        ).join('');
+    },
+
+    /**
      * Agregar fila de ingrediente a receta
      */
-    addIngredientRow() {
+    addIngredientRow(data = null) {
         const container = document.getElementById('recipeBuilder');
         const row = document.createElement('div');
         row.className = "flex gap-2 items-center pb-2 line-border";
+
         row.innerHTML = `
             <select class="flex-1 text-[10px] font-bold uppercase border-none bg-transparent recipe-ing-select">
-                ${Data.ingredients.map(i => `<option value="${i.id}">${i.name}</option>`).join('')}
+                ${Data.ingredients.map(i => `<option value="${i.id}" ${data?.id === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}
             </select>
-            <input type="number" class="w-16 text-[10px] recipe-ing-qty" placeholder="CANT." min="0" step="0.01">
+            <div class="flex items-center gap-1">
+                <input type="number" class="w-16 text-[10px] recipe-ing-qty" placeholder="CANT." min="0" step="0.01" value="${data?.qty || ''}">
+                <select class="text-[9px] font-bold uppercase border-none bg-transparent recipe-ing-unit"></select>
+            </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500">✕</button>
         `;
         container.appendChild(row);
+
+        const ingSelect = row.querySelector('.recipe-ing-select');
+        const unitSelect = row.querySelector('.recipe-ing-unit');
+
+        const handleChange = () => {
+            this.updateCompatibleUnitOptions(ingSelect, unitSelect, data?.unit);
+        };
+
+        ingSelect.addEventListener('change', () => {
+            this.updateCompatibleUnitOptions(ingSelect, unitSelect);
+        });
+
+        handleChange();
     },
 
     /**
      * Agregar fila de ingrediente a receta en modo edición
      */
-    addEditIngredientRow() {
+    addEditIngredientRow(data = null) {
         const container = document.getElementById('editRecipeBuilder');
         const row = document.createElement('div');
         row.className = "flex gap-2 items-center pb-2 line-border";
+
         row.innerHTML = `
             <select class="flex-1 text-[10px] font-bold uppercase border-none bg-transparent recipe-edit-ing-select">
-                ${Data.ingredients.map(i => `<option value="${i.id}">${i.name}</option>`).join('')}
+                ${Data.ingredients.map(i => `<option value="${i.id}" ${data?.id === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}
             </select>
-            <input type="number" class="w-16 text-[10px] recipe-edit-ing-qty" placeholder="CANT." min="0" step="0.01">
+            <div class="flex items-center gap-1">
+                <input type="number" class="w-16 text-[10px] recipe-edit-ing-qty" placeholder="CANT." min="0" step="0.01" value="${data?.qty || ''}">
+                <select class="text-[9px] font-bold uppercase border-none bg-transparent recipe-edit-ing-unit"></select>
+            </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500">✕</button>
         `;
         container.appendChild(row);
+
+        const ingSelect = row.querySelector('.recipe-edit-ing-select');
+        const unitSelect = row.querySelector('.recipe-edit-ing-unit');
+
+        const handleChange = () => {
+            this.updateCompatibleUnitOptions(ingSelect, unitSelect, data?.unit);
+        };
+
+        ingSelect.addEventListener('change', () => {
+            this.updateCompatibleUnitOptions(ingSelect, unitSelect);
+        });
+
+        handleChange();
     },
 
     /**
@@ -195,7 +243,7 @@ const Utils = {
             salesHistory: Data.salesHistory,
             exportDate: new Date().toISOString()
         };
-        
+
         const json = JSON.stringify(data, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);

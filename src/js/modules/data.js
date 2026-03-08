@@ -186,13 +186,17 @@ const Data = {
             const ingredient = this.ingredients.find(i => i.id === item.id);
             if (!ingredient) return total;
 
-            // Si hay equivalencias definidas, usar convertUnit
-            const unitCost = ingredient.cost;
+            // Unit conversion logic
             const quantity = item.qty;
+            const itemUnit = item.unit || ingredient.unit;
 
-            // Si el costo está en una unidad diferente a la del ingrediente, convertir
-            // Por ahora: costo * cantidad (sin conversión automática, solo si usuario lo especifica)
-            return total + (unitCost * quantity);
+            // Convert quantity to ingredient's base unit
+            const convertedQty = this.convertUnit(quantity, itemUnit, ingredient.unit);
+
+            // Cost is per ingredient base unit
+            const unitCost = ingredient.cost;
+
+            return total + (unitCost * convertedQty);
         }, 0);
     },
 
@@ -361,19 +365,28 @@ const Data = {
     getSalesStats() {
         let totalSales = 0;
         let totalCosts = 0;
+        let totalServiceExpenses = 0;
 
         this.salesHistory.forEach(sale => {
             totalSales += sale.total || 0;
             const saleCost = sale.items.reduce((sum, item) => sum + (item.cost || 0), 0);
             totalCosts += saleCost;
+
+            // Calculate service expense for each item in the sale
+            const saleServiceExpense = sale.items.reduce((sum, item) => {
+                const itemBasePrice = item.basePrice || (item.price / (1 + (item.servicePct || 0) / 100));
+                return sum + (itemBasePrice * (item.servicePct || 0) / 100);
+            }, 0);
+            totalServiceExpenses += saleServiceExpense;
         });
 
-        const netProfit = totalSales - totalCosts;
+        const netProfit = totalSales - totalCosts - totalServiceExpenses;
         const marginPercentage = totalSales > 0 ? (netProfit / totalSales * 100) : 0;
 
         return {
             totalSales,
             totalCosts,
+            totalServiceExpenses,
             netProfit,
             marginPercentage,
             transactionCount: this.salesHistory.length
@@ -541,6 +554,23 @@ const Data = {
         // Los costos se calculan on-the-fly en calculateProductCost
         // aquí solo marcamos que la receta debe ser recalculada
         // Al renderizar, usamos calculateProductCost que lee las unidades actuales
+    },
+
+    /**
+     * Obtener unidades compatibles con una unidad base
+     */
+    getCompatibleUnits(unit) {
+        if (!unit) return [];
+        const compatible = new Set([unit]);
+        const equivalences = this.settings.equivalences || {};
+
+        Object.keys(equivalences).forEach(key => {
+            const [from, to] = key.split('_to_');
+            if (from === unit) compatible.add(to);
+            if (to === unit) compatible.add(from);
+        });
+
+        return Array.from(compatible);
     },
 
     /**

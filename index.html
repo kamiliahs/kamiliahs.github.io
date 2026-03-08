@@ -98,6 +98,8 @@
             </div>
 
             <div id="recipeBuilder" class="space-y-4 pt-4"></div>
+            <div id="newRecipeMarginPreview" class="text-[10px] font-bold text-teal uppercase tracking-widest pt-2">
+            </div>
             <button onclick="APP.addIngredientRow()" class="label-caps underline hover:text-teal"> + Añadir Insumo
             </button>
 
@@ -124,6 +126,8 @@
             </div>
 
             <div id="editRecipeBuilder" class="space-y-4 pt-4"></div>
+            <div id="editRecipeMarginPreview" class="text-[10px] font-bold text-teal uppercase tracking-widest pt-2">
+            </div>
             <button onclick="APP.addEditIngredientRow()" class="label-caps underline hover:text-teal"> + Añadir Insumo
             </button>
 
@@ -213,14 +217,13 @@
     </div>
 
     <div id="inventoryView" class="view-container hidden-view p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="heading-lg">CATÁLOGO</h3>
-            <button onclick="APP.openModal('ingridientModal')" class="label-caps underline hover:text-teal">+
-                Nuevo</button>
-        </div>
         <div class="mb-6">
-            <input type="text" id="inventorySearch" placeholder="Buscar insumo..." class="search-input"
-                oninput="APP.filterInventory()">
+            <div class="flex gap-4 items-center mb-4">
+                <input type="text" id="inventorySearch" placeholder="Buscar insumo..." class="search-input flex-1"
+                    oninput="APP.filterInventory()">
+                <button onclick="APP.openModal('ingridientModal')"
+                    class="label-caps underline hover:text-teal text-[10px] whitespace-nowrap">+ Nuevo Insumo</button>
+            </div>
         </div>
         <div id="inventoryBody" class="space-y-6"></div>
     </div>
@@ -299,13 +302,13 @@
 
     <!-- Recipes View -->
     <div id="recipesView" class="view-container hidden-view p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="heading-lg">FICHAS</h3>
-            <button onclick="APP.openModal('recipeModal')" class="label-caps underline hover:text-teal">+ Nueva</button>
-        </div>
         <div class="mb-6">
-            <input type="text" id="recipeSearch" placeholder="Buscar receta..." class="search-input"
-                oninput="APP.filterRecipes()">
+            <div class="flex gap-4 items-center mb-4">
+                <input type="text" id="recipeSearch" placeholder="Buscar receta..." class="search-input flex-1"
+                    oninput="APP.filterRecipes()">
+                <button onclick="APP.openModal('recipeModal')"
+                    class="label-caps underline hover:text-teal text-[10px] whitespace-nowrap">+ Nueva Receta</button>
+            </div>
         </div>
         <div id="recipesContainer" class="space-y-12"></div>
     </div>
@@ -336,17 +339,14 @@
     </div>
 
     <div id="ordersView" class="view-container hidden-view p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="heading-lg">PEDIDOS</h3>
-            <div class="flex gap-4">
-                <button onclick="APP.exportOrders()" class="label-caps underline hover:text-teal">Exportar</button>
-                <button onclick="APP.clearOrders()"
-                    class="label-caps underline text-red-500 hover:text-red-700">Vaciar</button>
-            </div>
-        </div>
         <div class="mb-6">
-            <input type="text" id="orderSearch" placeholder="Buscar ID o fecha..." class="search-input"
-                oninput="APP.filterOrders()">
+            <div class="flex gap-4 items-center mb-4">
+                <input type="text" id="orderSearch" placeholder="Buscar ID o fecha..." class="search-input flex-1"
+                    oninput="APP.filterOrders()">
+                <button onclick="APP.clearOrders()"
+                    class="label-caps underline text-red-500 hover:text-red-700 text-[10px] whitespace-nowrap">Vaciar
+                    Todo</button>
+            </div>
             <div class="flex flex-wrap" id="orderFilters">
                 <span class="tag-filter active" onclick="APP.filterOrdersByPaid('all', this)">Todos</span>
                 <span class="tag-filter" onclick="APP.filterOrdersByPaid('paid', this)">Pagados</span>

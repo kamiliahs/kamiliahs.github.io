@@ -68,9 +68,19 @@ const UI = {
 
         container.innerHTML = filtered.map(p => {
             const cost = Data.calculateProductCost(p.id);
-            const computedMargin = p.price > 0 ? (((p.price - cost) / p.price) * 100).toFixed(0) : 0;
-            const margin = p.marginPct != null ? p.marginPct : computedMargin;
-            const service = p.servicePct != null ? p.servicePct : 0;
+            const servicePct = p.servicePct || 0;
+            const expectedMargin = p.marginPct || 0;
+
+            // Formula for recommended price to achieve expected margin while having service expense
+            // RecommendedPrice = Cost / (1 - (ExpectedMargin/100) - (Service/100))
+            const recommendedPrice = (1 - (expectedMargin / 100) - (servicePct / 100)) > 0
+                ? cost / (1 - (expectedMargin / 100) - (servicePct / 100))
+                : cost;
+
+            const sellingPrice = p.price * (1 + servicePct / 100);
+            // Actual margin (net) considering service as expense
+            const actualProfit = p.price - cost;
+            const actualMargin = sellingPrice > 0 ? (actualProfit / sellingPrice * 100).toFixed(1) : 0;
 
             return `
                 <div>
@@ -84,17 +94,26 @@ const UI = {
                     <div class="space-y-1 mb-4">
                         ${p.recipe.map(r => {
                 const ing = Data.ingredients.find(i => i.id === r.id);
-                return `<p class="text-[10px] text-muted font-medium uppercase tracking-wider">${r.qty}${ing?.unit || ''} ${ing?.name || '---'}</p>`;
+                const unit = r.unit || ing?.unit || '';
+                return `<p class="text-[10px] text-muted font-medium uppercase tracking-wider">${r.qty} ${unit} ${ing?.name || '---'}</p>`;
             }).join('')}
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-4 bg-card">
-                            <p class="label-caps mb-1">Costo Prod.</p>
-                            <p class="font-bold">SRD ${cost.toFixed(2)}</p>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="p-3 bg-card border-l-2 border-teal">
+                            <p class="label-caps mb-1 opacity-50">Costo / Margen Esperado</p>
+                            <p class="font-bold text-[11px]">SRD ${cost.toFixed(2)} / ${expectedMargin}%</p>
                         </div>
-                        <div class="p-4 btn-primary">
-                            <p class="label-caps opacity-50 mb-1">Margen %</p>
-                            <p class="font-bold">${margin}%</p>
+                        <div class="p-3 bg-card border-l-2 border-orange-400">
+                            <p class="label-caps mb-1 opacity-50">Gasto Servicio</p>
+                            <p class="font-bold text-[11px]">${servicePct}% (SRD ${(p.price * servicePct / 100).toFixed(2)})</p>
+                        </div>
+                        <div class="p-3 bg-card border-l-2 border-blue-400">
+                            <p class="label-caps mb-1 opacity-50">Precio Recomendado</p>
+                            <p class="font-bold text-[11px]">SRD ${recommendedPrice.toFixed(2)}</p>
+                        </div>
+                        <div class="p-3 ${actualProfit > 0 ? 'btn-primary' : 'bg-red-500 text-white'}">
+                            <p class="label-caps mb-1 opacity-50">Precio Actual / Margen Real</p>
+                            <p class="font-bold text-[11px]">SRD ${p.price.toFixed(2)} / ${actualMargin}%</p>
                         </div>
                     </div>
                 </div>
@@ -262,6 +281,16 @@ const UI = {
         toSelect.innerHTML = '<option value="">A --</option>' + options;
     },
 
+
+    /**
+     * Poblar un select con las unidades disponibles
+     */
+    populateUnitSelect(selectElement, selectedValue = '') {
+        const units = Data.getUnitsList();
+        selectElement.innerHTML = units.map(u =>
+            `<option value="${u.symbol}" ${u.symbol === selectedValue ? 'selected' : ''}>${u.symbol.toUpperCase()}</option>`
+        ).join('');
+    },
 
     /**
      * Renderizar todas las vistas

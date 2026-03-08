@@ -53,6 +53,27 @@ const APP = {
         window.addEventListener('cartUpdated', () => {
             UI.updateCartUI();
         });
+
+        // Listeners para previsualización de margen
+        ['new', 'edit'].forEach(prefix => {
+            const inputs = [
+                `${prefix}ProdPrice`,
+                `${prefix}ProdService`
+            ];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', () => this.updateRecipeMarginPreview(prefix === 'edit'));
+                }
+            });
+
+            // También escuchar en el contenedor de ingredientes (delegación)
+            const container = document.getElementById(prefix === 'new' ? 'recipeBuilder' : 'editRecipeBuilder');
+            if (container) {
+                container.addEventListener('input', () => this.updateRecipeMarginPreview(prefix === 'edit'));
+                container.addEventListener('change', () => this.updateRecipeMarginPreview(prefix === 'edit'));
+            }
+        });
     },
 
     // ========== INGREDIENTES ==========
@@ -141,14 +162,17 @@ const APP = {
         // Recopilar ingredientes
         const selects = document.querySelectorAll('.recipe-ing-select');
         const qtyInputs = document.querySelectorAll('.recipe-ing-qty');
+        const unitSelects = document.querySelectorAll('.recipe-ing-unit');
         const recipe = [];
 
         selects.forEach((select, i) => {
             const qty = parseFloat(qtyInputs[i].value);
+            const unit = unitSelects[i].value;
             if (select.value && !isNaN(qty) && qty > 0) {
                 recipe.push({
                     id: select.value,
-                    qty: qty
+                    qty: qty,
+                    unit: unit
                 });
             }
         });
@@ -188,9 +212,10 @@ const APP = {
         document.getElementById('editIngId').value = id;
         document.getElementById('editIngName').value = ing.name;
         document.getElementById('editIngCost').value = (ing.cost * (ing.packQty || 1)).toFixed(2);
-        document.getElementById('editIngUnit').value = ing.unit;
         const packQtyInput = document.getElementById('editIngPackQty');
         if (packQtyInput) packQtyInput.value = ing.packQty || 1;
+
+        UI.populateUnitSelect(document.getElementById('editIngUnit'), ing.unit);
 
         Utils.openModal('editIngridientModal');
     },
@@ -239,18 +264,10 @@ const APP = {
         document.getElementById('editProdMargin').value = product.marginPct || 0;
 
         const builder = document.getElementById('editRecipeBuilder');
-        builder.innerHTML = product.recipe.map((r, i) => {
-            const ing = Data.ingredients.find(ing => ing.id === r.id);
-            return `
-                <div class="flex gap-2 items-center">
-                    <select class="recipe-edit-ing-select flex-1" value="${r.id}">
-                        ${Data.ingredients.map(ing => `<option value="${ing.id}">${ing.name}</option>`).join('')}
-                    </select>
-                    <input type="number" value="${r.qty}" class="recipe-edit-ing-qty w-20">
-                    <button type="button" onclick="this.parentElement.remove()" class="text-red-500 text-sm">✕</button>
-                </div>
-            `;
-        }).join('');
+        builder.innerHTML = ''; // Limpiar antes de poblar
+        product.recipe.forEach(r => {
+            Utils.addEditIngredientRow(r);
+        });
 
         Utils.openModal('editRecipeModal');
     },
@@ -276,14 +293,17 @@ const APP = {
 
         const selects = document.querySelectorAll('.recipe-edit-ing-select');
         const qtyInputs = document.querySelectorAll('.recipe-edit-ing-qty');
+        const unitSelects = document.querySelectorAll('.recipe-edit-ing-unit');
         const recipe = [];
 
         selects.forEach((select, i) => {
             const qty = parseFloat(qtyInputs[i].value);
+            const unit = unitSelects[i].value;
             if (select.value && !isNaN(qty) && qty > 0) {
                 recipe.push({
                     id: select.value,
-                    qty: qty
+                    qty: qty,
+                    unit: unit
                 });
             }
         });
@@ -299,6 +319,40 @@ const APP = {
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('RECETA ACTUALIZADA');
+    },
+
+    /**
+     * Actualiza la previsualización del margen en los modales
+     */
+    updateRecipeMarginPreview(isEdit = false) {
+        const prefix = isEdit ? 'edit' : 'new';
+        const price = parseFloat(document.getElementById(`${prefix}ProdPrice`).value) || 0;
+        const service = parseFloat(document.getElementById(`${prefix}ProdService`).value) || 0;
+
+        let totalCost = 0;
+        const selects = document.querySelectorAll(`.recipe-${isEdit ? 'edit-' : ''}ing-select`);
+        const qtyInputs = document.querySelectorAll(`.recipe-${isEdit ? 'edit-' : ''}ing-qty`);
+        const unitSelects = document.querySelectorAll(`.recipe-${isEdit ? 'edit-' : ''}ing-unit`);
+
+        selects.forEach((select, i) => {
+            const ingId = select.value;
+            const qty = parseFloat(qtyInputs[i].value) || 0;
+            const unit = unitSelects[i].value;
+            const ingredient = Data.ingredients.find(ing => ing.id === ingId);
+
+            if (ingredient) {
+                const convertedQty = Data.convertUnit(qty, unit, ingredient.unit);
+                totalCost += ingredient.cost * convertedQty;
+            }
+        });
+
+        const sellingPrice = price * (1 + service / 100);
+        const margin = sellingPrice > 0 ? (((sellingPrice - totalCost) / sellingPrice) * 100).toFixed(1) : 0;
+
+        const previewEl = document.getElementById(`${isEdit ? 'edit' : 'new'}RecipeMarginPreview`);
+        if (previewEl) {
+            previewEl.innerText = `Costo Est: SRD ${totalCost.toFixed(2)} | Margen Est: ${margin}%`;
+        }
     },
 
     // ========== CARRITO Y VENTAS ==========
@@ -485,32 +539,6 @@ const APP = {
         sale.paid = !sale.paid;
         Data.saveAll();
         this.viewOrderDetail(saleId);
-    },
-
-    /**
-     * Exportar pedidos a CSV
-     */
-    exportOrders() {
-        const sales = Data.getAllSales();
-        if (sales.length === 0) {
-            Utils.showToast('No hay pedidos para exportar');
-            return;
-        }
-
-        let csv = 'ID,Fecha,Total,Items,Estado\n';
-        sales.forEach(sale => {
-            const itemList = sale.items.map(i => i.name).join(';');
-            csv += `"${sale.id.slice(-6)}","${new Date(sale.timestamp).toLocaleString()}","${sale.total.toFixed(2)}","${itemList}","${sale.paid ? 'Pagado' : 'Pendiente'}"\n`;
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `pedidos-${new Date().toISOString().slice(0, 10)}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        Utils.showToast('EXPORTADO');
     },
 
     /**
