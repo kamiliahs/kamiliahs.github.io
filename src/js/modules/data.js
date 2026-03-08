@@ -126,7 +126,7 @@ const Data = {
     /**
      * Agregar producto (receta)
      */
-    addProduct(name, icon, price, recipe, servicePct = 0, marginPct = 0, portions = 1) {
+    addProduct(name, icon, price, recipe, servicePct = 0, marginPct = 0, portions = 1, comments = '') {
         const product = {
             id: 'p' + Date.now(),
             name: name.toUpperCase(),
@@ -135,7 +135,8 @@ const Data = {
             recipe: recipe,
             servicePct: parseFloat(servicePct) || 0,
             marginPct: parseFloat(marginPct) || 0,
-            portions: parseFloat(portions) || 1
+            portions: parseFloat(portions) || 1,
+            comments: comments || ''
         };
         this.products.push(product);
         this.saveAll();
@@ -145,7 +146,7 @@ const Data = {
     /**
      * Actualizar producto completo
      */
-    updateProduct(id, name, icon, price, recipe, servicePct = 0, marginPct = 0, portions = 1) {
+    updateProduct(id, name, icon, price, recipe, servicePct = 0, marginPct = 0, portions = 1, comments = '') {
         const product = this.products.find(p => p.id === id);
         if (product) {
             product.name = name.toUpperCase();
@@ -155,6 +156,7 @@ const Data = {
             product.servicePct = parseFloat(servicePct) || 0;
             product.marginPct = parseFloat(marginPct) || 0;
             product.portions = parseFloat(portions) || 1;
+            product.comments = comments || '';
             this.saveAll();
             return true;
         }

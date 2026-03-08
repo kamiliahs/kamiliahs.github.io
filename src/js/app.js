@@ -186,8 +186,9 @@ const APP = {
         const service = parseFloat(document.getElementById('newProdService').value) || 0;
         const margin = parseFloat(document.getElementById('newProdMargin').value) || 0;
         const portions = parseFloat(document.getElementById('newProdPortions').value) || 1;
+        const comments = document.getElementById('newProdComments').value.trim();
 
-        const product = Data.addProduct(name, icon, price, recipe, service, margin, portions);
+        const product = Data.addProduct(name, icon, price, recipe, service, margin, portions, comments);
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('RECETA CREADA');
@@ -265,6 +266,7 @@ const APP = {
         document.getElementById('editProdService').value = product.servicePct || 0;
         document.getElementById('editProdMargin').value = product.marginPct || 0;
         document.getElementById('editProdPortions').value = product.portions || 1;
+        document.getElementById('editProdComments').value = product.comments || '';
 
         const builder = document.getElementById('editRecipeBuilder');
         builder.innerHTML = ''; // Limpiar antes de poblar
@@ -319,7 +321,8 @@ const APP = {
         const service = parseFloat(document.getElementById('editProdService').value) || 0;
         const margin = parseFloat(document.getElementById('editProdMargin').value) || 0;
         const portions = parseFloat(document.getElementById('editProdPortions').value) || 1;
-        Data.updateProduct(id, name, icon, price, recipe, service, margin, portions);
+        const comments = document.getElementById('editProdComments').value.trim();
+        Data.updateProduct(id, name, icon, price, recipe, service, margin, portions, comments);
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('RECETA ACTUALIZADA');
@@ -818,6 +821,205 @@ const APP = {
      */
     addEditIngredientRow() {
         Utils.addEditIngredientRow();
+    },
+
+    // ========== QR CODE & SHARING ==========
+
+    /**
+     * Generar y mostrar QR de una receta
+     */
+    shareProduct(id) {
+        const product = Data.getProduct(id);
+        if (!product) return;
+
+        const display = document.getElementById('qrDisplay');
+        if (!display) return;
+        display.innerHTML = ''; // Limpiar anterior
+
+        const nameEl = document.getElementById('qrRecipeName');
+        if (nameEl) nameEl.innerText = product.name;
+
+        // Preparar data compacta para QR
+        const exportData = {
+            t: 'recipe',
+            n: product.name,
+            i: product.icon,
+            p: product.price,
+            s: product.servicePct,
+            m: product.marginPct,
+            po: product.portions,
+            c: product.comments || '',
+            r: product.recipe.map(item => {
+                const ing = Data.ingredients.find(ing => ing.id === item.id);
+                return {
+                    q: item.qty,
+                    u: item.unit,
+                    ing: ing ? {
+                        n: ing.name,
+                        c: ing.cost,
+                        u: ing.unit,
+                        pq: ing.packQty
+                    } : null
+                };
+            })
+        };
+
+        const qrString = JSON.stringify(exportData);
+
+        // Usar la librería qr-code-styling
+        try {
+            const qrCode = new QRCodeStyling({
+                width: 280,
+                height: 280,
+                type: "canvas",
+                data: qrString,
+                dotsOptions: {
+                    color: "#14b8a6", // teal
+                    type: "rounded"
+                },
+                backgroundOptions: {
+                    color: "#ffffff",
+                },
+                cornersSquareOptions: {
+                    type: "extra-rounded",
+                    color: "#0f766e"
+                },
+                cornersDotOptions: {
+                    type: "dot",
+                    color: "#0f766e"
+                }
+            });
+
+            qrCode.append(display);
+            Utils.openModal('qrModal');
+        } catch (error) {
+            console.error(error);
+            Utils.showToast('Error generando QR');
+        }
+    },
+
+    privateScannerInterval: null,
+    privateScannerStream: null,
+
+    /**
+     * Iniciar escaneo de código QR
+     */
+    startScanner() {
+        const video = document.getElementById('scannerVideo');
+        if (!video) return;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+                this.privateScannerStream = stream;
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.play();
+                Utils.openModal('scannerModal');
+
+                this.privateScannerInterval = setInterval(() => {
+                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                        canvas.height = video.videoHeight;
+                        canvas.width = video.videoWidth;
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                            inversionAttempts: 'dontInvert',
+                        });
+
+                        if (code) {
+                            this.stopScanner();
+                            this.handleScannedData(code.data);
+                        }
+                    }
+                }, 300);
+            })
+            .catch(err => {
+                console.error(err);
+                Utils.showToast('Permiso de cámara denegado o no disponible');
+            });
+    },
+
+    /**
+     * Detener el escaneo y cerrar cámara
+     */
+    stopScanner() {
+        if (this.privateScannerInterval) {
+            clearInterval(this.privateScannerInterval);
+            this.privateScannerInterval = null;
+        }
+        if (this.privateScannerStream) {
+            this.privateScannerStream.getTracks().forEach(track => track.stop());
+            this.privateScannerStream = null;
+        }
+    },
+
+    /**
+     * Manejar datos leídos del QR
+     */
+    handleScannedData(data) {
+        try {
+            const parsed = JSON.parse(data);
+            if (parsed.t === 'recipe') {
+                this.importRecipeData(parsed);
+            } else {
+                Utils.showToast('Código QR no reconocido');
+            }
+        } catch (e) {
+            console.error('QR Parse Error:', e);
+            Utils.showToast('Formato de QR inválido');
+        }
+    },
+
+    /**
+     * Importar receta y sus ingredientes
+     */
+    importRecipeData(data) {
+        const newRecipeItems = [];
+        const timestamp = Date.now();
+
+        // Importamos ingredientes separados de los locales
+        data.r.forEach((item, idx) => {
+            if (!item.ing) return;
+
+            // Creamos un ID único con prefijo de importación
+            const remotePrefix = 'imp_';
+            const ingId = remotePrefix + timestamp + '_' + idx;
+
+            // Agregar ingrediente como importado
+            Data.ingredients.push({
+                id: ingId,
+                name: '[IMP] ' + item.ing.n.toUpperCase(),
+                cost: item.ing.c,
+                unit: item.ing.u,
+                packQty: item.ing.pq,
+                isImported: true
+            });
+
+            newRecipeItems.push({
+                id: ingId,
+                qty: item.q,
+                unit: item.u
+            });
+        });
+
+        // Crear el producto/receta
+        Data.addProduct(
+            data.n.toUpperCase() + ' (IMP)',
+            data.i || '🍴',
+            data.p,
+            newRecipeItems,
+            data.s || 0,
+            data.m || 0,
+            data.po || 1,
+            data.c || ''
+        );
+
+        Data.saveAll();
+        UI.renderAll();
+        Utils.closeAllPopups();
+        Utils.showToast('RECETA IMPORTADA EXITOSAMENTE');
     }
 };
 

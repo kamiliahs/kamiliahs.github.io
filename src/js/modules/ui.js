@@ -94,6 +94,7 @@ const UI = {
                     <div class="flex justify-between items-end mb-4">
                         <h4 class="heading-lg">${p.name}</h4>
                         <div class="space-x-4 flex">
+                            <button onclick="APP.shareProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal font-bold">QR</button>
                             <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal">Editar</button>
                             <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-red-500">Borrar</button>
                         </div>
