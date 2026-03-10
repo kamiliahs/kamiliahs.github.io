@@ -229,9 +229,28 @@ const UI = {
             return;
         }
 
-        container.innerHTML = filtered.reverse().map(sale => `
+        container.innerHTML = filtered.reverse().map(sale => {
+            // Calcular resumen de ítems por cantidad
+            const summary = {};
+            sale.items.forEach(item => {
+                const key = item.name;
+                if (!summary[key]) summary[key] = 0;
+                summary[key]++;
+            });
+            const summaryText = Object.entries(summary)
+                .map(([name, qty]) => `${qty}x ${name}`)
+                .join(', ');
+
+            const saleCost = sale.items.reduce((sum, item) => sum + (item.cost || 0), 0);
+            const saleServiceExpense = sale.items.reduce((sum, item) => {
+                const itemBasePrice = item.basePrice || (item.price / (1 + (item.servicePct || 0) / 100));
+                return sum + (itemBasePrice * (item.servicePct || 0) / 100);
+            }, 0);
+            const saleNetProfit = sale.total - saleCost - saleServiceExpense;
+
+            return `
             <div class="pb-4 line-border cursor-pointer hover:bg-card p-4 -mx-6 px-6 transition" onclick="APP.viewOrderDetail('${sale.id}')">
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center mb-1">
                     <div>
                         <p class="label-caps mb-1">ID: ${sale.id.slice(-6)}</p>
                         <p class="font-bold text-xs">${new Date(sale.timestamp).toLocaleString()}</p>
@@ -241,8 +260,15 @@ const UI = {
                         <p class="text-[9px] ${sale.paid ? 'text-teal font-bold' : 'text-red-500'}">${sale.paid ? 'PAGADO' : 'PENDIENTE'}</p>
                     </div>
                 </div>
+                <div class="flex justify-between items-end">
+                    <p class="text-[10px] text-muted truncate max-w-[180px]">${summaryText}</p>
+                    <div class="flex gap-3 text-[9px] font-black tracking-widest uppercase">
+                        <span class="text-muted/60">Costo: ${saleCost.toFixed(2)}</span>
+                        <span class="text-teal">Neto: ${saleNetProfit.toFixed(2)}</span>
+                    </div>
+                </div>
             </div>
-        `).join('');
+        `}).join('');
     },
 
     /**

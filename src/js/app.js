@@ -423,6 +423,18 @@ const APP = {
         if (!sale) return;
 
         document.getElementById('orderDetailTotal').innerText = sale.total.toFixed(2);
+
+        // Calcular costos y ganancias del pedido
+        const saleCost = sale.items.reduce((sum, item) => sum + (item.cost || 0), 0);
+        const saleServiceExpense = sale.items.reduce((sum, item) => {
+            const itemBasePrice = item.basePrice || (item.price / (1 + (item.servicePct || 0) / 100));
+            return sum + (itemBasePrice * (item.servicePct || 0) / 100);
+        }, 0);
+        const saleNetProfit = sale.total - saleCost - saleServiceExpense;
+
+        document.getElementById('orderDetailCost').innerText = saleCost.toFixed(2);
+        document.getElementById('orderDetailProfit').innerText = saleNetProfit.toFixed(2);
+
         document.getElementById('orderEditPrice').value = '';
 
         // paid status
@@ -451,12 +463,39 @@ const APP = {
         select.innerHTML = options;
 
         const itemsDiv = document.getElementById('orderDetailItems');
-        itemsDiv.innerHTML = sale.items.map((item, idx) => `
-            <div class="flex justify-between items-center text-xs">
-                <span>${item.name}</span>
-                <span>SRD ${item.price.toFixed(2)}</span>
-                ${item.servicePct ? `<span class="text-[8px] text-muted ml-2">+${item.servicePct}% serv.</span>` : ''}
-                ${sale.paid ? '' : `<button class="text-red-500 text-xs ml-2" onclick="APP.removeItemFromOrder('${saleId}', ${idx})">✕</button>`}
+
+        // Agrupar items por nombre para mostrar estadísticas según cantidad
+        const aggregatedItems = {};
+        sale.items.forEach((item, originalIndex) => {
+            const key = item.id + '_' + item.price; // Agrupar por ID y precio (por si cambió el precio base)
+            if (!aggregatedItems[key]) {
+                aggregatedItems[key] = {
+                    name: item.name,
+                    price: item.price,
+                    servicePct: item.servicePct,
+                    count: 0,
+                    indices: [] // Guardar índices originales para poder eliminar
+                };
+            }
+            aggregatedItems[key].count++;
+            aggregatedItems[key].indices.push(originalIndex);
+        });
+
+        itemsDiv.innerHTML = Object.values(aggregatedItems).map((group) => `
+            <div class="flex justify-between items-center text-xs pb-2">
+                <div class="flex-1">
+                    <p class="font-bold">${group.count}x ${group.name}</p>
+                    <p class="text-[9px] text-muted">SRD ${group.price.toFixed(2)} c/u ${group.servicePct ? `(+${group.servicePct}% serv.)` : ''}</p>
+                </div>
+                <div class="text-right flex items-center gap-3">
+                    <span class="font-black">SRD ${(group.price * group.count).toFixed(2)}</span>
+                    ${sale.paid ? '' : `
+                        <button class="bg-red-500/10 hover:bg-red-500/20 text-red-500 w-5 h-5 rounded flex items-center justify-center transition-colors" 
+                                onclick="APP.removeItemFromOrder('${saleId}', ${group.indices[group.indices.length - 1]})">
+                            ✕
+                        </button>
+                    `}
+                </div>
             </div>
         `).join('');
 
