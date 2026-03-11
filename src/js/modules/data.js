@@ -214,10 +214,8 @@ const Data = {
         const isPortion = asPortion && product.portions > 1;
         const portions = parseFloat(product.portions) || 1;
 
-        // compute effective price including service charge
         const basePrice = parseFloat(product.price);
-        const servicePct = parseFloat(product.servicePct) || 0;
-        const effectivePrice = basePrice * (1 + servicePct / 100);
+        const effectivePrice = basePrice;
 
         const cartItem = {
             ...product,
@@ -385,10 +383,9 @@ const Data = {
             const saleCost = sale.items.reduce((sum, item) => sum + (item.cost || 0), 0);
             totalCosts += saleCost;
 
-            // Calculate service expense for each item in the sale
+            // Calculate service expense as a percentage of the charged price
             const saleServiceExpense = sale.items.reduce((sum, item) => {
-                const itemBasePrice = item.basePrice || (item.price / (1 + (item.servicePct || 0) / 100));
-                return sum + (itemBasePrice * (item.servicePct || 0) / 100);
+                return sum + (item.price * (item.servicePct || 0) / 100);
             }, 0);
             totalServiceExpenses += saleServiceExpense;
         });
@@ -426,7 +423,7 @@ const Data = {
                 profitMap[item.name].count++;
                 profitMap[item.name].totalRevenue += item.price;
                 profitMap[item.name].totalCost += item.cost || 0;
-                const itemServiceExpense = (item.basePrice || (item.price / (1 + (item.servicePct || 0) / 100))) * (item.servicePct || 0) / 100;
+                const itemServiceExpense = item.price * (item.servicePct || 0) / 100;
                 profitMap[item.name].totalService += itemServiceExpense;
             });
         });

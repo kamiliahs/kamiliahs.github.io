@@ -354,15 +354,15 @@ const APP = {
         });
 
         const serviceExpense = price * (service / 100);
-        const sellingPrice = price + serviceExpense;
-        const profit = price - totalCost; // Net Profit = Price - Production Cost (excluding service expense)
+        const sellingPrice = price; // Price is now the final selling price
+        const profit = price - totalCost - serviceExpense;
         const margin = sellingPrice > 0 ? ((profit / sellingPrice) * 100).toFixed(1) : 0;
         const portions = parseFloat(document.getElementById(`${prefix}ProdPortions`).value) || 1;
         const pricePerPortion = portions > 0 ? (sellingPrice / portions).toFixed(2) : 0;
 
         const previewEl = document.getElementById(`${isEdit ? 'edit' : 'new'}RecipeMarginPreview`);
         if (previewEl) {
-            previewEl.innerText = `Costo Est: SRD ${totalCost.toFixed(2)} | Margen Est: ${margin}% | Porción: SRD ${pricePerPortion}`;
+            previewEl.innerText = `Costo Est: SRD ${totalCost.toFixed(2)} | Margen Real: ${margin}% | Porción: SRD ${pricePerPortion}`;
         }
     },
 
@@ -429,8 +429,7 @@ const APP = {
         // Calcular costos y ganancias del pedido
         const saleCost = sale.items.reduce((sum, item) => sum + (item.cost || 0), 0);
         const saleServiceExpense = sale.items.reduce((sum, item) => {
-            const itemBasePrice = item.basePrice || (item.price / (1 + (item.servicePct || 0) / 100));
-            return sum + (itemBasePrice * (item.servicePct || 0) / 100);
+            return sum + (item.price * (item.servicePct || 0) / 100);
         }, 0);
         const saleNetProfit = sale.total - saleCost - saleServiceExpense;
 
@@ -458,7 +457,7 @@ const APP = {
         Data.products.forEach(p => {
             options += `<option value="${p.id}">${p.name} - SRD ${p.price.toFixed(2)}</option>`;
             if (p.portions > 1) {
-                const portionPrice = (p.price * (1 + (p.servicePct || 0) / 100)) / p.portions;
+                const portionPrice = p.price / p.portions;
                 options += `<option value="${p.id}_portion">${p.name} (POR.) - SRD ${portionPrice.toFixed(2)}</option>`;
             }
         });
@@ -582,7 +581,7 @@ const APP = {
             const portions = parseFloat(product.portions) || 1;
             const servicePct = parseFloat(product.servicePct) || 0;
             const basePrice = parseFloat(product.price);
-            const effectivePrice = basePrice * (1 + servicePct / 100);
+            const effectivePrice = basePrice;
 
             const itemPrice = isPortion ? effectivePrice / portions : effectivePrice;
             const itemCost = isPortion ? Data.calculateProductCost(productId) / portions : Data.calculateProductCost(productId);

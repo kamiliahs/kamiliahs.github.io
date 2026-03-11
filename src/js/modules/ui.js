@@ -28,7 +28,7 @@ const UI = {
                         + PORCIÓN
                     </button>` : ''}
                     <div>
-                        <p class="font-black text-xl">${(p.price * (1 + (p.servicePct || 0) / 100)).toFixed(0)}</p>
+                        <p class="font-black text-xl">${p.price.toFixed(0)}</p>
                         <p class="text-[9px] font-bold text-muted uppercase">SRD</p>
                     </div>
                 </div>
@@ -84,9 +84,10 @@ const UI = {
                 ? cost / (1 - (expectedMargin / 100) - (servicePct / 100))
                 : cost;
 
-            const sellingPrice = p.price * (1 + servicePct / 100);
-            // Actual margin (net) considering service as expense
-            const actualProfit = p.price - cost;
+            const sellingPrice = p.price;
+            // Actual margin (net) considering service as expense (subtracted from price)
+            const serviceExpense = sellingPrice * (servicePct / 100);
+            const actualProfit = sellingPrice - cost - serviceExpense;
             const actualMargin = sellingPrice > 0 ? (actualProfit / sellingPrice * 100).toFixed(1) : 0;
 
             return `
@@ -117,7 +118,7 @@ const UI = {
                         </div>
                         <div class="p-3 bg-card border-l-2 border-purple-400">
                             <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? 'Precio por Porción' : 'Sin Porciones'}</p>
-                            <p class="font-bold text-[11px]">${p.portions > 1 ? `SRD ${((p.price * (1 + servicePct / 100)) / p.portions).toFixed(2)}` : '---'}</p>
+                            <p class="font-bold text-[11px]">${p.portions > 1 ? `SRD ${(sellingPrice / p.portions).toFixed(2)}` : '---'}</p>
                         </div>
                         <div class="p-3 bg-card border-l-2 border-blue-400">
                             <p class="label-caps mb-1 opacity-50">Precio Recomendado</p>
@@ -243,8 +244,7 @@ const UI = {
 
             const saleCost = sale.items.reduce((sum, item) => sum + (item.cost || 0), 0);
             const saleServiceExpense = sale.items.reduce((sum, item) => {
-                const itemBasePrice = item.basePrice || (item.price / (1 + (item.servicePct || 0) / 100));
-                return sum + (itemBasePrice * (item.servicePct || 0) / 100);
+                return sum + (item.price * (item.servicePct || 0) / 100);
             }, 0);
             const saleNetProfit = sale.total - saleCost - saleServiceExpense;
 
