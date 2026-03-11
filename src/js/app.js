@@ -434,6 +434,7 @@ const APP = {
         const saleNetProfit = sale.total - saleCost - saleServiceExpense;
 
         document.getElementById('orderDetailCost').innerText = saleCost.toFixed(2);
+        document.getElementById('orderDetailService').innerText = saleServiceExpense.toFixed(2);
         document.getElementById('orderDetailProfit').innerText = saleNetProfit.toFixed(2);
 
         document.getElementById('orderEditPrice').value = '';
@@ -1060,6 +1061,41 @@ const APP = {
         UI.renderAll();
         Utils.closeAllPopups();
         Utils.showToast('RECETA IMPORTADA EXITOSAMENTE');
+    },
+
+    /**
+     * Mostrar modal de información con descripción
+     */
+    showInfo(type) {
+        const titleEl = document.getElementById('infoModalTitle');
+        const contentEl = document.getElementById('infoModalContent');
+        if (!titleEl || !contentEl) return;
+
+        const info = {
+            ventasCostos: {
+                title: 'Ventas / Costos',
+                content: 'Representa la relación entre el ingreso bruto (lo que paga el cliente) y la inversión directa en insumos/ingredientes utilizados para la preparación del plato.'
+            },
+            gastoServicio: {
+                title: 'Gasto por Servicio',
+                content: 'Es el costo operativo indirecto (alquiler, electricidad, gas, sueldos, etc.) que se aplica como un porcentaje sobre el precio de venta para asegurar que la operación sea sustentable.'
+            },
+            gananciaNeta: {
+                title: 'Ganancia Neta',
+                content: 'Es el beneficio real que queda para el negocio después de haber pagado tanto los ingredientes como los gastos operativos. Es el dinero "limpio" o excedente final.'
+            },
+            margenReal: {
+                title: 'Margen Real (%)',
+                content: 'Es el porcentaje de rentabilidad real del producto. Indica qué parte de cada moneda vendida se convierte efectivamente en ganancia neta para el negocio.'
+            }
+        };
+
+        const data = info[type];
+        if (data) {
+            titleEl.innerText = data.title;
+            contentEl.innerText = data.content;
+            Utils.openModal('infoModal');
+        }
     }
 };
 

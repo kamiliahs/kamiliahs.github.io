@@ -156,12 +156,20 @@ const UI = {
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-[10px]">
                     <div>
-                        <p class="label-caps mb-1">Neto</p>
-                        <p class="font-bold">SRD ${item.profit.toFixed(2)}</p>
+                        <p class="label-caps mb-1 flex items-center gap-1">Ventas / Costos <button onclick="APP.showInfo('ventasCostos')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
+                        <p class="font-bold">SRD ${item.totalRevenue.toFixed(2)} / ${item.totalCost.toFixed(2)}</p>
                     </div>
                     <div>
-                        <p class="label-caps mb-1">Margen</p>
-                        <p class="font-bold">${item.margin.toFixed(0)}%</p>
+                        <p class="label-caps mb-1 flex items-center gap-1">Gasto Servicio <button onclick="APP.showInfo('gastoServicio')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
+                        <p class="font-bold">SRD ${item.totalService.toFixed(2)}</p>
+                    </div>
+                    <div>
+                        <p class="label-caps mb-1 flex items-center gap-1">Ganancia neta <button onclick="APP.showInfo('gananciaNeta')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
+                        <p class="font-bold text-teal">SRD ${item.profit.toFixed(2)}</p>
+                    </div>
+                    <div>
+                        <p class="label-caps mb-1 flex items-center gap-1">Margen Real <button onclick="APP.showInfo('margenReal')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
+                        <p class="font-bold">${item.margin.toFixed(1)}%</p>
                     </div>
                 </div>
             </div>
@@ -264,6 +272,7 @@ const UI = {
                     <p class="text-[10px] text-muted truncate max-w-[180px]">${summaryText}</p>
                     <div class="flex gap-3 text-[9px] font-black tracking-widest uppercase">
                         <span class="text-muted/60">Costo: ${saleCost.toFixed(2)}</span>
+                        <span class="text-orange-400">Servicio: ${saleServiceExpense.toFixed(2)}</span>
                         <span class="text-teal">Neto: ${saleNetProfit.toFixed(2)}</span>
                     </div>
                 </div>

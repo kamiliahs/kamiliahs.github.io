@@ -201,6 +201,10 @@
                             <p class="text-[8px] text-muted uppercase font-bold">Costo</p>
                             <p class="text-[10px] font-black" id="orderDetailCost">0.00</p>
                         </div>
+                        <div class="text-right text-orange-400">
+                            <p class="text-[8px] uppercase font-bold">Servicio</p>
+                            <p class="text-[10px] font-black" id="orderDetailService">0.00</p>
+                        </div>
                         <div class="text-right text-teal">
                             <p class="text-[8px] uppercase font-bold">Neto</p>
                             <p class="text-[10px] font-black" id="orderDetailProfit">0.00</p>
@@ -258,6 +262,16 @@
                 otra pantalla</p>
             <button onclick="APP.stopScanner(); APP.closeAllPopups()"
                 class="w-full label-caps btn-secondary py-4">Cancelar</button>
+        </div>
+    </div>
+
+
+    <!-- INFO MODAL -->
+    <div id="infoModal" class="modal">
+        <p class="label-caps mb-8" id="infoModalTitle">Información</p>
+        <div class="space-y-6">
+            <p id="infoModalContent" class="text-sm leading-relaxed opacity-80"></p>
+            <button onclick="APP.closeAllPopups()" class="w-full label-caps btn-secondary py-4 mt-6">Entendido</button>
         </div>
     </div>
 
@@ -426,9 +440,18 @@
             </div>
         </div>
 
-        <div>
+        <div class="mb-10">
             <p class="label-caps mb-6">Rendimiento</p>
             <div id="profitBreakdown" class="space-y-6"></div>
+        </div>
+    </div>
+
+    <!-- INFO MODAL -->
+    <div id="infoModal" class="modal">
+        <p class="label-caps mb-8" id="infoModalTitle">Información</p>
+        <div class="space-y-6">
+            <p id="infoModalContent" class="text-xs leading-relaxed opacity-80"></p>
+            <button onclick="APP.closeAllPopups()" class="w-full label-caps btn-secondary py-4 mt-6">Cerrar</button>
         </div>
     </div>
 
