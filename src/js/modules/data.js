@@ -419,19 +419,22 @@ const Data = {
                         name: item.name,
                         count: 0,
                         totalRevenue: 0,
-                        totalCost: 0
+                        totalCost: 0,
+                        totalService: 0
                     };
                 }
                 profitMap[item.name].count++;
                 profitMap[item.name].totalRevenue += item.price;
                 profitMap[item.name].totalCost += item.cost || 0;
+                const itemServiceExpense = (item.basePrice || (item.price / (1 + (item.servicePct || 0) / 100))) * (item.servicePct || 0) / 100;
+                profitMap[item.name].totalService += itemServiceExpense;
             });
         });
 
         return Object.values(profitMap).map(item => ({
             ...item,
-            profit: item.totalRevenue - item.totalCost,
-            margin: item.totalRevenue > 0 ? ((item.totalRevenue - item.totalCost) / item.totalRevenue * 100) : 0
+            profit: item.totalRevenue - item.totalCost - (item.totalService || 0),
+            margin: item.totalRevenue > 0 ? ((item.totalRevenue - item.totalCost - (item.totalService || 0)) / item.totalRevenue * 100) : 0
         }));
     },
 

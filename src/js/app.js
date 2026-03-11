@@ -353,8 +353,10 @@ const APP = {
             }
         });
 
-        const sellingPrice = price * (1 + service / 100);
-        const margin = sellingPrice > 0 ? (((sellingPrice - totalCost) / sellingPrice) * 100).toFixed(1) : 0;
+        const serviceExpense = price * (service / 100);
+        const sellingPrice = price + serviceExpense;
+        const profit = price - totalCost; // Net Profit = Price - Production Cost (excluding service expense)
+        const margin = sellingPrice > 0 ? ((profit / sellingPrice) * 100).toFixed(1) : 0;
         const portions = parseFloat(document.getElementById(`${prefix}ProdPortions`).value) || 1;
         const pricePerPortion = portions > 0 ? (sellingPrice / portions).toFixed(2) : 0;
 

@@ -28,7 +28,7 @@ const UI = {
                         + PORCIÓN
                     </button>` : ''}
                     <div>
-                        <p class="font-black text-xl">${p.price.toFixed(0)}</p>
+                        <p class="font-black text-xl">${(p.price * (1 + (p.servicePct || 0) / 100)).toFixed(0)}</p>
                         <p class="text-[9px] font-bold text-muted uppercase">SRD</p>
                     </div>
                 </div>
@@ -125,7 +125,7 @@ const UI = {
                         </div>
                         <div class="p-3 ${actualProfit > 0 ? 'btn-primary' : 'bg-red-500 text-white'}">
                             <p class="label-caps mb-1 opacity-50">Precio Total / Margen Real</p>
-                            <p class="font-bold text-[11px]">SRD ${p.price.toFixed(2)} / ${actualMargin}%</p>
+                            <p class="font-bold text-[11px]">SRD ${sellingPrice.toFixed(2)} / ${actualMargin}%</p>
                         </div>
                     </div>
                 </div>
@@ -155,7 +155,7 @@ const UI = {
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-[10px]">
                     <div>
-                        <p class="label-caps mb-1">Ganancia</p>
+                        <p class="label-caps mb-1">Neto</p>
                         <p class="font-bold">SRD ${item.profit.toFixed(2)}</p>
                     </div>
                     <div>
