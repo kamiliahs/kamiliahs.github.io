@@ -10,6 +10,11 @@ const APP = {
     init() {
         // Inicializar datos (incluye settings)
         Data.init();
+        Network.init();
+
+        // Configurar handlers de red
+        Network.onPeerUpdate = (peers) => this.updateNetworkUI(peers);
+        Network.onDataReceived = (payload, senderId) => this.handleIncomingData(payload, senderId);
 
         // Aplicar tema guardado
         this.applyTheme(Data.settings.theme);
@@ -864,23 +869,99 @@ const APP = {
         Utils.addEditIngredientRow();
     },
 
-    // ========== QR CODE & SHARING ==========
+    // ========== NETWORK & SHARING ==========
 
     /**
-     * Generar y mostrar QR de una receta
+     * Abrir modal de conexión y mostrar PIN
      */
-    shareProduct(id) {
+    openConnectionModal() {
+        const pin = Network.generatePin();
+        document.getElementById('generatedPin').innerText = pin;
+        document.getElementById('pinDisplay').classList.remove('hidden');
+        document.getElementById('pinEntry').classList.remove('hidden'); // Permitir ambos modos
+
+        Network.startPinListening(pin);
+
+        Utils.openModal('connectionModal');
+        this.updateNetworkUI(Network.nearbyPeers);
+    },
+
+    /**
+     * Actualizar la lista de dispositivos cercanos en el modal
+     */
+    updateNetworkUI(peers) {
+        const list = document.getElementById('nearbyList');
+        const statusDot = document.getElementById('connectionStatus');
+        const localIdEl = document.getElementById('localPeerId');
+
+        if (localIdEl) localIdEl.innerText = Network.localId || 'Iniciando...';
+        if (statusDot) {
+            statusDot.classList.toggle('bg-teal', !!Network.localId);
+            statusDot.classList.toggle('bg-red-500', !Network.localId);
+            statusDot.classList.toggle('animate-pulse', !Network.localId);
+        }
+
+        if (!list) return;
+
+        if (!peers || peers.length === 0) {
+            list.innerHTML = '<p class="text-[10px] opacity-50 italic py-2 text-center">Buscando kamilias...</p>';
+            return;
+        }
+
+        list.innerHTML = peers.map(peer => `
+            <div class="flex justify-between items-center p-3 bg-card/50 rounded-lg border border-teal/5 transition hover:border-teal/30">
+                <div>
+                    <p class="font-bold text-[11px]">${peer.name}</p>
+                    <p class="text-[8px] opacity-50 font-mono">${peer.id}</p>
+                </div>
+                <button onclick="APP.connectToPeer('${peer.id}')" 
+                    class="text-[9px] font-black uppercase text-teal hover:underline">
+                    ${Network.connections[peer.id] ? 'Conectado' : 'Conectar'}
+                </button>
+            </div>
+        `).join('');
+    },
+
+    /**
+     * Conectar a un equipo mediante PIN
+     */
+    connectWithPin() {
+        const pin = document.getElementById('connectionPin').value;
+        if (!pin || pin.length < 4) {
+            Utils.showToast('Ingresa un PIN válido');
+            return;
+        }
+
+        Utils.showToast('Intentando conectar...');
+        Network.connectWithPin(pin).then(() => {
+            // El resto sucede por eventos
+        });
+    },
+
+    /**
+     * Conectar directamente a un peer de la lista
+     */
+    connectToPeer(id) {
+        Network.connectToPeer(id);
+        Utils.showToast('Solicitando conexión...');
+    },
+
+    /**
+     * Preparar y enviar receta a equipos conectados
+     */
+    shareProductViaNetwork(id) {
         const product = Data.getProduct(id);
         if (!product) return;
 
-        const display = document.getElementById('qrDisplay');
-        if (!display) return;
-        display.innerHTML = ''; // Limpiar anterior
+        // Verificar si hay conexiones activas
+        const connectedPeers = Object.values(Network.connections).filter(c => c.open);
 
-        const nameEl = document.getElementById('qrRecipeName');
-        if (nameEl) nameEl.innerText = product.name;
+        if (connectedPeers.length === 0) {
+            Utils.showToast('No hay equipos conectados');
+            this.openConnectionModal();
+            return;
+        }
 
-        // Preparar data compacta para QR
         const exportData = {
             t: 'recipe',
             n: product.name,
@@ -905,111 +986,35 @@ const APP = {
             })
         };
 
-        const qrString = JSON.stringify(exportData);
+        document.getElementById('sharingRecipeName').innerText = product.name;
+        document.getElementById('sharingStatus').innerText = `Enviando a ${connectedPeers.length} equipo(s)...`;
+        Utils.openModal('sharingModal');
 
-        // Usar la librería qr-code-styling
-        try {
-            const qrCode = new QRCodeStyling({
-                width: 280,
-                height: 280,
-                type: "canvas",
-                data: qrString,
-                dotsOptions: {
-                    color: "#14b8a6", // teal
-                    type: "rounded"
-                },
-                backgroundOptions: {
-                    color: "#ffffff",
-                },
-                cornersSquareOptions: {
-                    type: "extra-rounded",
-                    color: "#0f766e"
-                },
-                cornersDotOptions: {
-                    type: "dot",
-                    color: "#0f766e"
-                }
-            });
-
-            qrCode.append(display);
-            Utils.openModal('qrModal');
-        } catch (error) {
-            console.error(error);
-            Utils.showToast('Error generando QR');
-        }
-    },
-
-    privateScannerInterval: null,
-    privateScannerStream: null,
-
-    /**
-     * Iniciar escaneo de código QR
-     */
-    startScanner() {
-        const video = document.getElementById('scannerVideo');
-        if (!video) return;
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d', { willReadFrequently: true });
-
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-            .then(stream => {
-                this.privateScannerStream = stream;
-                video.srcObject = stream;
-                video.setAttribute('playsinline', true);
-                video.play();
-                Utils.openModal('scannerModal');
-
-                this.privateScannerInterval = setInterval(() => {
-                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                        canvas.height = video.videoHeight;
-                        canvas.width = video.videoWidth;
-                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-                        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                            inversionAttempts: 'dontInvert',
-                        });
-
-                        if (code) {
-                            this.stopScanner();
-                            this.handleScannedData(code.data);
-                        }
-                    }
-                }, 300);
-            })
-            .catch(err => {
-                console.error(err);
-                Utils.showToast('Permiso de cámara denegado o no disponible');
-            });
-    },
-
-    /**
-     * Detener el escaneo y cerrar cámara
-     */
-    stopScanner() {
-        if (this.privateScannerInterval) {
-            clearInterval(this.privateScannerInterval);
-            this.privateScannerInterval = null;
-        }
-        if (this.privateScannerStream) {
-            this.privateScannerStream.getTracks().forEach(track => track.stop());
-            this.privateScannerStream = null;
-        }
-    },
-
-    /**
-     * Manejar datos leídos del QR
-     */
-    handleScannedData(data) {
-        try {
-            const parsed = JSON.parse(data);
-            if (parsed.t === 'recipe') {
-                this.importRecipeData(parsed);
-            } else {
-                Utils.showToast('Código QR no reconocido');
+        let successCount = 0;
+        connectedPeers.forEach(conn => {
+            if (Network.sendRecipe(conn.peer, exportData)) {
+                successCount++;
             }
-        } catch (e) {
-            console.error('QR Parse Error:', e);
-            Utils.showToast('Formato de QR inválido');
+        });
+
+        setTimeout(() => {
+            if (successCount > 0) {
+                Utils.showToast(`RECETA ENVIADA A ${successCount} DISPOSITIVOS`);
+                setTimeout(() => Utils.closeAllPopups(), 1000);
+            } else {
+                Utils.showToast('Error al enviar receta');
+            }
+        }, 800);
+    },
+
+    /**
+     * Manejar recepción de datos externos
+     */
+    handleIncomingData(payload, senderId) {
+        if (payload.t === 'recipe') {
+            if (confirm(`¿Importar receta "${payload.n}" recibida de ${senderId}?`)) {
+                this.importRecipeData(payload);
+            }
         }
     },
 
