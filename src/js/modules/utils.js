@@ -36,6 +36,7 @@ const Utils = {
             'recipes': 'nav-inventory',
             'reports': 'nav-reports',
             'orders': 'nav-orders',
+            'network': null,
             'config': null
         };
         if (navMap[viewId]) {
@@ -49,6 +50,7 @@ const Utils = {
             recipes: 'FICHAS',
             reports: 'REPORTES',
             orders: 'PEDIDOS',
+            network: 'CONEXIÓN',
             config: 'CONFIGURACIÓN'
         };
 
@@ -58,6 +60,7 @@ const Utils = {
             recipes: 'ESCANDALLOS',
             reports: 'ESTADÍSTICAS',
             orders: 'HISTÓRICO',
+            network: 'RED LOCAL',
             config: 'AJUSTES'
         };
 
@@ -78,6 +81,8 @@ const Utils = {
             UI.renderOrders();
         } else if (viewId === 'config') {
             UI.renderConfig();
+        } else if (viewId === 'network') {
+            UI.renderNetwork();
         }
     },
 

@@ -15,6 +15,7 @@ const APP = {
         // Configurar handlers de red
         Network.onPeerUpdate = (peers) => this.updateNetworkUI(peers);
         Network.onDataReceived = (payload, senderId) => this.handleIncomingData(payload, senderId);
+        Network.onConnectionStateChange = () => this.updateNetworkUI();
 
         // Aplicar tema guardado
         this.applyTheme(Data.settings.theme);
@@ -887,9 +888,10 @@ const APP = {
     },
 
     /**
-     * Actualizar la lista de dispositivos cercanos en el modal
+     * Actualizar la lista de dispositivos cercanos en el modal y la vista de red
      */
-    updateNetworkUI(peers) {
+    updateNetworkUI(peers = Network.nearbyPeers) {
+        // Actualizar Modal
         const list = document.getElementById('nearbyList');
         const statusDot = document.getElementById('connectionStatus');
         const localIdEl = document.getElementById('localPeerId');
@@ -901,25 +903,30 @@ const APP = {
             statusDot.classList.toggle('animate-pulse', !Network.localId);
         }
 
-        if (!list) return;
-
-        if (!peers || peers.length === 0) {
-            list.innerHTML = '<p class="text-[10px] opacity-50 italic py-2 text-center">Buscando kamilias...</p>';
-            return;
+        if (list) {
+            if (!peers || peers.length === 0) {
+                list.innerHTML = '<p class="text-[10px] opacity-50 italic py-2 text-center">Buscando kamilias...</p>';
+            } else {
+                list.innerHTML = peers.map(peer => {
+                    const isConnected = Network.connections[peer.id] && Network.connections[peer.id].open;
+                    return `
+                        <div class="flex justify-between items-center p-3 bg-card/50 rounded-lg border border-teal/5 transition hover:border-teal/30">
+                            <div>
+                                <p class="font-bold text-[11px]">${peer.name}</p>
+                                <p class="text-[8px] opacity-50 font-mono">${peer.id}</p>
+                            </div>
+                            <button onclick="APP.connectToPeer('${peer.id}')" 
+                                class="text-[9px] font-black uppercase ${isConnected ? 'text-teal' : 'text-muted'} hover:underline">
+                                ${isConnected ? 'Conectado' : 'Conectar'}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
         }
 
-        list.innerHTML = peers.map(peer => `
-            <div class="flex justify-between items-center p-3 bg-card/50 rounded-lg border border-teal/5 transition hover:border-teal/30">
-                <div>
-                    <p class="font-bold text-[11px]">${peer.name}</p>
-                    <p class="text-[8px] opacity-50 font-mono">${peer.id}</p>
-                </div>
-                <button onclick="APP.connectToPeer('${peer.id}')" 
-                    class="text-[9px] font-black uppercase text-teal hover:underline">
-                    ${Network.connections[peer.id] ? 'Conectado' : 'Conectar'}
-                </button>
-            </div>
-        `).join('');
+        // Actualizar Vista de Red Completa
+        UI.renderNetwork();
     },
 
     /**
@@ -944,6 +951,15 @@ const APP = {
     connectToPeer(id) {
         Network.connectToPeer(id);
         Utils.showToast('Solicitando conexión...');
+    },
+
+    /**
+     * Desconectarse de un peer
+     */
+    disconnectFromPeer(id) {
+        if (confirm('¿Desconectar de este equipo?')) {
+            Network.disconnect(id);
+        }
     },
 
     /**

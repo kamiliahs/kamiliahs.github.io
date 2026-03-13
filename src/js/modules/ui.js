@@ -340,6 +340,71 @@ const UI = {
     },
 
     /**
+     * Renderizar sección de Red y Conexiones
+     */
+    renderNetwork() {
+        const activeList = document.getElementById('activeConnectionsList');
+        const discoveredList = document.getElementById('discoveredPeersList');
+        const statusIndicator = document.getElementById('netStatusIndicator');
+        const localIdEl = document.getElementById('netLocalId');
+        const publicIpEl = document.getElementById('netPublicIp');
+
+        if (localIdEl) localIdEl.innerText = Network.localId || '---';
+        if (publicIpEl) publicIpEl.innerText = `Red: ${Network.myPublicIp || 'Detectando...'}`;
+
+        if (statusIndicator) {
+            const isOnline = !!Network.localId;
+            statusIndicator.classList.toggle('text-teal', isOnline);
+            statusIndicator.classList.toggle('text-red-500', !isOnline);
+            statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-current ${!isOnline ? 'animate-pulse' : ''}"></span> ${isOnline ? 'EN LÍNEA' : 'DESCONECTADO'}`;
+        }
+
+        // Renderizar Conexiones Activas
+        if (activeList) {
+            const connections = Object.values(Network.connections).filter(c => c.open);
+            if (connections.length === 0) {
+                activeList.innerHTML = '<p class="text-xs text-muted italic opacity-50">No hay equipos conectados</p>';
+            } else {
+                activeList.innerHTML = connections.map(conn => `
+                    <div class="flex justify-between items-center p-4 bg-card rounded-xl border border-teal/10">
+                        <div>
+                            <p class="font-bold text-sm">Equipo ${conn.peer.split('-')[1]?.toUpperCase() || 'Remoto'}</p>
+                            <p class="text-[9px] opacity-50 font-mono">${conn.peer}</p>
+                        </div>
+                        <button onclick="APP.disconnectFromPeer('${conn.peer}')" 
+                                class="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline">
+                            Desconectar
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Renderizar Equipos Descubiertos (No conectados)
+        if (discoveredList) {
+            const connectedIds = Object.keys(Network.connections);
+            const discovered = Network.nearbyPeers.filter(p => !connectedIds.includes(p.id));
+
+            if (discovered.length === 0) {
+                discoveredList.innerHTML = '<p class="text-xs text-muted italic opacity-50">No se detectaron más dispositivos</p>';
+            } else {
+                discoveredList.innerHTML = discovered.map(peer => `
+                    <div class="flex justify-between items-center p-4 bg-card/50 rounded-xl border border-white/5">
+                        <div>
+                            <p class="font-bold text-sm">${peer.name}</p>
+                            <p class="text-[9px] opacity-50 font-mono">${peer.id}</p>
+                        </div>
+                        <button onclick="APP.connectToPeer('${peer.id}')" 
+                                class="text-[10px] font-black text-teal uppercase tracking-widest hover:underline">
+                            Conectar
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+    },
+
+    /**
      * Renderizar todas las vistas
      */
     renderAll() {
@@ -348,5 +413,6 @@ const UI = {
         this.renderRecipes();
         this.renderReports();
         this.renderOrders();
+        this.renderNetwork();
     }
 };
