@@ -353,10 +353,10 @@ const UI = {
         if (publicIpEl) publicIpEl.innerText = `Red: ${Network.myPublicIp || 'Detectando...'}`;
 
         if (statusIndicator) {
-            const isOnline = !!Network.localId;
+            const isOnline = Network.peer && Network.peer.open;
             statusIndicator.classList.toggle('text-teal', isOnline);
             statusIndicator.classList.toggle('text-red-500', !isOnline);
-            statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-current ${!isOnline ? 'animate-pulse' : ''}"></span> ${isOnline ? 'EN LÍNEA' : 'DESCONECTADO'}`;
+            statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-current ${!isOnline ? 'animate-pulse' : ''}"></span> ${isOnline ? 'EN LÍNEA' : 'FUERA DE LÍNEA'}`;
         }
 
         // Renderizar Conexiones Activas

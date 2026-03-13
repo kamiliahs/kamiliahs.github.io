@@ -22,7 +22,7 @@ const ASSETS_TO_CACHE = [
 // Instalación del Service Worker
 self.addEventListener('install', (event) => {
     console.log('Service Worker: Instalando...');
-    
+
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
@@ -42,7 +42,7 @@ self.addEventListener('install', (event) => {
 // Activación del Service Worker
 self.addEventListener('activate', (event) => {
     console.log('Service Worker: Activado');
-    
+
     event.waitUntil(
         caches.keys()
             .then((cacheNames) => {
@@ -64,43 +64,50 @@ self.addEventListener('activate', (event) => {
 // Interception de peticiones (Fetch)
 self.addEventListener('fetch', (event) => {
     const { request } = event;
+    const url = new URL(request.url);
 
-    // Estrategia: Cache first, fallback to network
+    // No cachear la API de IP pública (siempre red)
+    if (url.hostname.includes('ipify.org')) {
+        return event.respondWith(fetch(request));
+    }
+
+    // Estrategia para scripts externos: Network First
+    if (request.destination === 'script' && (request.url.includes('unpkg') || request.url.includes('jsdelivr'))) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+                    return response;
+                })
+                .catch(() => caches.match(request))
+        );
+        return;
+    }
+
+    // Estrategia por defecto: Cache first, fallback to network
     event.respondWith(
         caches.match(request)
             .then((response) => {
-                // Si está en caché, devolverlo
-                if (response) {
-                    return response;
-                }
+                if (response) return response;
 
-                // Si no está en caché, hacer petición de red
-                return fetch(request)
-                    .then((response) => {
-                        // Si la petición falla, devolver error offline
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
-
-                        // Clonar la respuesta
-                        const responseToCache = response.clone();
-
-                        // Guardar en caché
-                        caches.open(CACHE_NAME)
-                            .then((cache) => {
-                                cache.put(request, responseToCache);
-                            });
-
+                return fetch(request).then((response) => {
+                    if (!response || response.status !== 200 || response.type !== 'basic') {
                         return response;
-                    })
-                    .catch(() => {
-                        // Fallback para recursos críticos cuando no hay conexión
-                        if (request.destination === 'document') {
-                            return caches.match('./index.html');
-                        }
-                        
-                        console.log('Service Worker: Recurso no disponible offline', request.url);
+                    }
+
+                    const responseToCache = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(request, responseToCache);
                     });
+
+                    return response;
+                });
+            })
+            .catch(() => {
+                if (request.destination === 'document') {
+                    return caches.match('./index.html');
+                }
             })
     );
 });
@@ -124,7 +131,7 @@ self.addEventListener('push', (event) => {
 // Click en notificación
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    
+
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true })
             .then((clientList) => {
