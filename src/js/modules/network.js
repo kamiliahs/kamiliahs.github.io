@@ -16,6 +16,10 @@ const Network = {
      * Inicializar el sistema de red
      */
     async init() {
+        if (this.peer) {
+            try { this.peer.destroy(); } catch(e) {}
+            this.peer = null;
+        }
         try {
             // Recuperar o generar ID local estable
             this.localId = localStorage.getItem('kamilia_peer_id');
@@ -25,12 +29,27 @@ const Network = {
             }
 
             // Obtener IP pública para agrupar dispositivos en la misma red
-            const response = await fetch('https://api.ipify.org?format=json');
-            const data = await response.json();
-            this.myPublicIp = data.ip;
-            const ipHash = await this._hashString(this.myPublicIp);
+            let ipHash = 'offline-lan';
+            try {
+                const response = await Promise.race([
+                    fetch('https://api.ipify.org?format=json'),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+                ]);
+                const data = await response.json();
+                this.myPublicIp = data.ip;
+                ipHash = await this._hashString(this.myPublicIp);
+            } catch (e) {
+                console.warn('No se pudo obtener IP pública, usando modo local limitado:', e);
+                this.myPublicIp = 'Desconocida (Offline)';
+            }
 
+            const ns = Data.settings.networkServer || { host: '0.peerjs.com', port: 443, path: '/', secure: true };
+            
             this.peer = new Peer(this.localId, {
+                host: ns.host || '0.peerjs.com',
+                port: ns.port || 443,
+                path: ns.path || '/',
+                secure: ns.secure !== false,
                 debug: 1,
                 config: {
                     'iceServers': [

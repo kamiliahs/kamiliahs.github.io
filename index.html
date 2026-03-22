@@ -14,10 +14,9 @@
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="./src/css/main.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./src/lib/tailwind.min.js"></script>
 
-    <!-- WebRTC PeerJS Library -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="./src/lib/peerjs.min.js"></script>
 
     <title>Kamiliahs - Editorial Design</title>
 </head>
@@ -254,8 +253,10 @@
 
             <div id="pinEntry" class="space-y-2 pt-4 hidden">
                 <p class="text-[10px] text-muted uppercase font-bold text-center">Ingresa el PIN del otro equipo</p>
-                <input type="number" id="connectionPin" placeholder="0000" class="text-center text-2xl tracking-[1em] font-black h-16">
-                <button onclick="APP.connectWithPin()" class="w-full btn-primary py-4 font-bold text-[10px] uppercase">Conectar</button>
+                <input type="number" id="connectionPin" placeholder="0000"
+                    class="text-center text-2xl tracking-[1em] font-black h-16">
+                <button onclick="APP.connectWithPin()"
+                    class="w-full btn-primary py-4 font-bold text-[10px] uppercase">Conectar</button>
             </div>
 
             <div id="pinDisplay" class="space-y-2 pt-4 hidden text-center">
@@ -399,6 +400,33 @@
             </div>
         </div>
 
+        <!-- CONFIGURACIÓN DE RED -->
+        <div class="mb-8 pb-8 line-border">
+            <p class="label-caps mb-4 text-orange-400">Servidor de Red (Signaling)</p>
+            <p class="text-[9px] text-muted mb-4 uppercase">Para uso 100% offline en LAN, especifica un servidor PeerJS
+                local.</p>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-[8px] text-muted uppercase font-bold mb-1">Host (Ej: 0.peerjs.com)</p>
+                    <input type="text" id="configPeerHost" placeholder="0.peerjs.com">
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-1/3">
+                        <p class="text-[8px] text-muted uppercase font-bold mb-1">Puerto</p>
+                        <input type="number" id="configPeerPort" placeholder="443" value="443">
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-[8px] text-muted uppercase font-bold mb-1">Ruta</p>
+                        <input type="text" id="configPeerPath" placeholder="/" value="/">
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="configPeerSecure" class="w-auto h-auto" checked>
+                    <p class="text-[10px] text-muted uppercase font-bold">Usar SSL (HTTPS)</p>
+                </div>
+            </div>
+        </div>
+
         <!-- RESPALDO Y DATOS -->
         <div class="mb-8 pb-8 line-border">
             <p class="label-caps mb-4 text-teal">Respaldo y Datos (Backup)</p>
@@ -509,10 +537,14 @@
                 <p id="netLocalId" class="text-2xl font-black tracking-tighter mb-1">---</p>
                 <p id="netPublicIp" class="text-[10px] text-muted font-mono opacity-50">Red: Detectando...</p>
             </div>
-            
+
             <div class="flex gap-4 mb-8">
-                <button onclick="APP.openConnectionModal()" class="flex-1 btn-primary py-4 font-bold text-[10px] uppercase tracking-widest">Nueva Conexión (PIN)</button>
-                <button onclick="Network.init()" class="flex-1 btn-secondary py-4 font-bold text-[10px] uppercase tracking-widest">Reconectar Servidor</button>
+                <button onclick="APP.openConnectionModal()"
+                    class="flex-1 btn-primary py-4 font-bold text-[10px] uppercase tracking-widest">Nueva Conexión
+                    (PIN)</button>
+                <button onclick="Network.init()"
+                    class="flex-1 btn-secondary py-4 font-bold text-[10px] uppercase tracking-widest">Reconectar
+                    Servidor</button>
             </div>
         </div>
 

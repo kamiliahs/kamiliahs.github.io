@@ -15,7 +15,13 @@ const Data = {
             { symbol: 'ml', name: 'Mililitro' },
             { symbol: 'pza', name: 'Pieza' }
         ],
-        equivalences: {}
+        equivalences: {},
+        networkServer: {
+            host: '0.peerjs.com',
+            port: 443,
+            path: '/',
+            secure: true
+        }
     },
 
     /**

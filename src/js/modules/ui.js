@@ -326,6 +326,13 @@ const UI = {
 
         fromSelect.innerHTML = '<option value="">De --</option>' + options;
         toSelect.innerHTML = '<option value="">A --</option>' + options;
+
+        // Network Server
+        const ns = s.networkServer || { host: '0.peerjs.com', port: 443, path: '/', secure: true };
+        document.getElementById('configPeerHost').value = ns.host || '0.peerjs.com';
+        document.getElementById('configPeerPort').value = ns.port || 443;
+        document.getElementById('configPeerPath').value = ns.path || '/';
+        document.getElementById('configPeerSecure').checked = ns.secure !== false;
     },
 
 
@@ -354,9 +361,15 @@ const UI = {
 
         if (statusIndicator) {
             const isOnline = Network.peer && Network.peer.open;
+            const isOfflineMode = Network.myPublicIp.includes('Offline');
+
             statusIndicator.classList.toggle('text-teal', isOnline);
             statusIndicator.classList.toggle('text-red-500', !isOnline);
-            statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-current ${!isOnline ? 'animate-pulse' : ''}"></span> ${isOnline ? 'EN LÍNEA' : 'FUERA DE LÍNEA'}`;
+
+            let statusText = isOnline ? 'EN LÍNEA' : 'FUERA DE LÍNEA';
+            if (isOnline && isOfflineMode) statusText += ' (MODO LAN)';
+
+            statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-current ${!isOnline ? 'animate-pulse' : ''}"></span> ${statusText}`;
         }
 
         // Renderizar Conexiones Activas

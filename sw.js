@@ -14,9 +14,10 @@ const ASSETS_TO_CACHE = [
     './src/js/modules/utils.js',
     './src/js/app.js',
     './manifest.json',
-    'https://cdn.tailwindcss.com',
-    'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-    'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js'
+    './src/lib/tailwind.min.js',
+    './src/lib/peerjs.min.js',
+    './src/lib/qrcode.min.js',
+    './src/lib/jsQR.min.js'
 ];
 
 // Instalación del Service Worker
@@ -69,6 +70,21 @@ self.addEventListener('fetch', (event) => {
     // No cachear la API de IP pública (siempre red)
     if (url.hostname.includes('ipify.org')) {
         return event.respondWith(fetch(request));
+    }
+
+    // Cachear Google Fonts
+    if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
+        event.respondWith(
+            caches.open(CACHE_NAME).then((cache) => {
+                return cache.match(request).then((response) => {
+                    return response || fetch(request).then((networkResponse) => {
+                        cache.put(request, networkResponse.clone());
+                        return networkResponse;
+                    });
+                });
+            })
+        );
+        return;
     }
 
     // Estrategia para scripts externos: Network First

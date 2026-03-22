@@ -743,12 +743,21 @@ const APP = {
      */
     saveSettings() {
         const theme = document.getElementById('configTheme').value;
+        const host = document.getElementById('configPeerHost').value.trim() || '0.peerjs.com';
+        const port = parseInt(document.getElementById('configPeerPort').value) || 443;
+        const path = document.getElementById('configPeerPath').value.trim() || '/';
+        const secure = document.getElementById('configPeerSecure').checked;
 
         Data.updateSettings({
-            theme: theme
-            // units y equivalences ya se han actualizado con addUnit y addEquivalence
+            theme: theme,
+            networkServer: { host, port, path, secure }
         });
+
         this.applyTheme(theme);
+
+        // Reiniciar red con nuevos parámetros
+        Network.init();
+
         Utils.showToast('Configuración guardada');
     },
 
