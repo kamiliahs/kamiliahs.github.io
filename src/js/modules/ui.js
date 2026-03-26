@@ -89,6 +89,7 @@ const UI = {
             const serviceExpense = sellingPrice * (servicePct / 100);
             const actualProfit = sellingPrice - cost - serviceExpense;
             const actualMargin = sellingPrice > 0 ? (actualProfit / sellingPrice * 100).toFixed(1) : 0;
+            const expectedProfit = recommendedPrice * (expectedMargin / 100);
 
             return `
                 <div>
@@ -100,25 +101,34 @@ const UI = {
                             <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-red-500">Borrar</button>
                         </div>
                     </div>
-                    <div class="space-y-1 mb-4">
+                    <div class="space-y-1 mb-4 max-w-sm">
                         ${p.recipe.map(r => {
                 const ing = Data.ingredients.find(i => i.id === r.id);
                 const unit = r.unit || ing?.unit || '';
-                return `<p class="text-[10px] text-muted font-medium uppercase tracking-wider">${r.qty} ${unit} ${ing?.name || '---'}</p>`;
+                let costStr = '';
+                if (ing) {
+                    const convertedQty = Data.convertUnit(r.qty, unit, ing.unit);
+                    const costForQty = ing.cost * convertedQty;
+                    costStr = `<span class="opacity-70 font-bold">SRD ${costForQty.toFixed(2)}</span>`;
+                }
+                return `<div class="text-[10px] text-muted font-medium uppercase tracking-wider flex justify-between border-b border-white/5 pb-1">
+                            <span>${r.qty} ${unit} ${ing?.name || '---'}</span>
+                            ${costStr}
+                        </div>`;
             }).join('')}
                     </div>
                     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="p-3 bg-card border-l-2 border-teal">
                             <p class="label-caps mb-1 opacity-50">Costo / Margen Esperado</p>
-                            <p class="font-bold text-[11px]">SRD ${cost.toFixed(2)} / ${expectedMargin}%</p>
+                            <p class="font-bold text-[11px]">SRD ${cost.toFixed(2)} / ${expectedMargin}% (SRD ${expectedProfit.toFixed(2)})</p>
                         </div>
                         <div class="p-3 bg-card border-l-2 border-orange-400">
                             <p class="label-caps mb-1 opacity-50">Gasto Servicio</p>
-                            <p class="font-bold text-[11px]">${servicePct}% (SRD ${(p.price * servicePct / 100).toFixed(2)})</p>
+                            <p class="font-bold text-[11px]">${servicePct}% (SRD ${serviceExpense.toFixed(2)})</p>
                         </div>
                         <div class="p-3 bg-card border-l-2 border-purple-400">
-                            <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? 'Precio por Porción' : 'Sin Porciones'}</p>
-                            <p class="font-bold text-[11px]">${p.portions > 1 ? `SRD ${(sellingPrice / p.portions).toFixed(2)}` : '---'}</p>
+                            <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? 'Precio por Porción (Def. / Rcmd.)' : 'Sin Porciones'}</p>
+                            <p class="font-bold text-[11px]">${p.portions > 1 ? `SRD ${(sellingPrice / p.portions).toFixed(2)} / SRD ${(recommendedPrice / p.portions).toFixed(2)}` : '---'}</p>
                         </div>
                         <div class="p-3 bg-card border-l-2 border-blue-400">
                             <p class="label-caps mb-1 opacity-50">Precio Recomendado</p>
@@ -126,7 +136,7 @@ const UI = {
                         </div>
                         <div class="p-3 ${actualProfit > 0 ? 'btn-primary' : 'bg-red-500 text-white'}">
                             <p class="label-caps mb-1 opacity-50">Precio Total / Margen Real</p>
-                            <p class="font-bold text-[11px]">SRD ${sellingPrice.toFixed(2)} / ${actualMargin}%</p>
+                            <p class="font-bold text-[11px]">SRD ${sellingPrice.toFixed(2)} / ${actualMargin}% (SRD ${actualProfit.toFixed(2)})</p>
                         </div>
                     </div>
                 </div>
@@ -145,7 +155,7 @@ const UI = {
         document.getElementById('repTotalCost').innerText = stats.totalCosts.toFixed(2);
         document.getElementById('repNetProfit').innerText = stats.netProfit.toFixed(2);
         document.getElementById('headerProfit').innerText = `SRD ${stats.netProfit.toFixed(2)}`;
-        document.getElementById('repMarginAvg').innerText = `${stats.marginPercentage.toFixed(1)}% de margen`;
+        document.getElementById('repMarginAvg').innerText = `${stats.marginPercentage.toFixed(1)}% margen (SRD ${stats.netProfit.toFixed(2)})`;
 
         const breakdown = document.getElementById('profitBreakdown');
         breakdown.innerHTML = profitByProduct.length > 0 ? profitByProduct.map(item => `
@@ -161,7 +171,7 @@ const UI = {
                     </div>
                     <div>
                         <p class="label-caps mb-1 flex items-center gap-1">Gasto Servicio <button onclick="APP.showInfo('gastoServicio')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
-                        <p class="font-bold">SRD ${item.totalService.toFixed(2)}</p>
+                        <p class="font-bold">${item.totalRevenue > 0 ? (item.totalService / item.totalRevenue * 100).toFixed(1) : 0}% (SRD ${item.totalService.toFixed(2)})</p>
                     </div>
                     <div>
                         <p class="label-caps mb-1 flex items-center gap-1">Ganancia neta <button onclick="APP.showInfo('gananciaNeta')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
@@ -169,7 +179,7 @@ const UI = {
                     </div>
                     <div>
                         <p class="label-caps mb-1 flex items-center gap-1">Margen Real <button onclick="APP.showInfo('margenReal')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
-                        <p class="font-bold">${item.margin.toFixed(1)}%</p>
+                        <p class="font-bold">${item.margin.toFixed(1)}% (SRD ${item.profit.toFixed(2)})</p>
                     </div>
                 </div>
             </div>
