@@ -361,7 +361,7 @@ const UI = {
 
         if (statusIndicator) {
             const isOnline = Network.peer && Network.peer.open;
-            const isOfflineMode = Network.myPublicIp.includes('Offline');
+            const isOfflineMode = Network.myPublicIp && Network.myPublicIp.includes('Offline');
 
             statusIndicator.classList.toggle('text-teal', isOnline);
             statusIndicator.classList.toggle('text-red-500', !isOnline);
