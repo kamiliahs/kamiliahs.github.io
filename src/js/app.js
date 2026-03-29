@@ -284,6 +284,57 @@ const APP = {
     },
 
     /**
+     * Guardar receta editada como una nueva receta
+     */
+    saveAsNewRecipe() {
+        const name = document.getElementById('editProdName').value.trim();
+        const icon = document.getElementById('editProdIcon').value.trim() || '🍽️';
+        const price = parseFloat(document.getElementById('editProdPrice').value);
+
+        if (!name) {
+            Utils.showToast('Nombre requerido');
+            return;
+        }
+
+        if (isNaN(price) || price < 0) {
+            Utils.showToast('Precio inválido');
+            return;
+        }
+
+        const selects = document.querySelectorAll('.recipe-edit-ing-select');
+        const qtyInputs = document.querySelectorAll('.recipe-edit-ing-qty');
+        const unitSelects = document.querySelectorAll('.recipe-edit-ing-unit');
+        const recipe = [];
+
+        selects.forEach((select, i) => {
+            const qty = parseFloat(qtyInputs[i].value);
+            const unit = unitSelects[i].value;
+            if (select.value && !isNaN(qty) && qty > 0) {
+                recipe.push({
+                    id: select.value,
+                    qty: qty,
+                    unit: unit
+                });
+            }
+        });
+
+        if (recipe.length === 0) {
+            Utils.showToast('Agregar al menos un insumo');
+            return;
+        }
+
+        const service = parseFloat(document.getElementById('editProdService').value) || 0;
+        const margin = parseFloat(document.getElementById('editProdMargin').value) || 0;
+        const portions = parseFloat(document.getElementById('editProdPortions').value) || 1;
+        const comments = document.getElementById('editProdComments').value.trim();
+        
+        Data.addProduct(name, icon, price, recipe, service, margin, portions, comments);
+        UI.renderAll();
+        Utils.closeAllPopups();
+        Utils.showToast('RECETA CREADA (COPIA)');
+    },
+
+    /**
      * Guardar cambios de receta
      */
     saveEditRecipe() {
