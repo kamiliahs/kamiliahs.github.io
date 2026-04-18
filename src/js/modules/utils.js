@@ -16,6 +16,11 @@ const Utils = {
      * Cambiar vista activa
      */
     switchView(viewId, pushToHistory = true) {
+        if (window.currentActiveView === viewId) {
+            pushToHistory = false; // Prevent pushing duplicate state
+        }
+        window.currentActiveView = viewId;
+
         // Ocultar todas las vistas
         document.querySelectorAll('.view-container').forEach(v => v.classList.add('hidden-view'));
 

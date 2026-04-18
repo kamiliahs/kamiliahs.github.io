@@ -535,12 +535,12 @@
     </div>
 
     <!-- CHANGELOG MODAL -->
-    <div id="changelogModal" class="modal max-h-[85vh] flex flex-col p-0">
-        <div class="p-6 pb-4 border-b border-border flex justify-between items-center bg-background rounded-t-3xl shrink-0">
+    <div id="changelogModal" class="modal max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
             <p class="label-caps !mb-0">Historial de Versiones</p>
             <button onclick="APP.closeAllPopups()" class="text-[10px] font-black uppercase text-muted hover:text-white transition-colors">✕ Cerrar</button>
         </div>
-        <div id="fullChangelogContainer" class="p-6 space-y-6 overflow-y-auto flex-1 no-scrollbar">
+        <div id="fullChangelogContainer" class="space-y-6">
             <p class="text-xs text-muted text-center py-4">Cargando historial...</p>
         </div>
     </div>
