@@ -276,15 +276,36 @@
 
 
     <!-- SIDEBAR -->
-    <div class="sidebar" id="sidebar">
-        <button onclick="APP.toggleMenu()" class="label-caps mb-20">← Volver</button>
-        <div class="space-y-12">
-            <div onclick="APP.switchView('recipes')" class="heading-xl">RECETAS</div>
-            <div onclick="APP.switchView('inventory')" class="heading-xl">INSUMOS</div>
-            <div onclick="APP.switchView('pos')" class="heading-xl">VENTAS</div>
-            <div onclick="APP.switchView('reports')" class="heading-xl">ESTADÍSTICAS</div>
-            <div onclick="APP.switchView('shifts')" class="heading-xl">TURNOS</div>
-            <div onclick="APP.switchView('config')" class="heading-xl">CONFIGURACIÓN</div>
+    <div class="sidebar flex flex-col justify-between overflow-y-auto" id="sidebar">
+        <div>
+            <button onclick="APP.toggleMenu()" class="label-caps mb-20">← Volver</button>
+            <div class="space-y-12">
+                <div onclick="APP.switchView('recipes')" class="heading-xl hover:text-teal transition-colors cursor-pointer">RECETAS</div>
+                <div onclick="APP.switchView('inventory')" class="heading-xl hover:text-teal transition-colors cursor-pointer">INSUMOS</div>
+                <div onclick="APP.switchView('pos')" class="heading-xl hover:text-teal transition-colors cursor-pointer">VENTAS</div>
+                <div onclick="APP.switchView('reports')" class="heading-xl hover:text-teal transition-colors cursor-pointer">ESTADÍSTICAS</div>
+                <div onclick="APP.switchView('shifts')" class="heading-xl hover:text-teal transition-colors cursor-pointer">TURNOS</div>
+                <div onclick="APP.switchView('config')" class="heading-xl hover:text-teal transition-colors cursor-pointer">CONFIGURACIÓN</div>
+            </div>
+        </div>
+
+        <!-- SHARE APP SECTION -->
+        <div class="mt-16 pt-8 border-t border-border">
+            <p class="text-[9px] font-black uppercase tracking-widest opacity-40 mb-4">Compartir App</p>
+            <div class="flex gap-6 items-center">
+                <!-- Share API -->
+                <button onclick="APP.shareApp()" class="text-muted hover:text-teal transition-colors" title="Compartir">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                </button>
+                <!-- WhatsApp -->
+                <a href="https://api.whatsapp.com/send?text=Prueba%20Kamiliahs%20POS%2C%20el%20sistema%20minimalista%20de%20ventas%3A%20https%3A%2F%2Fkamiliahs.github.io%2F" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-[#25D366] transition-colors" title="WhatsApp">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </a>
+                <!-- Twitter -->
+                <a href="https://twitter.com/intent/tweet?text=Prueba%20Kamiliahs%20POS%2C%20el%20sistema%20minimalista%20de%20ventas&url=https%3A%2F%2Fkamiliahs.github.io%2F" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-white transition-colors" title="Twitter/X">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg>
+                </a>
+            </div>
         </div>
     </div>
 

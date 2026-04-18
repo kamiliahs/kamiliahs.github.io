@@ -841,6 +841,30 @@ const APP = {
     },
 
     /**
+     * Compartir App
+     */
+    async shareApp() {
+        const shareData = {
+            title: 'Kamiliahs POS',
+            text: 'Prueba Kamiliahs POS, el sistema minimalista de ventas',
+            url: 'https://kamiliahs.github.io/'
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(shareData.url);
+                Utils.showToast('ENLACE COPIADO AL PORTAPAPELES');
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error('Error al compartir:', err);
+            }
+        }
+    },
+
+    /**
      * Volver a la sección anterior
      */
     goBack() {
