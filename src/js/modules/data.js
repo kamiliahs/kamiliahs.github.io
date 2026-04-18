@@ -6,6 +6,8 @@ const Data = {
     ingredients: [],
     products: [],
     salesHistory: [],
+    shifts: [],
+    activeShiftId: null,
     stock: {}, // Inventario de insumos
     cart: [],
     settings: {
@@ -16,12 +18,6 @@ const Data = {
             { symbol: 'pza', name: 'Pieza' }
         ],
         equivalences: {},
-        networkServer: {
-            host: '0.peerjs.com',
-            port: 443,
-            path: '/',
-            secure: true
-        }
     },
 
     /**
@@ -31,6 +27,8 @@ const Data = {
         this.ingredients = Storage.getIngredients();
         this.products = Storage.getProducts();
         this.salesHistory = Storage.getSalesHistory();
+        this.shifts = Storage.getShifts ? Storage.getShifts() || [] : [];
+        this.activeShiftId = Storage.getActiveShiftId ? Storage.getActiveShiftId() : null;
         this.stock = Storage.getStock();
         this.cart = [];
         this.settings = Storage.getSettings();
@@ -43,6 +41,8 @@ const Data = {
         Storage.saveIngredients(this.ingredients);
         Storage.saveProducts(this.products);
         Storage.saveSalesHistory(this.salesHistory);
+        Storage.saveShifts(this.shifts);
+        Storage.saveActiveShiftId(this.activeShiftId);
         Storage.saveStock(this.stock);
         Storage.saveSettings(this.settings);
     },
@@ -284,9 +284,15 @@ const Data = {
      */
     checkout() {
         if (this.cart.length === 0) return false;
+        
+        // No permitir venta sin turno abierto
+        if (!this.activeShiftId) {
+            return { error: 'NO_ACTIVE_SHIFT' };
+        }
 
         const sale = {
             id: 'sale_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            shiftId: this.activeShiftId,
             total: this.getCartTotal(),
             items: this.cart.map(item => ({
                 id: item.id,
@@ -304,6 +310,106 @@ const Data = {
         this.cart = [];
         this.saveAll();
         return true;
+    },
+
+    /**
+     * ========== CRUD TURNOS (SHIFTS) ==========
+     */
+
+    /**
+     * Abrir un nuevo turno
+     */
+    openShift(name, date = null) {
+        if (this.activeShiftId) return false;
+
+        const shift = {
+            id: 'shift_' + Date.now(),
+            name: name.toUpperCase(),
+            date: date || new Date().toISOString().split('T')[0],
+            startTime: Date.now(),
+            endTime: null,
+            status: 'open'
+        };
+
+        this.shifts.push(shift);
+        this.activeShiftId = shift.id;
+        this.saveAll();
+        return shift;
+    },
+
+    /**
+     * Cerrar turno activo
+     */
+    closeShift() {
+        if (!this.activeShiftId) return false;
+        
+        const shift = this.shifts.find(s => s.id === this.activeShiftId);
+        if (shift) {
+            shift.status = 'closed';
+            shift.endTime = Date.now();
+            this.activeShiftId = null;
+            this.saveAll();
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Eliminar turno y sus ventas asociadas? 
+     * El usuario pidió vincular datos de ventas, pero no especificó si deben borrarse.
+     * Normalmente se conservan las ventas pero quedan huérfanas o se borran en cascada.
+     * Implementaremos borrado en cascada para limpieza, o simplemente desvincular.
+     * Usuario dijo "CRUd completo para los turnos", así que permitir borrar.
+     */
+    deleteShift(id) {
+        const index = this.shifts.findIndex(s => s.id === id);
+        if (index !== -1) {
+            const shift = this.shifts[index];
+            if (this.activeShiftId === shift.id) {
+                this.activeShiftId = null;
+            }
+            this.shifts.splice(index, 1);
+            // Opcional: Borrar ventas de este turno
+            this.salesHistory = this.salesHistory.filter(s => s.shiftId !== id);
+            this.saveAll();
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Actualizar datos de un turno (Nombre/Fecha)
+     */
+    updateShift(id, name, date) {
+        const shift = this.shifts.find(s => s.id === id);
+        if (shift) {
+            shift.name = name.toUpperCase();
+            shift.date = date;
+            this.saveAll();
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * Obtener ventas de un turno específico
+     */
+    getSalesByShift(shiftId) {
+        return this.salesHistory.filter(s => s.shiftId === shiftId);
+    },
+
+    /**
+     * Obtener turno por ID
+     */
+    getShift(id) {
+        return this.shifts.find(s => s.id === id);
+    },
+
+    /**
+     * Obtener turno activo
+     */
+    getActiveShift() {
+        return this.shifts.find(s => s.id === this.activeShiftId);
     },
 
     /**
@@ -620,6 +726,8 @@ const Data = {
             ingredients: this.ingredients,
             products: this.products,
             salesHistory: this.salesHistory,
+            shifts: this.shifts,
+            activeShiftId: this.activeShiftId,
             stock: this.stock,
             settings: this.settings,
             exportDate: new Date().toISOString(),
@@ -636,6 +744,8 @@ const Data = {
         this.ingredients = data.ingredients || [];
         this.products = data.products || [];
         this.salesHistory = data.salesHistory || [];
+        this.shifts = data.shifts || [];
+        this.activeShiftId = data.activeShiftId || null;
         this.stock = data.stock || {};
         this.settings = data.settings || this.settings;
 

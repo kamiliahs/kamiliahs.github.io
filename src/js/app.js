@@ -10,12 +10,7 @@ const APP = {
     init() {
         // Inicializar datos (incluye settings)
         Data.init();
-        Network.init();
 
-        // Configurar handlers de red
-        Network.onPeerUpdate = (peers) => this.updateNetworkUI(peers);
-        Network.onDataReceived = (payload, senderId) => this.handleIncomingData(payload, senderId);
-        Network.onConnectionStateChange = () => this.updateNetworkUI();
 
         // Aplicar tema guardado
         this.applyTheme(Data.settings.theme);
@@ -26,6 +21,9 @@ const APP = {
 
         // Configurar event listeners
         this.setupEventListeners();
+
+        // Cargar vista por defecto
+        this.switchView('recipes');
 
         console.log('Kamiliahs iniciado correctamente');
 
@@ -466,10 +464,14 @@ const APP = {
         const count = Data.cart.length;
 
         if (confirm(`¿Confirmar venta de ${count} artículo(s) por SRD ${total.toFixed(2)}?`)) {
-            if (Data.checkout()) {
+            const result = Data.checkout();
+            if (result === true) {
                 UI.updateCartUI();
                 UI.renderReports();
                 Utils.showToast('TRANSACCIÓN COMPLETADA');
+            } else if (result && result.error === 'NO_ACTIVE_SHIFT') {
+                Utils.showToast('⚠️ ERROR: DEBES ABRIR UN TURNO PRIMERO');
+                this.switchView('shifts');
             }
         }
     },
@@ -743,7 +745,7 @@ const APP = {
                 const data = JSON.parse(e.target.result);
                 if (confirm('¿Importar respaldo? Los datos actuales serán reemplazados por completo.')) {
                     if (Data.importFullAppData(data)) {
-                        Utils.showToast('RESTORE COMPLETADO');
+                        Utils.showToast('RESTAURACIÓN COMPLETADA');
                         // Reiniciar app para refrescar todo
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
@@ -794,20 +796,11 @@ const APP = {
      */
     saveSettings() {
         const theme = document.getElementById('configTheme').value;
-        const host = document.getElementById('configPeerHost').value.trim() || '0.peerjs.com';
-        const port = parseInt(document.getElementById('configPeerPort').value) || 443;
-        const path = document.getElementById('configPeerPath').value.trim() || '/';
-        const secure = document.getElementById('configPeerSecure').checked;
-
         Data.updateSettings({
-            theme: theme,
-            networkServer: { host, port, path, secure }
+            theme: theme
         });
 
         this.applyTheme(theme);
-
-        // Reiniciar red con nuevos parámetros
-        Network.init();
 
         Utils.showToast('Configuración guardada');
     },
@@ -930,219 +923,90 @@ const APP = {
         Utils.addEditIngredientRow();
     },
 
-    // ========== NETWORK & SHARING ==========
+    // ========== TURNO (SHIFTS) ==========
 
-    /**
-     * Abrir modal de conexión y mostrar PIN
-     */
-    openConnectionModal() {
-        const pin = Network.generatePin();
-        document.getElementById('generatedPin').innerText = pin;
-        document.getElementById('pinDisplay').classList.remove('hidden');
-        document.getElementById('pinEntry').classList.remove('hidden'); // Permitir ambos modos
-
-        Network.startPinListening(pin);
-
-        Utils.openModal('connectionModal');
-        this.updateNetworkUI(Network.nearbyPeers);
+    openShiftModal() {
+        document.getElementById('editShiftId').value = '';
+        document.getElementById('shiftName').value = '';
+        document.getElementById('shiftDate').value = new Date().toISOString().split('T')[0];
+        Utils.openModal('shiftModal');
     },
 
-    /**
-     * Actualizar la lista de dispositivos cercanos en el modal y la vista de red
-     */
-    updateNetworkUI(peers = Network.nearbyPeers) {
-        // Actualizar Modal
-        const list = document.getElementById('nearbyList');
-        const statusDot = document.getElementById('connectionStatus');
-        const localIdEl = document.getElementById('localPeerId');
+    saveShift() {
+        const id = document.getElementById('editShiftId').value;
+        const name = document.getElementById('shiftName').value.trim();
+        const date = document.getElementById('shiftDate').value;
 
-        if (localIdEl) localIdEl.innerText = Network.localId || 'Iniciando...';
-        if (statusDot) {
-            statusDot.classList.toggle('bg-teal', !!Network.localId);
-            statusDot.classList.toggle('bg-red-500', !Network.localId);
-            statusDot.classList.toggle('animate-pulse', !Network.localId);
-        }
-
-        if (list) {
-            if (!peers || peers.length === 0) {
-                list.innerHTML = '<p class="text-[10px] opacity-50 italic py-2 text-center">Buscando kamilias...</p>';
-            } else {
-                list.innerHTML = peers.map(peer => {
-                    const isConnected = Network.connections[peer.id] && Network.connections[peer.id].open;
-                    return `
-                        <div class="flex justify-between items-center p-3 bg-card/50 rounded-lg border border-teal/5 transition hover:border-teal/30">
-                            <div>
-                                <p class="font-bold text-[11px]">${peer.name}</p>
-                                <p class="text-[8px] opacity-50 font-mono">${peer.id}</p>
-                            </div>
-                            <button onclick="APP.connectToPeer('${peer.id}')" 
-                                class="text-[9px] font-black uppercase ${isConnected ? 'text-teal' : 'text-muted'} hover:underline">
-                                ${isConnected ? 'Conectado' : 'Conectar'}
-                            </button>
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        // Actualizar Vista de Red Completa
-        UI.renderNetwork();
-    },
-
-    /**
-     * Conectar a un equipo mediante PIN
-     */
-    connectWithPin() {
-        const pin = document.getElementById('connectionPin').value;
-        if (!pin || pin.length < 4) {
-            Utils.showToast('Ingresa un PIN válido');
+        if (!name) {
+            Utils.showToast('Nombre requerido');
             return;
         }
 
-        Utils.showToast('Intentando conectar...');
-        Network.connectWithPin(pin).then(() => {
-            // El resto sucede por eventos
-        });
-    },
-
-    /**
-     * Conectar directamente a un peer de la lista
-     */
-    connectToPeer(id) {
-        Network.connectToPeer(id);
-        Utils.showToast('Solicitando conexión...');
-    },
-
-    /**
-     * Desconectarse de un peer
-     */
-    disconnectFromPeer(id) {
-        if (confirm('¿Desconectar de este equipo?')) {
-            Network.disconnect(id);
-        }
-    },
-
-    /**
-     * Preparar y enviar receta a equipos conectados
-     */
-    shareProductViaNetwork(id) {
-        const product = Data.getProduct(id);
-        if (!product) return;
-
-        // Verificar si hay conexiones activas
-        const connectedPeers = Object.values(Network.connections).filter(c => c.open);
-
-        if (connectedPeers.length === 0) {
-            Utils.showToast('No hay equipos conectados');
-            this.openConnectionModal();
-            return;
+        if (id) {
+            Data.updateShift(id, name, date);
+            Utils.showToast('TURNO ACTUALIZADO');
+        } else {
+            if (Data.activeShiftId) {
+                Utils.showToast('Ya hay un turno abierto');
+                return;
+            }
+            Data.openShift(name, date);
+            Utils.showToast('TURNO ABIERTO');
         }
 
-        const exportData = {
-            t: 'recipe',
-            n: product.name,
-            i: product.icon,
-            p: product.price,
-            s: product.servicePct,
-            m: product.marginPct,
-            po: product.portions,
-            c: product.comments || '',
-            r: product.recipe.map(item => {
-                const ing = Data.ingredients.find(ing => ing.id === item.id);
-                return {
-                    q: item.qty,
-                    u: item.unit,
-                    ing: ing ? {
-                        n: ing.name,
-                        c: ing.cost,
-                        u: ing.unit,
-                        pq: ing.packQty
-                    } : null
-                };
-            })
-        };
-
-        document.getElementById('sharingRecipeName').innerText = product.name;
-        document.getElementById('sharingStatus').innerText = `Enviando a ${connectedPeers.length} equipo(s)...`;
-        Utils.openModal('sharingModal');
-
-        let successCount = 0;
-        connectedPeers.forEach(conn => {
-            if (Network.sendRecipe(conn.peer, exportData)) {
-                successCount++;
-            }
-        });
-
-        setTimeout(() => {
-            if (successCount > 0) {
-                Utils.showToast(`RECETA ENVIADA A ${successCount} DISPOSITIVOS`);
-                setTimeout(() => Utils.closeAllPopups(), 1000);
-            } else {
-                Utils.showToast('Error al enviar receta');
-            }
-        }, 800);
-    },
-
-    /**
-     * Manejar recepción de datos externos
-     */
-    handleIncomingData(payload, senderId) {
-        if (payload.t === 'recipe') {
-            if (confirm(`¿Importar receta "${payload.n}" recibida de ${senderId}?`)) {
-                this.importRecipeData(payload);
-            }
-        }
-    },
-
-    /**
-     * Importar receta y sus ingredientes
-     */
-    importRecipeData(data) {
-        const newRecipeItems = [];
-        const timestamp = Date.now();
-
-        // Importamos ingredientes separados de los locales
-        data.r.forEach((item, idx) => {
-            if (!item.ing) return;
-
-            // Creamos un ID único con prefijo de importación
-            const remotePrefix = 'imp_';
-            const ingId = remotePrefix + timestamp + '_' + idx;
-
-            // Agregar ingrediente como importado
-            Data.ingredients.push({
-                id: ingId,
-                name: '[IMP] ' + item.ing.n.toUpperCase(),
-                cost: item.ing.c,
-                unit: item.ing.u,
-                packQty: item.ing.pq,
-                isImported: true
-            });
-
-            newRecipeItems.push({
-                id: ingId,
-                qty: item.q,
-                unit: item.u
-            });
-        });
-
-        // Crear el producto/receta
-        Data.addProduct(
-            data.n.toUpperCase() + ' (IMP)',
-            data.i || '🍴',
-            data.p,
-            newRecipeItems,
-            data.s || 0,
-            data.m || 0,
-            data.po || 1,
-            data.c || ''
-        );
-
-        Data.saveAll();
         UI.renderAll();
         Utils.closeAllPopups();
-        Utils.showToast('RECETA IMPORTADA EXITOSAMENTE');
     },
+
+    closeActiveShift() {
+        const active = Data.getActiveShift();
+        if (!active) return;
+
+        if (confirm(`¿Cerrar el turno "${active.name}"?`)) {
+            Data.closeShift();
+            UI.renderAll();
+            Utils.showToast('TURNO CERRADO');
+        }
+    },
+
+    editShift(id) {
+        const shift = Data.getShift(id);
+        if (!shift) return;
+
+        document.getElementById('editShiftId').value = id;
+        document.getElementById('shiftName').value = shift.name;
+        document.getElementById('shiftDate').value = shift.date;
+        Utils.openModal('shiftModal');
+    },
+
+    deleteShift(id) {
+        if (confirm('¿Eliminar este turno y todas sus ventas asociadas? Esta acción es irreversible.')) {
+            Data.deleteShift(id);
+            UI.renderAll();
+            Utils.showToast('TURNO ELIMINADO');
+        }
+    },
+
+    viewShiftSales(id) {
+        const shift = Data.getShift(id);
+        if (!shift) return;
+
+        // Podríamos re-usar la vista de pedidos filtrada
+        this.switchView('orders');
+        document.getElementById('orderSearch').value = ''; // Limpiar búsqueda
+        // Filtrar UI.renderOrders manualmente para este turno
+        const query = '';
+        const paidFilter = 'all';
+        const sales = Data.getSalesByShift(id);
+        
+        // Sobrescribir temporalmente el renderizado de pedidos para mostrar solo los de este turno
+        // O mejor, añadir un filtro por turno a renderOrders si fuera necesario.
+        // Por ahora, simularemos un filtrado visual.
+        UI.renderOrders(query, paidFilter, id); 
+        Utils.showToast(`Ventas de: ${shift.name}`);
+    },
+
+
 
     /**
      * Mostrar modal de información con descripción
