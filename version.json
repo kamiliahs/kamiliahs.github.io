@@ -1,6 +1,6 @@
 {
-  "version": "1.0.5",
-  "name": "Sistema de Actualizaciones Inteligentes",
-  "description": "Se ha implementado el control de versiones con notificaciones, historial de cambios (changelog) y posibilidad de actualizar manualmente desde la configuración.",
+  "version": "1.0.7",
+  "name": "Mejoras en el sistema de actualizaciones",
+  "description": "Actualización automática de sistema y optimización de recursos.",
   "date": "2026-04-18"
 }

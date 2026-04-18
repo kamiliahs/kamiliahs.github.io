@@ -1,31 +1,34 @@
 #!/bin/bash
 
-# Script para sincronizar version.json y sw.js con Git
-# Uso: bash update-version.sh
+# Script para actualizar versión, hacer commit y push automáticamente
+# Uso: bash update-version.sh "Título del Commit" "Descripción opcional"
 
+if [ -z "$1" ]; then
+    echo "❌ Error: Debes proporcionar un título para el commit."
+    echo "Uso: bash update-version.sh \"Título del mensaje\" \"Descripción opcional\""
+    exit 1
+fi
+
+COMMIT_NAME="$1"
+COMMIT_DESC="$2"
+
+if [ -z "$COMMIT_DESC" ]; then
+    COMMIT_DESC="Actualización automática de sistema y optimización de recursos."
+fi
+
+# 1. Obtener versión actual e incrementar
 if [ ! -f version.json ]; then
     echo "{\"version\":\"1.0.0\",\"name\":\"Inicio\",\"description\":\"Primera versión\",\"date\":\"$(date +%Y-%m-%d)\"}" > version.json
 fi
 
-# 1. Obtener versión actual e incrementar
 VERSION=$(grep '"version"' version.json | cut -d '"' -f 4)
 BASE_VERSION=$(echo $VERSION | cut -d. -f1-2)
 PATCH_VERSION=$(echo $VERSION | cut -d. -f3)
 NEW_PATCH=$((PATCH_VERSION + 1))
 NEW_VERSION="$BASE_VERSION.$NEW_PATCH"
-
-# 2. Obtener info del último commit
-COMMIT_NAME=$(git log -1 --pretty=%s | sed 's/"/\\"/g')
-COMMIT_DESC=$(git log -1 --pretty=%b | tr '\n' ' ' | sed 's/"/\\"/g')
-
-# Si la descripción está vacía, poner un genérico
-if [ -z "$COMMIT_DESC" ] || [ "$COMMIT_DESC" == " " ]; then
-    COMMIT_DESC="Mejoras de rendimiento y optimización de código."
-fi
-
-# 3. Escribir el nuevo version.json
 DATE=$(date +%Y-%m-%d)
 
+# 2. Actualizar version.json
 cat > version.json <<EOF
 {
   "version": "$NEW_VERSION",
@@ -35,10 +38,15 @@ cat > version.json <<EOF
 }
 EOF
 
-# 4. Actualizar el Service Worker para forzar la actualización en el navegador
-# Buscamos la línea const CACHE_NAME = '...'; y la reemplazamos
+# 3. Actualizar sw.js para forzar caché
 sed -i "s/const CACHE_NAME = '.*';/const CACHE_NAME = 'pos-minimalist-v$NEW_VERSION';/" sw.js
 
-echo "✅ version.json actualizado: v$NEW_VERSION"
-echo "🔄 Service Worker (sw.js) actualizado para forzar caché v$NEW_VERSION"
-echo "📝 Título: $COMMIT_NAME"
+echo "✅ Archivos de versión actualizados a v$NEW_VERSION"
+
+# 4. Git Add, Commit y Push
+echo "🚀 Iniciando carga a GitHub..."
+git add .
+git commit -m "$COMMIT_NAME" -m "$COMMIT_DESC"
+git push
+
+echo "✨ ¡Todo listo! La actualización v$NEW_VERSION ya está en camino."
