@@ -854,9 +854,20 @@ const APP = {
     /**
      * Mostrar aviso de nueva versión
      */
-    showUpdateToast() {
+    async showUpdateToast() {
         const toast = document.getElementById('updateToast');
+        const info = document.getElementById('updateInfo');
+        
         if (toast) {
+            // Intentar cargar el nombre de la actualización
+            try {
+                const response = await fetch('./version.json?t=' + Date.now());
+                const data = await response.json();
+                if (info) info.innerText = data.name || 'Se han aplicado mejoras al sistema.';
+            } catch (err) {
+                console.log('No se pudo cargar el nombre del commit para el toast');
+            }
+
             toast.classList.remove('hidden');
             setTimeout(() => {
                 toast.classList.remove('translate-y-full');
