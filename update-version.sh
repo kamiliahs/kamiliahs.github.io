@@ -12,9 +12,7 @@ fi
 COMMIT_NAME="$1"
 COMMIT_DESC="$2"
 
-if [ -z "$COMMIT_DESC" ]; then
-    COMMIT_DESC="Actualización automática de sistema y optimización de recursos."
-fi
+
 
 # 1. Obtener versión actual e incrementar
 if [ ! -f version.json ]; then
@@ -46,7 +44,11 @@ echo "✅ Archivos de versión actualizados a v$NEW_VERSION"
 # 4. Git Add, Commit y Push
 echo "🚀 Iniciando carga a GitHub..."
 git add .
-git commit -m "$COMMIT_NAME" -m "$COMMIT_DESC"
+if [ -z "$COMMIT_DESC" ]; then
+    git commit -m "$COMMIT_NAME"
+else
+    git commit -m "$COMMIT_NAME" -m "$COMMIT_DESC"
+fi
 git push
 
 echo "✨ ¡Todo listo! La actualización v$NEW_VERSION ya está en camino."
