@@ -58,7 +58,7 @@ const Utils = {
             pos: 'OPERACIONES',
             shifts: 'GESTIÓN TIEMPO',
             inventory: 'STOCK',
-            recipes: 'ESCANDALLOS',
+            recipes: 'RECETAS',
             reports: 'ESTADÍSTICAS',
             orders: 'HISTÓRICO',
             config: 'AJUSTES'
