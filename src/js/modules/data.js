@@ -485,8 +485,14 @@ const Data = {
     /**
      * Obtener estadísticas de ventas
      */
-    getSalesStats(shiftId = null) {
-        const sales = shiftId ? this.getSalesByShift(shiftId) : this.salesHistory;
+    getSalesStats(shiftIdOrSales = null) {
+        let sales;
+        if (Array.isArray(shiftIdOrSales)) {
+            sales = shiftIdOrSales;
+        } else {
+            sales = shiftIdOrSales ? this.getSalesByShift(shiftIdOrSales) : this.salesHistory;
+        }
+
         let totalSales = 0;
         let totalCosts = 0;
         let totalServiceExpenses = 0;
@@ -519,10 +525,16 @@ const Data = {
     /**
      * Obtener desglose de ganancias por producto
      */
-    getProfitByProduct() {
+    getProfitByProduct(shiftIdOrSales = null) {
+        let sales;
+        if (Array.isArray(shiftIdOrSales)) {
+            sales = shiftIdOrSales;
+        } else {
+            sales = shiftIdOrSales ? this.getSalesByShift(shiftIdOrSales) : this.salesHistory;
+        }
         const profitMap = {};
 
-        this.salesHistory.forEach(sale => {
+        sales.forEach(sale => {
             sale.items.forEach(item => {
                 if (!profitMap[item.name]) {
                     profitMap[item.name] = {

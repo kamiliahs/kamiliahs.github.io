@@ -282,24 +282,22 @@
             <div onclick="APP.switchView('recipes')" class="heading-xl">RECETAS</div>
             <div onclick="APP.switchView('inventory')" class="heading-xl">INSUMOS</div>
             <div onclick="APP.switchView('pos')" class="heading-xl">VENTAS</div>
+            <div onclick="APP.switchView('reports')" class="heading-xl">ESTADÍSTICAS</div>
             <div onclick="APP.switchView('shifts')" class="heading-xl">TURNOS</div>
             <div onclick="APP.switchView('config')" class="heading-xl">CONFIGURACIÓN</div>
         </div>
     </div>
 
     <!-- HEADER -->
-    <header class="p-6 pt-10 line-border flex justify-between items-end">
-        <div>
-            <p class="label-caps mb-1" id="viewSubtitle">Store No. 01</p>
-            <h1 class="heading-lg" id="viewTitle">TERMINAL</h1>
+    <header class="p-6 pt-10 line-border flex justify-between items-end gap-2 flex-wrap">
+        <div class="flex-1 min-w-[120px]">
+            <p class="label-caps mb-1 opacity-60" id="viewSubtitle">Store No. 01</p>
+            <h1 class="heading-lg truncate" id="viewTitle">TERMINAL</h1>
         </div>
         <div class="flex gap-2" id="headerActionButtons">
-            <button onclick="APP.switchView('reports')" class="btn-secondary px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                Estadísticas
-            </button>
-            <button onclick="APP.switchView('orders')" class="btn-secondary px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+
+            <button onclick="APP.switchView('orders')" class="btn-secondary px-3 sm:px-5 py-2 sm:py-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 sm:gap-2 shadow-sm whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-3.5 sm:h-3.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                 Pedidos
             </button>
         </div>
@@ -452,6 +450,33 @@
 
     <!-- Reports View -->
     <div id="reportsView" class="view-container hidden-view p-6">
+        <div class="mb-8 space-y-4">
+            <p class="label-caps mb-2">Filtrar Estadísticas</p>
+            
+            <div class="flex gap-2">
+                <input type="text" id="reportsSearch" placeholder="Buscar turno o producto..." class="search-input flex-1 !mb-0" oninput="APP.filterReports()">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-[8px] font-black uppercase text-muted mb-1">Desde</p>
+                    <input type="date" id="reportsDateStart" class="search-input !text-[10px] !p-2 !mb-0" onchange="APP.filterReports()">
+                </div>
+                <div>
+                    <p class="text-[8px] font-black uppercase text-muted mb-1">Hasta</p>
+                    <input type="date" id="reportsDateEnd" class="search-input !text-[10px] !p-2 !mb-0" onchange="APP.filterReports()">
+                </div>
+            </div>
+            
+            <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar" id="reportsTags">
+                <button onclick="APP.setReportsTag('all', this)" class="tag-filter active">Todo</button>
+                <button onclick="APP.setReportsTag('today', this)" class="tag-filter">Hoy</button>
+                <button onclick="APP.setReportsTag('yesterday', this)" class="tag-filter">Ayer</button>
+                <button onclick="APP.setReportsTag('week', this)" class="tag-filter">Esta Semana</button>
+                <button onclick="APP.setReportsTag('current_shift', this)" class="tag-filter">Turno Activo</button>
+            </div>
+        </div>
+
         <div class="mb-12">
             <p class="label-caps mb-4">Balance General</p>
             <div class="heading-xl mb-2" id="repNetProfit">0.00</div>

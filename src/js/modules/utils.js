@@ -71,11 +71,17 @@ const Utils = {
             this.toggleMenu();
         }
 
+        // Gestionar estado de turno visualizado
+        if (viewId !== 'orders' && viewId !== 'reports') {
+            if (typeof APP !== 'undefined') APP.viewingShiftId = null;
+        }
+
         // Actualizar visibilidad del grupo de botones en el header
         const headerActionButtons = document.getElementById('headerActionButtons');
         if (headerActionButtons) {
-            const isVisible = (viewId === 'pos' || viewId === 'reports' || viewId === 'orders');
-            headerActionButtons.classList.toggle('hidden', !isVisible);
+            const hasContext = Data.activeShiftId || (typeof APP !== 'undefined' && APP.viewingShiftId);
+            const isTargetView = (viewId === 'pos' || viewId === 'reports' || viewId === 'orders');
+            headerActionButtons.classList.toggle('hidden', !(hasContext && isTargetView));
         }
 
         // Re-renderizar vistas
