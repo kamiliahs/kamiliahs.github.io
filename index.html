@@ -283,8 +283,6 @@
             <div onclick="APP.switchView('inventory')" class="heading-xl">INSUMOS</div>
             <div onclick="APP.switchView('pos')" class="heading-xl">VENTAS</div>
             <div onclick="APP.switchView('shifts')" class="heading-xl">TURNOS</div>
-            <div onclick="APP.switchView('orders')" class="heading-xl">PEDIDOS</div>
-            <div onclick="APP.switchView('reports')" class="heading-xl">ESTADÍSTICAS</div>
             <div onclick="APP.switchView('config')" class="heading-xl">CONFIGURACIÓN</div>
         </div>
     </div>
@@ -295,9 +293,15 @@
             <p class="label-caps mb-1" id="viewSubtitle">Store No. 01</p>
             <h1 class="heading-lg" id="viewTitle">TERMINAL</h1>
         </div>
-        <div class="text-right">
-            <p class="label-caps mb-1">Ganancia Hoy</p>
-            <p class="font-bold text-sm" id="headerProfit">SRD 0.00</p>
+        <div class="flex gap-2" id="headerActionButtons">
+            <button onclick="APP.switchView('reports')" class="btn-secondary px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Estadísticas
+            </button>
+            <button onclick="APP.switchView('orders')" class="btn-secondary px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Pedidos
+            </button>
         </div>
     </header>
 
@@ -318,7 +322,7 @@
             <div class="flex justify-between items-center">
                 <span id="cartTotal" class="heading-lg">0.00</span>
                 <button onclick="APP.checkout()"
-                    class="bg-white text-black px-8 py-3 font-black text-[10px] uppercase tracking-tighter hover:bg-opacity-90 transition-all">Cobrar</button>
+                    class="bg-white text-black px-8 py-3 font-black text-[10px] uppercase tracking-tighter hover:bg-opacity-90 transition-all">Ordenar</button>
             </div>
         </div>
     </div>
@@ -361,7 +365,7 @@
 
     <!-- Configuración View -->
     <div id="configView" class="view-container hidden-view p-6">
-        <h3 class="heading-lg mb-4">Configuración</h3>
+
 
         <!-- TEMA -->
         <div class="mb-8 pb-8 line-border">

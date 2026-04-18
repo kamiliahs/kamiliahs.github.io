@@ -71,6 +71,13 @@ const Utils = {
             this.toggleMenu();
         }
 
+        // Actualizar visibilidad del grupo de botones en el header
+        const headerActionButtons = document.getElementById('headerActionButtons');
+        if (headerActionButtons) {
+            const isVisible = (viewId === 'pos' || viewId === 'reports' || viewId === 'orders');
+            headerActionButtons.classList.toggle('hidden', !isVisible);
+        }
+
         // Re-renderizar vistas
         if (viewId === 'pos') {
             UI.renderPOS();
@@ -79,7 +86,7 @@ const Utils = {
         } else if (viewId === 'reports') {
             UI.renderReports();
         } else if (viewId === 'orders') {
-            UI.renderOrders();
+            UI.renderOrders('', 'all', Data.activeShiftId);
         } else if (viewId === 'shifts') {
             UI.renderShifts();
         } else if (viewId === 'config') {

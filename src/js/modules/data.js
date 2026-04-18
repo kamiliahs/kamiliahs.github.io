@@ -485,12 +485,13 @@ const Data = {
     /**
      * Obtener estadísticas de ventas
      */
-    getSalesStats() {
+    getSalesStats(shiftId = null) {
+        const sales = shiftId ? this.getSalesByShift(shiftId) : this.salesHistory;
         let totalSales = 0;
         let totalCosts = 0;
         let totalServiceExpenses = 0;
 
-        this.salesHistory.forEach(sale => {
+        sales.forEach(sale => {
             totalSales += sale.total || 0;
             const saleCost = sale.items.reduce((sum, item) => sum + (item.cost || 0), 0);
             totalCosts += saleCost;
@@ -511,7 +512,7 @@ const Data = {
             totalServiceExpenses,
             netProfit,
             marginPercentage,
-            transactionCount: this.salesHistory.length
+            transactionCount: sales.length
         };
     },
 
