@@ -1,8 +1,26 @@
-/**
- * Utilities Module - Funciones auxiliares
- */
-
 const Utils = {
+    /**
+     * Feedback háptico (vibración) para móviles
+     */
+    haptic(type = 'light') {
+        if (!navigator.vibrate) return;
+
+        switch (type) {
+            case 'light':
+                navigator.vibrate(10);
+                break;
+            case 'medium':
+                navigator.vibrate(20);
+                break;
+            case 'success':
+                navigator.vibrate([10, 30, 10]);
+                break;
+            case 'error':
+                navigator.vibrate([50, 50, 50]);
+                break;
+        }
+    },
+
     /**
      * Mostrar notificación toast
      */
@@ -10,6 +28,9 @@ const Utils = {
         const toast = document.getElementById('toast');
         toast.innerText = message;
         toast.classList.add('show');
+
+        // Vibrar al mostrar toast (feedback sutil)
+        this.haptic('light');
 
         setTimeout(() => {
             toast.classList.remove('show');
@@ -20,6 +41,7 @@ const Utils = {
      * Cambiar vista activa
      */
     switchView(viewId, pushToHistory = true) {
+        this.haptic('light');
         // Ocultar todas las vistas
         document.querySelectorAll('.view-container').forEach(v => v.classList.add('hidden-view'));
 
@@ -117,6 +139,7 @@ const Utils = {
      * Alternar menú lateral
      */
     toggleMenu() {
+        this.haptic('medium');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('globalOverlay');
 
@@ -128,6 +151,7 @@ const Utils = {
      * Abrir modal
      */
     openModal(modalId) {
+        this.haptic('medium');
         const modal = document.getElementById(modalId);
         const overlay = document.getElementById('globalOverlay');
 
