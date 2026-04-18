@@ -440,8 +440,11 @@
                 <h4 class="font-black text-xs uppercase mb-1" id="changelogTitle">Cargando información</h4>
                 <p class="text-xs text-muted leading-relaxed" id="changelogDesc">Por favor, espera</p>
             </div>
-            <button onclick="APP.checkForUpdates()" class="w-full btn-secondary border border-border py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-teal transition-all shadow-sm">
+            <button onclick="APP.checkForUpdates()" class="w-full btn-secondary border border-border py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-teal transition-all shadow-sm mb-4">
                 Buscar Actualizaciones
+            </button>
+            <button onclick="APP.openChangelogModal()" class="w-full text-center text-[9px] font-black uppercase tracking-widest underline hover:text-teal transition-colors">
+                Ver Historial Completo de Versiones
             </button>
         </div>
 
@@ -530,6 +533,18 @@
             <button onclick="APP.closeAllPopups()" class="w-full label-caps btn-secondary py-4 mt-6">Cerrar</button>
         </div>
     </div>
+
+    <!-- CHANGELOG MODAL -->
+    <div id="changelogModal" class="modal max-h-[85vh] flex flex-col p-0">
+        <div class="p-6 pb-4 border-b border-border flex justify-between items-center bg-background rounded-t-3xl shrink-0">
+            <p class="label-caps !mb-0">Historial de Versiones</p>
+            <button onclick="APP.closeAllPopups()" class="text-[10px] font-black uppercase text-muted hover:text-white transition-colors">✕ Cerrar</button>
+        </div>
+        <div id="fullChangelogContainer" class="p-6 space-y-6 overflow-y-auto flex-1 no-scrollbar">
+            <p class="text-xs text-muted text-center py-4">Cargando historial...</p>
+        </div>
+    </div>
+
 
     <div id="ordersView" class="view-container hidden-view p-6">
         <div class="mb-6">

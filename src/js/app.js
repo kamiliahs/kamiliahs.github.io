@@ -921,6 +921,38 @@ const APP = {
     },
 
     /**
+     * Abrir modal con historial completo de versiones
+     */
+    async openChangelogModal() {
+        Utils.openModal('changelogModal');
+        const container = document.getElementById('fullChangelogContainer');
+        container.innerHTML = '<p class="text-xs text-muted text-center py-4">Cargando historial...</p>';
+        
+        try {
+            const response = await fetch('./changelog.json?t=' + Date.now());
+            const commits = await response.json();
+            
+            container.innerHTML = commits.map(c => `
+                <div class="border-b border-border pb-4 last:border-0 last:pb-0">
+                    <div class="flex justify-between items-start mb-1">
+                        <h4 class="font-black text-[11px] uppercase">${c.name || 'Actualización'}</h4>
+                        <span class="text-[9px] text-teal border border-teal/20 bg-teal/10 px-1.5 py-0.5 rounded ml-2 shrink-0">${c.hash}</span>
+                    </div>
+                    <p class="text-[9px] text-muted mb-2 font-black tracking-widest opacity-60">${c.date}</p>
+                    ${c.description ? `<p class="text-[11px] text-muted leading-relaxed opacity-90">${c.description}</p>` : ''}
+                </div>
+            `).join('');
+            
+            if(commits.length === 0) {
+                container.innerHTML = '<p class="text-xs text-muted text-center py-4">No hay historial disponible.</p>';
+            }
+        } catch (err) {
+            console.error('Error cargando historial completo:', err);
+            container.innerHTML = '<p class="text-xs text-red-500 text-center py-4">Error al cargar el historial.</p>';
+        }
+    },
+
+    /**
      * Aplicar tema visual (light/dark/system)
      */
     applyTheme(mode) {

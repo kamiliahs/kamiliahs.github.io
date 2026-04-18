@@ -49,6 +49,33 @@ if [ -z "$COMMIT_DESC" ]; then
 else
     git commit -m "$COMMIT_NAME" -m "$COMMIT_DESC"
 fi
+
+# 5. Generar historial completo (changelog.json) usando Python para procesar el log de Git de forma segura
+python3 -c '
+import subprocess
+import json
+
+try:
+    log_output = subprocess.check_output(["git", "log", "--pretty=format:%h|%ad|%s|%b", "--date=short"]).decode("utf-8")
+    commits = []
+    for line in log_output.strip().split("\n"):
+        parts = line.split("|", 3)
+        if len(parts) == 4:
+            commits.append({
+                "hash": parts[0],
+                "date": parts[1],
+                "name": parts[2],
+                "description": parts[3].replace("\n", " ").strip()
+            })
+
+    with open("changelog.json", "w") as f:
+        json.dump(commits, f, indent=2)
+except Exception as e:
+    print("Error generando changelog.json:", e)
+'
+git add changelog.json
+git commit --amend --no-edit
+
 git push
 
 echo "✨ ¡Todo listo! La actualización v$NEW_VERSION ya está en camino."

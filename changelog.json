@@ -1,0 +1,284 @@
+[
+  {
+    "hash": "2d171b5",
+    "date": "2026-04-18",
+    "name": "Mejoras en el sistema de actualizaciones",
+    "description": ""
+  },
+  {
+    "hash": "2f2bf71",
+    "date": "2026-04-18",
+    "name": "Cambios en actualizador de versiones",
+    "description": ""
+  },
+  {
+    "hash": "91dcd34",
+    "date": "2026-04-18",
+    "name": "Mejoras en las notificaciones de actualizaci\u00f3n y UI",
+    "description": "Actualizaci\u00f3n autom\u00e1tica de sistema y optimizaci\u00f3n de recursos."
+  },
+  {
+    "hash": "00a13ba",
+    "date": "2026-04-18",
+    "name": "Mejoras en las notificaciones de actualizaci\u00f3n",
+    "description": "Actualizaci\u00f3n autom\u00e1tica de sistema y optimizaci\u00f3n de recursos."
+  },
+  {
+    "hash": "c1e6d76",
+    "date": "2026-04-18",
+    "name": "Mejoras en el sistema de actualizaciones",
+    "description": "Actualizaci\u00f3n autom\u00e1tica de sistema y optimizaci\u00f3n de recursos."
+  },
+  {
+    "hash": "52c90fc",
+    "date": "2026-04-18",
+    "name": "Cambios en la interfaz de usuario",
+    "description": ""
+  },
+  {
+    "hash": "e1ca13d",
+    "date": "2026-04-18",
+    "name": "Updates system",
+    "description": ""
+  },
+  {
+    "hash": "d8774ea",
+    "date": "2026-04-18",
+    "name": "clean",
+    "description": ""
+  },
+  {
+    "hash": "90aae33",
+    "date": "2026-04-18",
+    "name": "updta haptoc",
+    "description": ""
+  },
+  {
+    "hash": "767ae42",
+    "date": "2026-04-18",
+    "name": "Add haptic feedback",
+    "description": ""
+  },
+  {
+    "hash": "f6a62f9",
+    "date": "2026-04-18",
+    "name": "Updates",
+    "description": ""
+  },
+  {
+    "hash": "f69c772",
+    "date": "2026-04-18",
+    "name": "Merge pull request #4 from kamiliahs/Develop",
+    "description": "Develop"
+  },
+  {
+    "hash": "b233c48",
+    "date": "2026-04-18",
+    "name": "Update",
+    "description": ""
+  },
+  {
+    "hash": "7cb3717",
+    "date": "2026-04-18",
+    "name": "Updates",
+    "description": ""
+  },
+  {
+    "hash": "8624d7d",
+    "date": "2026-04-17",
+    "name": "Merge pull request #3 from kamiliahs/Develop",
+    "description": "feat: relocate navigation to header buttons, update sales stats to su\u2026"
+  },
+  {
+    "hash": "7797442",
+    "date": "2026-04-17",
+    "name": "feat: relocate navigation to header buttons, update sales stats to support shift filtering, and rename checkout to order action",
+    "description": ""
+  },
+  {
+    "hash": "1e31e37",
+    "date": "2026-04-17",
+    "name": "Merge pull request #2 from kamiliahs/Develop",
+    "description": "refactor: remove redundant libraries and consolidate view navigation \u2026"
+  },
+  {
+    "hash": "2f8f412",
+    "date": "2026-04-17",
+    "name": "refactor: remove redundant libraries and consolidate view navigation and data handling logic",
+    "description": ""
+  },
+  {
+    "hash": "5e7af03",
+    "date": "2026-03-29",
+    "name": "feat: add save as new recipe functionality and update recipe modal UI layout",
+    "description": ""
+  },
+  {
+    "hash": "06baa01",
+    "date": "2026-03-26",
+    "name": "feat: Update all application icons with a new logo design and integrate it into the splash screen.",
+    "description": ""
+  },
+  {
+    "hash": "b482ff0",
+    "date": "2026-03-26",
+    "name": "feat: Enhance product and ingredient financial displays with detailed profit, cost, and margin breakdowns.",
+    "description": ""
+  },
+  {
+    "hash": "a0793f9",
+    "date": "2026-03-26",
+    "name": "Fix: Add null check to `Network.myPublicIp` when determining offline mode.",
+    "description": ""
+  },
+  {
+    "hash": "da8f410",
+    "date": "2026-03-21",
+    "name": "cambios",
+    "description": ""
+  },
+  {
+    "hash": "a702dba",
+    "date": "2026-03-13",
+    "name": "Network issues",
+    "description": ""
+  },
+  {
+    "hash": "1621b1b",
+    "date": "2026-03-13",
+    "name": "webrtc fix",
+    "description": ""
+  },
+  {
+    "hash": "693bdf9",
+    "date": "2026-03-13",
+    "name": "Sync",
+    "description": ""
+  },
+  {
+    "hash": "f2ae72b",
+    "date": "2026-03-11",
+    "name": "Contable",
+    "description": ""
+  },
+  {
+    "hash": "d29560e",
+    "date": "2026-03-10",
+    "name": "Costos",
+    "description": ""
+  },
+  {
+    "hash": "c46cb2a",
+    "date": "2026-03-10",
+    "name": "Costos",
+    "description": ""
+  },
+  {
+    "hash": "0440a83",
+    "date": "2026-03-10",
+    "name": "Info en pedidos",
+    "description": ""
+  },
+  {
+    "hash": "a265ab8",
+    "date": "2026-03-08",
+    "name": "QR",
+    "description": ""
+  },
+  {
+    "hash": "5e67a5d",
+    "date": "2026-03-08",
+    "name": "Commit",
+    "description": ""
+  },
+  {
+    "hash": "44fb981",
+    "date": "2026-03-08",
+    "name": "feat: Implement recipe margin preview with ingredient unit conversion and refine modal and view layouts.",
+    "description": ""
+  },
+  {
+    "hash": "9f72c30",
+    "date": "2026-03-05",
+    "name": "feat: mejorar estilos y funcionalidad de botones en la interfaz de usuario",
+    "description": ""
+  },
+  {
+    "hash": "fd6d1b3",
+    "date": "2026-03-05",
+    "name": "feat: mejorar estilos y funcionalidad de botones en la interfaz de usuario",
+    "description": ""
+  },
+  {
+    "hash": "7cb110e",
+    "date": "2026-03-05",
+    "name": "docs: Update meta description content to \"Kamiliahs\".",
+    "description": ""
+  },
+  {
+    "hash": "19a7a13",
+    "date": "2026-03-05",
+    "name": "feat(storage): add settings management to localStorage",
+    "description": "- Introduced SETTINGS key in localStorage for user preferences."
+  },
+  {
+    "hash": "1118417",
+    "date": "2026-03-05",
+    "name": "feat: Add PWA support with a new manifest, service worker, and various application icons.",
+    "description": ""
+  },
+  {
+    "hash": "e1ce813",
+    "date": "2026-03-04",
+    "name": "feat: Implementar mejoras en el sistema de QR y alertas de clientes",
+    "description": "- Arreglar la visualizaci\u00f3n del c\u00f3digo QR en el canvas al iniciar el servidor."
+  },
+  {
+    "hash": "1a5c568",
+    "date": "2026-03-04",
+    "name": "feat: agregar funcionalidad de escaneo y promoci\u00f3n de servidor en la red local",
+    "description": ""
+  },
+  {
+    "hash": "134172d",
+    "date": "2026-03-04",
+    "name": "Merge pull request #1 from kamiliahs/Develop",
+    "description": "Develop"
+  },
+  {
+    "hash": "f0965e6",
+    "date": "2026-03-04",
+    "name": "feat: Implement complete QR code generation and synchronization system",
+    "description": "- Added RESUMEN-IMPLEMENTACION.md for detailed implementation summary"
+  },
+  {
+    "hash": "b29e061",
+    "date": "2026-03-04",
+    "name": "feat: Implement PWA support with Service Worker for offline functionality",
+    "description": "feat: Add main CSS styles for the POS Minimalist application"
+  },
+  {
+    "hash": "e670c10",
+    "date": "2026-02-22",
+    "name": "docs: agregar validaci\u00f3n final",
+    "description": "- Agregar VALIDACION_FINAL.md con verificaciones completas"
+  },
+  {
+    "hash": "82fab98",
+    "date": "2026-02-22",
+    "name": "docs: agregar documentaci\u00f3n de reorganizaci\u00f3n de configuraci\u00f3n",
+    "description": "- Agregar REORGANIZACION_CONFIGURACION.md con detalles t\u00e9cnicos"
+  },
+  {
+    "hash": "020a99d",
+    "date": "2026-02-22",
+    "name": "feat: reorganizar configuraci\u00f3n de tema e idioma a secci\u00f3n dedicada",
+    "description": "- Simplificar navbar dejando solo bot\u00f3n settings + hamburger"
+  },
+  {
+    "hash": "42892cd",
+    "date": "2026-01-25",
+    "name": "Initial commit",
+    "description": ""
+  }
+]
