@@ -174,7 +174,9 @@ const UI = {
         document.getElementById('repTotalSales').innerText = stats.totalSales.toFixed(2);
         document.getElementById('repTotalCost').innerText = stats.totalCosts.toFixed(2);
         document.getElementById('repNetProfit').innerText = stats.netProfit.toFixed(2);
-        document.getElementById('headerProfit').innerText = `SRD ${stats.netProfit.toFixed(2)}`;
+        
+
+
         document.getElementById('repMarginAvg').innerText = `${stats.marginPercentage.toFixed(1)}% margen (SRD ${stats.netProfit.toFixed(2)})`;
 
         const breakdown = document.getElementById('profitBreakdown');
@@ -446,6 +448,21 @@ const UI = {
                 </div>
             `;
         }).join('') || '<p class="text-muted text-sm italic">No hay historial de turnos</p>';
+    },
+
+    /**
+     * Actualizar la ganancia del turno en el header
+     */
+    updateHeaderProfit() {
+        const headerProfitEl = document.getElementById('headerProfit');
+        if (!headerProfitEl) return;
+
+        if (Data.activeShiftId) {
+            const shiftStats = Data.getSalesStats(Data.activeShiftId);
+            headerProfitEl.innerText = `SRD ${shiftStats.netProfit.toFixed(2)}`;
+        } else {
+            headerProfitEl.innerText = 'SRD 0.00';
+        }
     },
 
     renderAll() {
