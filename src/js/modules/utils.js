@@ -19,7 +19,7 @@ const Utils = {
     /**
      * Cambiar vista activa
      */
-    switchView(viewId) {
+    switchView(viewId, pushToHistory = true) {
         // Ocultar todas las vistas
         document.querySelectorAll('.view-container').forEach(v => v.classList.add('hidden-view'));
 
@@ -28,6 +28,11 @@ const Utils = {
 
         // Mostrar vista seleccionada
         document.getElementById(viewId + 'View')?.classList.remove('hidden-view');
+
+        // Manejar historial para el gesto de "volver" en móviles
+        if (pushToHistory) {
+            history.pushState({ viewId: viewId }, '', '#' + viewId);
+        }
 
         // Actualizar navegación activa
         const navMap = {
@@ -76,11 +81,19 @@ const Utils = {
             if (typeof APP !== 'undefined') APP.viewingShiftId = null;
         }
 
-        // Actualizar visibilidad del grupo de botones en el header
+        // Visibilidad del botón "Volver" en el header
+        const backBtn = document.getElementById('headerBackBtn');
+        if (backBtn) {
+            // Mostrar si no es la vista principal inicial (recipes) o si hay historial
+            const isInitialView = viewId === 'recipes';
+            backBtn.classList.toggle('hidden', isInitialView);
+        }
+
+        // Actualizar visibilidad del grupo de botones en el header (Solo Pedidos)
         const headerActionButtons = document.getElementById('headerActionButtons');
         if (headerActionButtons) {
             const hasContext = Data.activeShiftId || (typeof APP !== 'undefined' && APP.viewingShiftId);
-            const isTargetView = (viewId === 'pos' || viewId === 'reports' || viewId === 'orders');
+            const isTargetView = (viewId === 'pos'); // Solo visible en la sección de ventas
             headerActionButtons.classList.toggle('hidden', !(hasContext && isTargetView));
         }
 

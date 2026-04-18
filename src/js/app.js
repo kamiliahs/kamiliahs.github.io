@@ -24,8 +24,10 @@ const APP = {
         // Configurar event listeners
         this.setupEventListeners();
 
-        // Cargar vista por defecto
-        this.switchView('recipes');
+        // Cargar vista por defecto e inicializar historial
+        const initialView = 'recipes';
+        this.switchView(initialView, false);
+        history.replaceState({ viewId: initialView }, '', '#' + initialView);
 
         console.log('Kamiliahs iniciado correctamente');
 
@@ -53,6 +55,13 @@ const APP = {
                     }
                 }
             });
+        });
+
+        // Listener para el gesto de "volver" del navegador/móvil
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.viewId) {
+                this.switchView(e.state.viewId, false);
+            }
         });
 
         // Listener para cambios en el carrito
@@ -726,24 +735,31 @@ const APP = {
         el.classList.add('active');
         
         const now = new Date();
+        const formatDate = (date) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
         const startInput = document.getElementById('reportsDateStart');
         const endInput = document.getElementById('reportsDateEnd');
         
         if (tag === 'today') {
-            const today = now.toISOString().split('T')[0];
-            startInput.value = today;
-            endInput.value = today;
+            const dateStr = formatDate(now);
+            startInput.value = dateStr;
+            endInput.value = dateStr;
         } else if (tag === 'yesterday') {
             const yesterday = new Date(now);
             yesterday.setDate(now.getDate() - 1);
-            const dateStr = yesterday.toISOString().split('T')[0];
+            const dateStr = formatDate(yesterday);
             startInput.value = dateStr;
             endInput.value = dateStr;
         } else if (tag === 'week') {
             const startOfWeek = new Date(now);
             startOfWeek.setDate(now.getDate() - 7);
-            startInput.value = startOfWeek.toISOString().split('T')[0];
-            endInput.value = now.toISOString().split('T')[0];
+            startInput.value = formatDate(startOfWeek);
+            endInput.value = formatDate(now);
         } else if (tag === 'all' || tag === 'current_shift') {
             startInput.value = '';
             endInput.value = '';
@@ -818,6 +834,17 @@ const APP = {
      */
     toggleMenu() {
         Utils.toggleMenu();
+    },
+
+    /**
+     * Volver a la sección anterior
+     */
+    goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            this.switchView('recipes');
+        }
     },
 
     /**

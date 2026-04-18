@@ -172,21 +172,19 @@ const UI = {
         const dateStart = document.getElementById('reportsDateStart');
         const dateEnd = document.getElementById('reportsDateEnd');
         
-        if (!searchInput) return; // Not in reports view or not loaded
+        if (!searchInput) return;
 
         const query = searchInput.value.toLowerCase();
-        const start = dateStart.value ? new Date(dateStart.value).getTime() : null;
-        const end = dateEnd.value ? new Date(dateEnd.value).setHours(23, 59, 59, 999) : null;
-        const activeTag = document.querySelector('#reportsTags .tag-filter.active')?.innerText.toLowerCase();
+        const activeTag = document.querySelector('#reportsTags .tag-filter.active')?.dataset.tag;
 
-        let filteredSales = [...Data.salesHistory];
+        let filteredSales = Data.salesHistory.filter(s => s.paid === true);
 
-        // 1. Filtrar por Turno Activo si el tag está seleccionado
-        if (activeTag === 'turno activo' || activeTag === 'current_shift') {
-            filteredSales = Data.getSalesByShift(Data.activeShiftId);
+        // 1. Filtrar por Turno Activo
+        if (activeTag === 'current_shift') {
+            filteredSales = filteredSales.filter(s => s.shiftId === Data.activeShiftId);
         }
 
-        // 2. Filtrar por búsqueda (Nombre del turno o nombre de producto en la venta)
+        // 2. Filtrar por búsqueda (Turno o Producto)
         if (query) {
             filteredSales = filteredSales.filter(sale => {
                 const shift = Data.getShift(sale.shiftId);
@@ -196,12 +194,14 @@ const UI = {
             });
         }
 
-        // 3. Filtrar por fecha
-        if (start) {
-            filteredSales = filteredSales.filter(s => s.timestamp >= start);
+        // 3. Filtrar por fecha (Usando strings de fecha para evitar problemas de zona horaria)
+        if (dateStart.value) {
+            const startTime = new Date(dateStart.value + 'T00:00:00').getTime();
+            filteredSales = filteredSales.filter(s => s.timestamp >= startTime);
         }
-        if (end) {
-            filteredSales = filteredSales.filter(s => s.timestamp <= end);
+        if (dateEnd.value) {
+            const endTime = new Date(dateEnd.value + 'T23:59:59').getTime();
+            filteredSales = filteredSales.filter(s => s.timestamp <= endTime);
         }
 
         const stats = Data.getSalesStats(filteredSales);

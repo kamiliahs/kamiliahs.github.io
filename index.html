@@ -290,9 +290,14 @@
 
     <!-- HEADER -->
     <header class="p-6 pt-10 line-border flex justify-between items-end gap-2 flex-wrap">
-        <div class="flex-1 min-w-[120px]">
-            <p class="label-caps mb-1 opacity-60" id="viewSubtitle">Store No. 01</p>
-            <h1 class="heading-lg truncate" id="viewTitle">TERMINAL</h1>
+        <div class="flex items-center gap-4 flex-1 min-w-[120px]">
+            <button onclick="APP.goBack()" id="headerBackBtn" class="hidden hover:opacity-100 opacity-60 transition-opacity">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="flex-1">
+                <p class="label-caps mb-1 opacity-60" id="viewSubtitle">Store No. 01</p>
+                <h1 class="heading-lg truncate" id="viewTitle">TERMINAL</h1>
+            </div>
         </div>
         <div class="flex gap-2" id="headerActionButtons">
 
@@ -450,6 +455,10 @@
 
     <!-- Reports View -->
     <div id="reportsView" class="view-container hidden-view p-6">
+        <div class="mb-4 flex justify-between items-center">
+            <p class="label-caps !mb-0">Estadísticas</p>
+            <span class="text-[8px] font-black uppercase text-teal bg-teal/10 px-2 py-1 rounded">Solo Pagados</span>
+        </div>
         <div class="mb-8 space-y-4">
             <p class="label-caps mb-2">Filtrar Estadísticas</p>
             
@@ -469,11 +478,11 @@
             </div>
             
             <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar" id="reportsTags">
-                <button onclick="APP.setReportsTag('all', this)" class="tag-filter active">Todo</button>
-                <button onclick="APP.setReportsTag('today', this)" class="tag-filter">Hoy</button>
-                <button onclick="APP.setReportsTag('yesterday', this)" class="tag-filter">Ayer</button>
-                <button onclick="APP.setReportsTag('week', this)" class="tag-filter">Esta Semana</button>
-                <button onclick="APP.setReportsTag('current_shift', this)" class="tag-filter">Turno Activo</button>
+                <button onclick="APP.setReportsTag('all', this)" class="tag-filter active" data-tag="all">Todo</button>
+                <button onclick="APP.setReportsTag('today', this)" class="tag-filter" data-tag="today">Hoy</button>
+                <button onclick="APP.setReportsTag('yesterday', this)" class="tag-filter" data-tag="yesterday">Ayer</button>
+                <button onclick="APP.setReportsTag('week', this)" class="tag-filter" data-tag="week">Esta Semana</button>
+                <button onclick="APP.setReportsTag('current_shift', this)" class="tag-filter" data-tag="current_shift">Turno Activo</button>
             </div>
         </div>
 
