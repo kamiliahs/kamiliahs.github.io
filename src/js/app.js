@@ -719,6 +719,47 @@ const APP = {
     },
 
     /**
+     * Establecer tag de filtrado en reportes
+     */
+    setReportsTag(tag, el) {
+        document.querySelectorAll('#reportsTags .tag-filter').forEach(btn => btn.classList.remove('active'));
+        el.classList.add('active');
+        
+        const now = new Date();
+        const startInput = document.getElementById('reportsDateStart');
+        const endInput = document.getElementById('reportsDateEnd');
+        
+        if (tag === 'today') {
+            const today = now.toISOString().split('T')[0];
+            startInput.value = today;
+            endInput.value = today;
+        } else if (tag === 'yesterday') {
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+            const dateStr = yesterday.toISOString().split('T')[0];
+            startInput.value = dateStr;
+            endInput.value = dateStr;
+        } else if (tag === 'week') {
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - 7);
+            startInput.value = startOfWeek.toISOString().split('T')[0];
+            endInput.value = now.toISOString().split('T')[0];
+        } else if (tag === 'all' || tag === 'current_shift') {
+            startInput.value = '';
+            endInput.value = '';
+        }
+        
+        UI.renderReports();
+    },
+
+    /**
+     * Ejecutar filtrado de reportes
+     */
+    filterReports() {
+        UI.renderReports();
+    },
+
+    /**
      * Exportar todos los datos a un archivo JSON
      */
     exportAppData() {

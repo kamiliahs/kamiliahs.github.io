@@ -168,16 +168,49 @@ const UI = {
      * Renderizar vista de reportes
      */
     renderReports() {
-        const targetShiftId = (typeof APP !== 'undefined' && APP.viewingShiftId) || Data.activeShiftId;
-        const stats = Data.getSalesStats(targetShiftId);
-        const profitByProduct = Data.getProfitByProduct(targetShiftId);
+        const searchInput = document.getElementById('reportsSearch');
+        const dateStart = document.getElementById('reportsDateStart');
+        const dateEnd = document.getElementById('reportsDateEnd');
+        
+        if (!searchInput) return; // Not in reports view or not loaded
+
+        const query = searchInput.value.toLowerCase();
+        const start = dateStart.value ? new Date(dateStart.value).getTime() : null;
+        const end = dateEnd.value ? new Date(dateEnd.value).setHours(23, 59, 59, 999) : null;
+        const activeTag = document.querySelector('#reportsTags .tag-filter.active')?.innerText.toLowerCase();
+
+        let filteredSales = [...Data.salesHistory];
+
+        // 1. Filtrar por Turno Activo si el tag está seleccionado
+        if (activeTag === 'turno activo' || activeTag === 'current_shift') {
+            filteredSales = Data.getSalesByShift(Data.activeShiftId);
+        }
+
+        // 2. Filtrar por búsqueda (Nombre del turno o nombre de producto en la venta)
+        if (query) {
+            filteredSales = filteredSales.filter(sale => {
+                const shift = Data.getShift(sale.shiftId);
+                const shiftMatch = shift && shift.name.toLowerCase().includes(query);
+                const productMatch = sale.items.some(item => item.name.toLowerCase().includes(query));
+                return shiftMatch || productMatch;
+            });
+        }
+
+        // 3. Filtrar por fecha
+        if (start) {
+            filteredSales = filteredSales.filter(s => s.timestamp >= start);
+        }
+        if (end) {
+            filteredSales = filteredSales.filter(s => s.timestamp <= end);
+        }
+
+        const stats = Data.getSalesStats(filteredSales);
+        const profitByProduct = Data.getProfitByProduct(filteredSales);
 
         document.getElementById('repTotalSales').innerText = stats.totalSales.toFixed(2);
         document.getElementById('repTotalCost').innerText = stats.totalCosts.toFixed(2);
         document.getElementById('repNetProfit').innerText = stats.netProfit.toFixed(2);
         
-
-
         document.getElementById('repMarginAvg').innerText = `${stats.marginPercentage.toFixed(1)}% margen (SRD ${stats.netProfit.toFixed(2)})`;
 
         const breakdown = document.getElementById('profitBreakdown');
@@ -206,7 +239,7 @@ const UI = {
                     </div>
                 </div>
             </div>
-        `).join('') : '<p class="text-muted text-sm">Sin datos de ventas aún</p>';
+        `).join('') : '<p class="text-muted text-sm">Sin datos para estos filtros</p>';
     },
 
     /**
