@@ -432,6 +432,19 @@
             </div>
         </div>
 
+        <!-- ACTUALIZACIONES Y CHANGELOG -->
+        <div class="mb-12 pb-8">
+            <p class="label-caps mb-4 text-teal">Actualizaciones y Cambios</p>
+            <div id="changelogContent" class="bg-card p-6 rounded-3xl border border-border mb-4">
+                <p class="text-[9px] font-black uppercase tracking-widest opacity-40 mb-2" id="currentVerLabel">Versión Actual: ...</p>
+                <h4 class="font-black text-xs uppercase mb-1" id="changelogTitle">Cargando información...</h4>
+                <p class="text-xs text-muted leading-relaxed" id="changelogDesc">Por favor, espera...</p>
+            </div>
+            <button onclick="APP.checkForUpdates()" class="w-full btn-secondary border border-border py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-teal transition-all shadow-sm">
+                Buscar Actualizaciones
+            </button>
+        </div>
+
         <!-- BOTONES -->
         <div class="flex gap-4">
             <button onclick="APP.saveSettings()"
@@ -554,16 +567,55 @@
 
     <script src="./src/js/app.js"></script>
 
-    <!-- Service Worker Registration -->
+    <!-- Update Toast -->
+    <div id="updateToast" class="fixed bottom-24 left-4 right-4 bg-teal text-white p-4 rounded-2xl shadow-2xl z-[6000] hidden transform translate-y-full transition-transform duration-500">
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex-1">
+                <p class="text-[10px] font-black uppercase tracking-widest mb-1">Nueva Versión Disponible</p>
+                <p class="text-xs opacity-90" id="updateInfo">Se han aplicado mejoras al sistema.</p>
+            </div>
+            <button onclick="APP.applyUpdate()" class="bg-white text-teal px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Actualizar</button>
+        </div>
+    </div>
+
+    <!-- PWA Install Banner -->
+    ...
     <script>
+        // Registro de Service Worker con gestión de actualizaciones
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(err => {
-                console.log('Service Worker registration failed: ', err);
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    console.log('SW registrado');
+                    
+                    // Guardar referencia para actualizar manualmente
+                    APP.swRegistration = reg;
+
+                    // Detectar si hay un worker esperando (ya descargado anteriormente)
+                    if (reg.waiting) {
+                        APP.showUpdateToast();
+                    }
+
+                    // Detectar nuevas actualizaciones
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                APP.showUpdateToast();
+                            }
+                        });
+                    });
+                });
+
+                // Recargar cuando el nuevo SW tome el control
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (refreshing) return;
+                    window.location.reload();
+                    refreshing = true;
+                });
             });
         }
     </script>
-
-    <!-- PWA Install Banner -->
     <div id="installBanner"
         class="fixed bottom-4 left-4 right-4 text-white p-5 rounded-lg shadow-2xl z-50 hidden transition-all duration-300">
         <div class="flex items-center justify-between gap-4">

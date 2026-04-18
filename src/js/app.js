@@ -5,6 +5,7 @@
 
 const APP = {
     viewingShiftId: null,
+    swRegistration: null,
 
     /**
      * Inicializar aplicación
@@ -28,6 +29,9 @@ const APP = {
         const initialView = 'recipes';
         this.switchView(initialView, false);
         history.replaceState({ viewId: initialView }, '', '#' + initialView);
+
+        // Configurar comprobación periódica de actualizaciones (cada 30 min)
+        setInterval(() => this.checkForUpdates(), 30 * 60 * 1000);
 
         console.log('Kamiliahs iniciado correctamente');
 
@@ -844,6 +848,64 @@ const APP = {
             window.history.back();
         } else {
             this.switchView('recipes');
+        }
+    },
+
+    /**
+     * Mostrar aviso de nueva versión
+     */
+    showUpdateToast() {
+        const toast = document.getElementById('updateToast');
+        if (toast) {
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-full');
+            }, 100);
+        }
+    },
+
+    /**
+     * Aplicar actualización descargada
+     */
+    applyUpdate() {
+        if (this.swRegistration && this.swRegistration.waiting) {
+            this.swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+    },
+
+    /**
+     * Forzar búsqueda de actualizaciones
+     */
+    checkForUpdates() {
+        if (this.swRegistration) {
+            console.log('Buscando actualizaciones...');
+            this.swRegistration.update().then(() => {
+                if (this.swRegistration.waiting) {
+                    this.showUpdateToast();
+                } else {
+                    Utils.showToast('SISTEMA AL DÍA');
+                }
+            });
+        }
+    },
+
+    /**
+     * Cargar información de la versión y cambios
+     */
+    async loadChangelog() {
+        try {
+            const response = await fetch('./version.json?t=' + Date.now());
+            const data = await response.json();
+            
+            const label = document.getElementById('currentVerLabel');
+            const title = document.getElementById('changelogTitle');
+            const desc = document.getElementById('changelogDesc');
+            
+            if (label) label.innerText = `Versión Actual: ${data.version} (${data.date})`;
+            if (title) title.innerText = data.name;
+            if (desc) desc.innerText = data.description;
+        } catch (err) {
+            console.error('Error cargando changelog:', err);
         }
     },
 

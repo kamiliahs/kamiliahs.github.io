@@ -165,4 +165,11 @@ self.addEventListener('notificationclick', (event) => {
     );
 });
 
+// Mensajes desde la App
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
+
 console.log('Service Worker: Cargado y registrado');

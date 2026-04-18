@@ -350,6 +350,7 @@ const UI = {
      * Renderizar vista de configuración
      */
     renderConfig() {
+        if (typeof APP !== 'undefined') APP.loadChangelog();
         const s = Data.settings || {};
 
         // Theme

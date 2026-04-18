@@ -1,0 +1,6 @@
+{
+  "version": "1.0.5",
+  "name": "Sistema de Actualizaciones Inteligentes",
+  "description": "Se ha implementado el control de versiones con notificaciones, historial de cambios (changelog) y posibilidad de actualizar manualmente desde la configuración.",
+  "date": "2026-04-18"
+}
