@@ -440,7 +440,6 @@ const APP = {
     addToCart(productId, asPortion = false) {
         const item = Data.addToCart(productId, asPortion);
         if (item) {
-            Utils.haptic('light');
             UI.updateCartUI();
             Utils.showToast(`${item.name} AGREGADO`);
         }
@@ -478,12 +477,10 @@ const APP = {
         if (confirm(`¿Confirmar venta de ${count} artículo(s) por SRD ${total.toFixed(2)}?`)) {
             const result = Data.checkout();
             if (result === true) {
-                Utils.haptic('success');
                 UI.updateCartUI();
                 UI.renderReports();
                 Utils.showToast('TRANSACCIÓN COMPLETADA');
             } else if (result && result.error === 'NO_ACTIVE_SHIFT') {
-                Utils.haptic('error');
                 Utils.showToast('⚠️ ERROR: DEBES ABRIR UN TURNO PRIMERO');
                 this.switchView('shifts');
             }
@@ -843,7 +840,6 @@ const APP = {
      * Volver a la sección anterior
      */
     goBack() {
-        Utils.haptic('light');
         if (window.history.length > 1) {
             window.history.back();
         } else {
