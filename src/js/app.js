@@ -4,6 +4,8 @@
  */
 
 const APP = {
+    viewingShiftId: null,
+
     /**
      * Inicializar aplicación
      */
@@ -991,6 +993,7 @@ const APP = {
         const shift = Data.getShift(id);
         if (!shift) return;
 
+        this.viewingShiftId = id;
         // Podríamos re-usar la vista de pedidos filtrada
         this.switchView('orders');
         document.getElementById('orderSearch').value = ''; // Limpiar búsqueda

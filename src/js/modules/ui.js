@@ -168,8 +168,9 @@ const UI = {
      * Renderizar vista de reportes
      */
     renderReports() {
-        const stats = Data.getSalesStats();
-        const profitByProduct = Data.getProfitByProduct();
+        const targetShiftId = (typeof APP !== 'undefined' && APP.viewingShiftId) || Data.activeShiftId;
+        const stats = Data.getSalesStats(targetShiftId);
+        const profitByProduct = Data.getProfitByProduct(targetShiftId);
 
         document.getElementById('repTotalSales').innerText = stats.totalSales.toFixed(2);
         document.getElementById('repTotalCost').innerText = stats.totalCosts.toFixed(2);
