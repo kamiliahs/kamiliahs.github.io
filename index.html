@@ -16,9 +16,9 @@
     <link rel="stylesheet" href="./src/css/main.css">
     <script src="./src/lib/tailwind.min.js"></script>
 
-    <script src="./src/lib/peerjs.min.js"></script>
 
-    <title>Kamiliahs - Editorial Design</title>
+
+    <title>Kamiliahs - Gestión Gastronómica</title>
 </head>
 
 <body>
@@ -242,63 +242,30 @@
         </div>
     </div>
 
-    <!-- CONNECTION MODAL -->
-    <div id="connectionModal" class="modal">
-        <p class="label-caps mb-8">Conexión de Dispositivos</p>
-        <div class="space-y-6">
-            <div class="bg-card p-4 rounded-xl border border-teal/20">
-                <p class="text-[10px] text-muted uppercase font-bold mb-2">Tu Identificador</p>
-                <div class="flex justify-between items-center">
-                    <p id="localPeerId" class="font-mono text-sm tracking-wider">Iniciando...</p>
-                    <span id="connectionStatus" class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
-                </div>
-            </div>
 
-            <div id="nearbyDevicesContainer" class="space-y-4">
-                <p class="text-[10px] text-muted uppercase font-bold">Dispositivos en la red</p>
-                <div id="nearbyList" class="space-y-2 max-h-[150px] overflow-y-auto">
-                    <p class="text-[10px] opacity-50 italic py-2 text-center">Buscando kamilias...</p>
-                </div>
-            </div>
-
-            <div id="pinEntry" class="space-y-2 pt-4 hidden">
-                <p class="text-[10px] text-muted uppercase font-bold text-center">Ingresa el PIN del otro equipo</p>
-                <input type="number" id="connectionPin" placeholder="0000"
-                    class="text-center text-2xl tracking-[1em] font-black h-16">
-                <button onclick="APP.connectWithPin()"
-                    class="w-full btn-primary py-4 font-bold text-[10px] uppercase">Conectar</button>
-            </div>
-
-            <div id="pinDisplay" class="space-y-2 pt-4 hidden text-center">
-                <p class="text-[10px] text-muted uppercase font-bold">PIN de Seguridad</p>
-                <p id="generatedPin" class="text-4xl font-black text-teal tracking-widest py-4">----</p>
-                <p class="text-[8px] text-muted uppercase">Comparte este PIN con el otro equipo</p>
-            </div>
-
-            <button onclick="APP.closeAllPopups()" class="w-full label-caps btn-secondary py-4">Cerrar</button>
-        </div>
-    </div>
-
-    <!-- SHARING NOTIFICATION MODAL -->
-    <div id="sharingModal" class="modal">
-        <p class="label-caps mb-8">Compartiendo Receta</p>
-        <div class="flex flex-col items-center space-y-6 text-center">
-            <div class="w-16 h-16 bg-teal/10 rounded-full flex items-center justify-center animate-bounce">
-                <span class="text-2xl">⚡</span>
-            </div>
-            <div>
-                <p id="sharingRecipeName" class="font-bold text-lg mb-1"></p>
-                <p id="sharingStatus" class="text-[10px] text-muted uppercase tracking-widest">Preparando envío...</p>
-            </div>
-            <div id="connectedPeersList" class="w-full space-y-2">
-                <!-- Se llenará con los dispositivos conectados -->
-            </div>
-            <button onclick="APP.closeAllPopups()" class="w-full label-caps btn-secondary py-4">Cancelar</button>
-        </div>
-    </div>
 
 
     <!-- INFO MODAL -->
+    <div id="shiftModal" class="modal">
+        <p class="label-caps mb-8">Gestión de Turno</p>
+        <div class="space-y-6">
+            <input type="hidden" id="editShiftId">
+            <div>
+                <p class="text-[10px] text-muted uppercase font-bold mb-1">Nombre del Turno</p>
+                <input type="text" id="shiftName" placeholder="Eje: MAÑANA, TARDE...">
+            </div>
+            <div>
+                <p class="text-[10px] text-muted uppercase font-bold mb-1">Fecha del Turno</p>
+                <input type="date" id="shiftDate">
+            </div>
+            <div class="flex gap-4 pt-10">
+                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cancelar</button>
+                <button onclick="APP.saveShift()"
+                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest">Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="infoModal" class="modal">
         <p class="label-caps mb-8" id="infoModalTitle">Información</p>
         <div class="space-y-6">
@@ -312,11 +279,12 @@
     <div class="sidebar" id="sidebar">
         <button onclick="APP.toggleMenu()" class="label-caps mb-20">← Volver</button>
         <div class="space-y-12">
-            <div onclick="APP.switchView('inventory')" class="heading-xl">INSUMOS</div>
             <div onclick="APP.switchView('recipes')" class="heading-xl">RECETAS</div>
-            <div onclick="APP.switchView('reports')" class="heading-xl">MÁRGENES</div>
+            <div onclick="APP.switchView('inventory')" class="heading-xl">INSUMOS</div>
+            <div onclick="APP.switchView('pos')" class="heading-xl">VENTAS</div>
+            <div onclick="APP.switchView('shifts')" class="heading-xl">TURNOS</div>
             <div onclick="APP.switchView('orders')" class="heading-xl">PEDIDOS</div>
-            <div onclick="APP.switchView('network')" class="heading-xl">CONEXIÓN</div>
+            <div onclick="APP.switchView('reports')" class="heading-xl">ESTADÍSTICAS</div>
             <div onclick="APP.switchView('config')" class="heading-xl">CONFIGURACIÓN</div>
         </div>
     </div>
@@ -328,14 +296,14 @@
             <h1 class="heading-lg" id="viewTitle">TERMINAL</h1>
         </div>
         <div class="text-right">
-            <p class="label-caps mb-1">Profit Hoy</p>
+            <p class="label-caps mb-1">Ganancia Hoy</p>
             <p class="font-bold text-sm" id="headerProfit">SRD 0.00</p>
         </div>
     </header>
 
     <!-- VIEWS -->
     <!-- POS View -->
-    <div id="posView" class="view-container">
+    <div id="posView" class="view-container hidden-view">
         <div class="px-6 mb-4">
             <input type="text" id="posSearch" placeholder="Buscar plato..." class="search-input"
                 oninput="APP.filterPOS()">
@@ -355,6 +323,29 @@
         </div>
     </div>
 
+    <div id="shiftsView" class="view-container hidden-view p-6">
+        <div class="mb-8 flex justify-between items-end">
+            <div>
+                <p class="label-caps mb-1">Gestión de Tiempo</p>
+                <h2 class="heading-lg">Turnos</h2>
+            </div>
+            <button onclick="APP.openShiftModal()" class="label-caps underline hover:text-teal">+ Nuevo Turno</button>
+        </div>
+
+        <div id="activeShiftBanner" class="mb-8 p-6 rounded-2xl border-2 border-teal bg-teal/5 transition-all hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="label-caps text-teal mb-1">Turno Activo</p>
+                    <h3 id="activeShiftName" class="heading-lg">SIN TURNO</h3>
+                    <p id="activeShiftInfo" class="text-[10px] text-muted font-bold uppercase"></p>
+                </div>
+                <button onclick="APP.closeActiveShift()" class="btn-primary px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">Cerrar Turno</button>
+            </div>
+        </div>
+
+        <div id="shiftsList" class="space-y-6"></div>
+    </div>
+
     <div id="inventoryView" class="view-container hidden-view p-6">
         <div class="mb-6">
             <div class="flex gap-4 items-center mb-4">
@@ -366,6 +357,7 @@
         </div>
         <div id="inventoryBody" class="space-y-6"></div>
     </div>
+
 
     <!-- Configuración View -->
     <div id="configView" class="view-container hidden-view p-6">
@@ -410,32 +402,7 @@
             </div>
         </div>
 
-        <!-- CONFIGURACIÓN DE RED -->
-        <div class="mb-8 pb-8 line-border">
-            <p class="label-caps mb-4 text-orange-400">Servidor de Red (Signaling)</p>
-            <p class="text-[9px] text-muted mb-4 uppercase">Para uso 100% offline en LAN, especifica un servidor PeerJS
-                local.</p>
-            <div class="space-y-4">
-                <div>
-                    <p class="text-[8px] text-muted uppercase font-bold mb-1">Host (Ej: 0.peerjs.com)</p>
-                    <input type="text" id="configPeerHost" placeholder="0.peerjs.com">
-                </div>
-                <div class="flex gap-4">
-                    <div class="w-1/3">
-                        <p class="text-[8px] text-muted uppercase font-bold mb-1">Puerto</p>
-                        <input type="number" id="configPeerPort" placeholder="443" value="443">
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-[8px] text-muted uppercase font-bold mb-1">Ruta</p>
-                        <input type="text" id="configPeerPath" placeholder="/" value="/">
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="configPeerSecure" class="w-auto h-auto" checked>
-                    <p class="text-[10px] text-muted uppercase font-bold">Usar SSL (HTTPS)</p>
-                </div>
-            </div>
-        </div>
+
 
         <!-- RESPALDO Y DATOS -->
         <div class="mb-8 pb-8 line-border">
@@ -467,7 +434,7 @@
     </div>
 
     <!-- Recipes View -->
-    <div id="recipesView" class="view-container hidden-view p-6">
+    <div id="recipesView" class="view-container p-6">
         <div class="mb-6">
             <div class="flex gap-4 items-center mb-4">
                 <input type="text" id="recipeSearch" placeholder="Buscar receta..." class="search-input flex-1"
@@ -531,56 +498,14 @@
         <div id="ordersContainer" class="space-y-4"></div>
     </div>
 
-    <!-- Network View -->
-    <div id="networkView" class="view-container hidden-view p-6">
-        <div class="mb-8">
-            <p class="label-caps mb-4">Estado de Red</p>
-            <div class="bg-card p-6 rounded-2xl border border-teal/20 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-xs font-bold text-muted uppercase tracking-widest">Identificador Local</span>
-                    <span id="netStatusIndicator" class="flex items-center gap-2 text-[10px] font-black text-red-500">
-                        <span class="w-2 h-2 rounded-full bg-current"></span> DESCONECTADO
-                    </span>
-                </div>
-                <p id="netLocalId" class="text-2xl font-black tracking-tighter mb-1">---</p>
-                <p id="netPublicIp" class="text-[10px] text-muted font-mono opacity-50">Red: Detectando...</p>
-            </div>
-
-            <div class="flex gap-4 mb-8">
-                <button onclick="APP.openConnectionModal()"
-                    class="flex-1 btn-primary py-4 font-bold text-[10px] uppercase tracking-widest">Nueva Conexión
-                    (PIN)</button>
-                <button onclick="Network.init()"
-                    class="flex-1 btn-secondary py-4 font-bold text-[10px] uppercase tracking-widest">Reconectar
-                    Servidor</button>
-            </div>
-        </div>
-
-        <div class="space-y-8">
-            <div>
-                <p class="label-caps mb-4 text-teal">Equipos Conectados</p>
-                <div id="activeConnectionsList" class="space-y-3">
-                    <p class="text-xs text-muted italic opacity-50">No hay conexiones activas</p>
-                </div>
-            </div>
-
-            <div>
-                <p class="label-caps mb-4">Dispositivos en la Red</p>
-                <div id="discoveredPeersList" class="space-y-3">
-                    <p class="text-xs text-muted italic opacity-50">Buscando dispositivos...</p>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
-    <!-- BOTTOM NAVIGATION -->
+
     <nav class="bottom-nav">
-        <div onclick="APP.switchView('pos')" class="nav-item active" id="nav-pos">Ventas</div>
-        <div onclick="APP.switchView('inventory')" class="nav-item" id="nav-inventory">Stock</div>
-        <div onclick="APP.switchView('reports')" class="nav-item" id="nav-reports">Stats</div>
-        <div onclick="APP.switchView('orders')" class="nav-item" id="nav-orders">Pedidos</div>
-        <div onclick="APP.toggleMenu()" class="nav-item">Menu</div>
+        <div onclick="APP.switchView('recipes')" class="nav-item active" id="nav-recipes">Recetas</div>
+        <div onclick="APP.switchView('inventory')" class="nav-item" id="nav-inventory">Insumos</div>
+        <div onclick="APP.switchView('pos')" class="nav-item" id="nav-pos">Ventas</div>
+        <div onclick="APP.toggleMenu()" class="nav-item">Menú</div>
     </nav>
 
     <!-- Scripts -->
@@ -588,7 +513,7 @@
     <script src="./src/js/modules/data.js"></script>
     <script src="./src/js/modules/ui.js"></script>
     <script src="./src/js/modules/utils.js"></script>
-    <script src="./src/js/modules/network.js"></script>
+
     <script src="./src/js/app.js"></script>
 
     <!-- Service Worker Registration -->

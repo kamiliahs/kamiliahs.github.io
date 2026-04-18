@@ -7,7 +7,9 @@ const STORAGE_KEYS = {
     PRODUCTS: 'min_pos_prod',
     SALES_HISTORY: 'min_pos_sales',
     STOCK: 'min_pos_stock',
-    SETTINGS: 'min_pos_settings'
+    SETTINGS: 'min_pos_settings',
+    SHIFTS: 'min_pos_shifts',
+    ACTIVE_SHIFT: 'min_pos_active_shift'
 };
 
 const Storage = {
@@ -108,6 +110,38 @@ const Storage = {
     },
 
     /**
+     * Obtener turnos
+     */
+    getShifts() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.SHIFTS)) || [];
+    },
+
+    /**
+     * Guardar turnos
+     */
+    saveShifts(shifts) {
+        localStorage.setItem(STORAGE_KEYS.SHIFTS, JSON.stringify(shifts));
+    },
+
+    /**
+     * Obtener ID de turno activo
+     */
+    getActiveShiftId() {
+        return localStorage.getItem(STORAGE_KEYS.ACTIVE_SHIFT);
+    },
+
+    /**
+     * Guardar ID de turno activo
+     */
+    saveActiveShiftId(id) {
+        if (id) {
+            localStorage.setItem(STORAGE_KEYS.ACTIVE_SHIFT, id);
+        } else {
+            localStorage.removeItem(STORAGE_KEYS.ACTIVE_SHIFT);
+        }
+    },
+
+    /**
      * Limpiar todos los datos del localStorage
      */
     clearAll() {
@@ -116,6 +150,8 @@ const Storage = {
         localStorage.removeItem(STORAGE_KEYS.SALES_HISTORY);
         localStorage.removeItem(STORAGE_KEYS.STOCK);
         localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+        localStorage.removeItem(STORAGE_KEYS.SHIFTS);
+        localStorage.removeItem(STORAGE_KEYS.ACTIVE_SHIFT);
     }
 };
 

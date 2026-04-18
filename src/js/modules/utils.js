@@ -32,12 +32,11 @@ const Utils = {
         // Actualizar navegación activa
         const navMap = {
             'pos': 'nav-pos',
+            'shifts': 'nav-shifts',
             'inventory': 'nav-inventory',
-            'recipes': 'nav-inventory',
+            'recipes': 'nav-recipes',
             'reports': 'nav-reports',
-            'orders': 'nav-orders',
-            'network': null,
-            'config': null
+            'orders': 'nav-orders'
         };
         if (navMap[viewId]) {
             document.getElementById(navMap[viewId])?.classList.add('active');
@@ -45,22 +44,22 @@ const Utils = {
 
         // Actualizar títulos
         const titles = {
-            pos: 'TERMINAL',
-            inventory: 'CATÁLOGO',
-            recipes: 'FICHAS',
-            reports: 'REPORTES',
+            pos: 'VENTAS',
+            shifts: 'TURNOS',
+            inventory: 'INSUMOS',
+            recipes: 'RECETAS',
+            reports: 'ESTADÍSTICAS',
             orders: 'PEDIDOS',
-            network: 'CONEXIÓN',
             config: 'CONFIGURACIÓN'
         };
 
         const subtitles = {
             pos: 'OPERACIONES',
-            inventory: 'INSUMOS',
+            shifts: 'GESTIÓN TIEMPO',
+            inventory: 'STOCK',
             recipes: 'ESCANDALLOS',
             reports: 'ESTADÍSTICAS',
             orders: 'HISTÓRICO',
-            network: 'RED LOCAL',
             config: 'AJUSTES'
         };
 
@@ -73,16 +72,18 @@ const Utils = {
         }
 
         // Re-renderizar vistas
-        if (viewId === 'recipes') {
+        if (viewId === 'pos') {
+            UI.renderPOS();
+        } else if (viewId === 'recipes') {
             UI.renderRecipes();
         } else if (viewId === 'reports') {
             UI.renderReports();
         } else if (viewId === 'orders') {
             UI.renderOrders();
+        } else if (viewId === 'shifts') {
+            UI.renderShifts();
         } else if (viewId === 'config') {
             UI.renderConfig();
-        } else if (viewId === 'network') {
-            UI.renderNetwork();
         }
     },
 
@@ -242,12 +243,7 @@ const Utils = {
      * Descargar datos como JSON
      */
     downloadDataAsJSON() {
-        const data = {
-            ingredients: Data.ingredients,
-            products: Data.products,
-            salesHistory: Data.salesHistory,
-            exportDate: new Date().toISOString()
-        };
+        const data = Data.getFullAppData();
 
         const json = JSON.stringify(data, null, 2);
         const blob = new Blob([json], { type: 'application/json' });

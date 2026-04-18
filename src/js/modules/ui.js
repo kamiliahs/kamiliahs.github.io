@@ -9,6 +9,27 @@ const UI = {
     renderPOS(searchQuery = '') {
         const grid = document.getElementById('productGrid');
         if (!grid) return;
+
+        // Verificar si hay un turno activo
+        if (!Data.activeShiftId) {
+            grid.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 px-6 text-center animate-fade-in">
+                    <div class="w-20 h-20 mb-6 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <h3 class="heading-lg mb-2 uppercase tracking-tight">Ventas Bloqueadas</h3>
+                    <p class="text-xs text-muted font-bold uppercase mb-8 max-w-[200px]">Debes abrir un turno para poder procesar ventas</p>
+                    <button onclick="APP.openShiftModal()" class="btn-primary px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-teal/20">
+                        Abrir Nuevo Turno
+                    </button>
+                </div>
+            `;
+            // Ocultar barra del carrito si el turno está cerrado
+            const cartBar = document.getElementById('cartBar');
+            if (cartBar) cartBar.style.transform = 'translateY(200%)';
+            return;
+        }
+
         const query = searchQuery.toLowerCase();
         const filtered = Data.products.filter(p =>
             p.name.toLowerCase().includes(query) ||
@@ -96,7 +117,6 @@ const UI = {
                     <div class="flex justify-between items-end mb-4">
                         <h4 class="heading-lg">${p.name}</h4>
                         <div class="space-x-4 flex">
-                            <button onclick="APP.shareProductViaNetwork('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal font-bold">Compartir</button>
                             <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal">Editar</button>
                             <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-red-500">Borrar</button>
                         </div>
@@ -229,9 +249,9 @@ const UI = {
     /**
      * Renderizar vista de pedidos
      */
-    renderOrders(searchQuery = '', paidFilter = 'all') {
+    renderOrders(searchQuery = '', paidFilter = 'all', shiftId = null) {
         const container = document.getElementById('ordersContainer');
-        const sales = Data.getAllSales();
+        const sales = shiftId ? Data.getSalesByShift(shiftId) : Data.getAllSales();
 
         const query = searchQuery.toLowerCase();
         const filtered = sales.filter(sale => {
@@ -244,7 +264,7 @@ const UI = {
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = '<p class="text-muted text-sm">No se encontraron pedidos</p>';
+            container.innerHTML = `<p class="text-muted text-sm">No se encontraron pedidos ${shiftId ? 'en este turno' : ''}</p>`;
             return;
         }
 
@@ -337,12 +357,6 @@ const UI = {
         fromSelect.innerHTML = '<option value="">De --</option>' + options;
         toSelect.innerHTML = '<option value="">A --</option>' + options;
 
-        // Network Server
-        const ns = s.networkServer || { host: '0.peerjs.com', port: 443, path: '/', secure: true };
-        document.getElementById('configPeerHost').value = ns.host || '0.peerjs.com';
-        document.getElementById('configPeerPort').value = ns.port || 443;
-        document.getElementById('configPeerPath').value = ns.path || '/';
-        document.getElementById('configPeerSecure').checked = ns.secure !== false;
     },
 
 
@@ -356,86 +370,90 @@ const UI = {
         ).join('');
     },
 
-    /**
-     * Renderizar sección de Red y Conexiones
-     */
-    renderNetwork() {
-        const activeList = document.getElementById('activeConnectionsList');
-        const discoveredList = document.getElementById('discoveredPeersList');
-        const statusIndicator = document.getElementById('netStatusIndicator');
-        const localIdEl = document.getElementById('netLocalId');
-        const publicIpEl = document.getElementById('netPublicIp');
 
-        if (localIdEl) localIdEl.innerText = Network.localId || '---';
-        if (publicIpEl) publicIpEl.innerText = `Red: ${Network.myPublicIp || 'Detectando...'}`;
-
-        if (statusIndicator) {
-            const isOnline = Network.peer && Network.peer.open;
-            const isOfflineMode = Network.myPublicIp && Network.myPublicIp.includes('Offline');
-
-            statusIndicator.classList.toggle('text-teal', isOnline);
-            statusIndicator.classList.toggle('text-red-500', !isOnline);
-
-            let statusText = isOnline ? 'EN LÍNEA' : 'FUERA DE LÍNEA';
-            if (isOnline && isOfflineMode) statusText += ' (MODO LAN)';
-
-            statusIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-current ${!isOnline ? 'animate-pulse' : ''}"></span> ${statusText}`;
-        }
-
-        // Renderizar Conexiones Activas
-        if (activeList) {
-            const connections = Object.values(Network.connections).filter(c => c.open);
-            if (connections.length === 0) {
-                activeList.innerHTML = '<p class="text-xs text-muted italic opacity-50">No hay equipos conectados</p>';
-            } else {
-                activeList.innerHTML = connections.map(conn => `
-                    <div class="flex justify-between items-center p-4 bg-card rounded-xl border border-teal/10">
-                        <div>
-                            <p class="font-bold text-sm">Equipo ${conn.peer.split('-')[1]?.toUpperCase() || 'Remoto'}</p>
-                            <p class="text-[9px] opacity-50 font-mono">${conn.peer}</p>
-                        </div>
-                        <button onclick="APP.disconnectFromPeer('${conn.peer}')" 
-                                class="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline">
-                            Desconectar
-                        </button>
-                    </div>
-                `).join('');
-            }
-        }
-
-        // Renderizar Equipos Descubiertos (No conectados)
-        if (discoveredList) {
-            const connectedIds = Object.keys(Network.connections);
-            const discovered = Network.nearbyPeers.filter(p => !connectedIds.includes(p.id));
-
-            if (discovered.length === 0) {
-                discoveredList.innerHTML = '<p class="text-xs text-muted italic opacity-50">No se detectaron más dispositivos</p>';
-            } else {
-                discoveredList.innerHTML = discovered.map(peer => `
-                    <div class="flex justify-between items-center p-4 bg-card/50 rounded-xl border border-white/5">
-                        <div>
-                            <p class="font-bold text-sm">${peer.name}</p>
-                            <p class="text-[9px] opacity-50 font-mono">${peer.id}</p>
-                        </div>
-                        <button onclick="APP.connectToPeer('${peer.id}')" 
-                                class="text-[10px] font-black text-teal uppercase tracking-widest hover:underline">
-                            Conectar
-                        </button>
-                    </div>
-                `).join('');
-            }
-        }
-    },
 
     /**
      * Renderizar todas las vistas
      */
+    /**
+     * Renderizar sección de Turnos
+     */
+    renderShifts() {
+        const listContainer = document.getElementById('shiftsList');
+        const activeBanner = document.getElementById('activeShiftBanner');
+        const activeName = document.getElementById('activeShiftName');
+        const activeInfo = document.getElementById('activeShiftInfo');
+
+        const activeShift = Data.getActiveShift();
+        const shifts = Data.shifts || [];
+
+        // Actualizar Banner de Turno Activo
+        if (activeShift) {
+            activeBanner.classList.remove('hidden');
+            activeName.innerText = activeShift.name;
+            activeInfo.innerText = `${activeShift.date} · DESDE ${new Date(activeShift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        } else {
+            activeBanner.classList.add('hidden');
+        }
+
+        // Renderizar lista de turnos (excluyendo el activo si se prefiere, o mostrándolo abajo también)
+        // Mostraremos todos ordenados por fecha/inicio descendente
+        listContainer.innerHTML = [...shifts].reverse().map(s => {
+            const shiftSales = Data.getSalesByShift(s.id);
+            const totalRevenue = shiftSales.reduce((sum, sale) => sum + sale.total, 0);
+            const totalProfit = shiftSales.reduce((sum, sale) => {
+                const saleCost = sale.items.reduce((csum, item) => csum + (item.cost || 0), 0);
+                const saleService = sale.items.reduce((ssum, item) => ssum + (item.price * (item.servicePct || 0) / 100), 0);
+                return sum + (sale.total - saleCost - saleService);
+            }, 0);
+
+            const isActive = s.id === Data.activeShiftId;
+
+            return `
+                <div class="p-6 bg-card rounded-2xl border ${isActive ? 'border-teal' : 'border-border'} transition-all">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <p class="label-caps">${s.date}</p>
+                                ${isActive ? '<span class="px-2 py-0.5 bg-teal text-white text-[8px] font-black rounded-full">EN CURSO</span>' : ''}
+                            </div>
+                            <h4 class="heading-lg">${s.name}</h4>
+                            <p class="text-[10px] text-muted font-bold uppercase">
+                                ${new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+                                ${s.endTime ? ' - ' + new Date(s.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="APP.editShift('${s.id}')" class="text-teal text-[10px] font-black uppercase hover:underline">Editar</button>
+                            ${!isActive ? `<button onclick="APP.deleteShift('${s.id}')" class="text-red-500 text-[10px] font-black uppercase hover:underline">Borrar</button>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 border-t border-border pt-4 mt-2">
+                        <div>
+                            <p class="label-caps opacity-50 mb-1">Ventas</p>
+                            <p class="font-black text-sm">SRD ${totalRevenue.toFixed(2)}</p>
+                            <p class="text-[8px] text-muted">${shiftSales.length} transacciones</p>
+                        </div>
+                        <div>
+                            <p class="label-caps opacity-50 mb-1 text-teal">Neto</p>
+                            <p class="font-black text-sm text-teal">SRD ${totalProfit.toFixed(2)}</p>
+                        </div>
+                        <div class="text-right">
+                             <button onclick="APP.viewShiftSales('${s.id}')" class="label-caps underline hover:text-teal">Detalle</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<p class="text-muted text-sm italic">No hay historial de turnos</p>';
+    },
+
     renderAll() {
         this.renderPOS();
         this.renderInventory();
         this.renderRecipes();
         this.renderReports();
         this.renderOrders();
-        this.renderNetwork();
+        this.renderShifts();
     }
 };
