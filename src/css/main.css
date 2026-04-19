@@ -76,18 +76,45 @@ body {
     pointer-events: none;
 }
 
+/* ── Non-selectable interactive elements ─────────── */
+button, a, nav, .bottom-nav, .bottom-nav * {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ── Suggested price — strong contrast both modes ── */
+#newProdSuggestedPrice,
+#editProdSuggestedPrice {
+    color: #15803d;       /* green-700: legible on white bg */
+    font-weight: 800;
+}
+
+[data-theme="dark"] #newProdSuggestedPrice,
+[data-theme="dark"] #editProdSuggestedPrice {
+    color: #4ade80;       /* green-400: legible on dark bg */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) #newProdSuggestedPrice,
+    :root:not([data-theme="light"]) #editProdSuggestedPrice {
+        color: #4ade80;
+    }
+}
+
 /* Tipografía Editorial */
 .heading-xl {
     font-weight: 900;
     font-size: 2.5rem;
     line-height: 0.9;
     letter-spacing: -0.05em;
+    user-select: none;
 }
 
 .heading-lg {
     font-weight: 800;
     font-size: 1.5rem;
     letter-spacing: -0.04em;
+    user-select: none;
 }
 
 .label-caps {
@@ -97,12 +124,12 @@ body {
     letter-spacing: 0.1em;
     color: var(--text-muted);
     transition: color 0.3s ease;
+    user-select: none;
 }
 
 [data-theme="dark"] .label-caps {
-    color: var(--teal);
+    color: var(--text-muted);
     opacity: 0.9;
-    text-shadow: 0 0 8px rgba(45, 212, 191, 0.25);
 }
 
 /* Componentes Minimalistas */
