@@ -36,25 +36,41 @@ const UI = {
             (p.icon && p.icon.toLowerCase().includes(query))
         );
 
-        grid.innerHTML = filtered.map(p => `
-            <div class="product-card flex justify-between items-center cursor-pointer" onclick="APP.addToCart('${p.id}')">
+        grid.innerHTML = filtered.map(p => {
+            const hasPortions = p.portions > 1;
+            const portionPrice = hasPortions ? (p.price / p.portions).toFixed(2) : null;
+
+            const actions = hasPortions
+                ? `<div class="flex flex-col gap-1">
+                        <button onclick="event.stopPropagation(); APP.addToCart('${p.id}')"
+                                class="pos-btn-whole text-[8px] font-black px-3 py-1.5 rounded transition-all flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+                            ENTERO · $${p.price.toFixed(2)}
+                        </button>
+                        <button onclick="event.stopPropagation(); APP.addToCart('${p.id}', true)"
+                                class="pos-btn-portion text-[8px] font-black px-3 py-1.5 rounded transition-all flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                            PORCIÓN · $${portionPrice}
+                        </button>
+                   </div>`
+                : `<div>
+                        <p class="font-black text-xl">${p.price.toFixed(0)}</p>
+                        <p class="text-[9px] font-bold text-muted uppercase">$</p>
+                   </div>`;
+
+            return `
+            <div class="product-card flex justify-between items-center ${hasPortions ? '' : 'cursor-pointer'}" ${hasPortions ? '' : `onclick="APP.addToCart('${p.id}')"`}>
                 <div>
                     <p class="label-caps mb-1">${p.icon} RECETA</p>
                     <h4 class="font-black text-lg leading-none">${p.name}</h4>
+                    ${!hasPortions ? `<p class="text-[10px] text-muted mt-0.5">$${p.price.toFixed(2)}</p>` : ''}
                 </div>
                 <div class="text-right flex items-center gap-3">
-                    ${p.portions > 1 ? `
-                    <button onclick="event.stopPropagation(); APP.addToCart('${p.id}', true)" 
-                            class="bg-teal/10 hover:bg-teal/20 text-teal text-[8px] font-black px-2 py-1 rounded border border-teal/20 transition-all">
-                        + PORCIÓN
-                    </button>` : ''}
-                    <div>
-                        <p class="font-black text-xl">${p.price.toFixed(0)}</p>
-                        <p class="text-[9px] font-bold text-muted uppercase">SRD</p>
-                    </div>
+                    ${actions}
                 </div>
             </div>
-        `).join('') || '<p class="text-muted text-sm px-6">No se encontraron platos</p>';
+        `;
+        }).join('') || '<p class="text-muted text-sm px-6">No se encontraron platos</p>';
     },
 
     /**
@@ -129,10 +145,14 @@ const UI = {
                 if (ing) {
                     const convertedQty = Data.convertUnit(r.qty, unit, ing.unit);
                     const costForQty = ing.cost * convertedQty;
-                    costStr = `<span class="opacity-70 font-bold">SRD ${costForQty.toFixed(2)}</span>`;
+                    costStr = `<span class="opacity-70 font-bold">$${costForQty.toFixed(2)}</span>`;
                 }
+                let scopeLabel = '';
+                if (r.scope === 'whole') scopeLabel = ' <span class="text-[8px] opacity-50 bg-white/10 px-1 rounded ml-1">SOLO ENTERO</span>';
+                else if (r.scope === 'portion') scopeLabel = ' <span class="text-[8px] opacity-50 bg-teal/10 text-teal px-1 rounded ml-1">SOLO PORCIÓN</span>';
+
                 return `<div class="text-[10px] text-muted font-medium uppercase tracking-wider flex justify-between border-b border-white/5 pb-1">
-                            <span>${r.qty} ${unit} ${ing?.name || '---'}</span>
+                            <span class="flex items-center">${r.qty} ${unit} ${ing?.name || '---'}${scopeLabel}</span>
                             ${costStr}
                         </div>`;
             }).join('')}
@@ -140,23 +160,23 @@ const UI = {
                     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                         <div class="p-3 bg-card border-l-2 border-teal">
                             <p class="label-caps mb-1 opacity-50">Costo / Margen Esperado</p>
-                            <p class="font-bold text-[11px]">SRD ${cost.toFixed(2)} / ${expectedMargin}% (SRD ${expectedProfit.toFixed(2)})</p>
+                            <p class="font-bold text-[11px]">$${cost.toFixed(2)} / ${expectedMargin}% ($${expectedProfit.toFixed(2)})</p>
                         </div>
                         <div class="p-3 bg-card border-l-2 border-orange-400">
                             <p class="label-caps mb-1 opacity-50">Gasto Servicio</p>
-                            <p class="font-bold text-[11px]">${servicePct}% (SRD ${serviceExpense.toFixed(2)})</p>
+                            <p class="font-bold text-[11px]">${servicePct}% ($${serviceExpense.toFixed(2)})</p>
                         </div>
                         <div class="p-3 bg-card border-l-2 border-purple-400">
                             <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? 'Precio por Porción (Def. / Rcmd.)' : 'Sin Porciones'}</p>
-                            <p class="font-bold text-[11px]">${p.portions > 1 ? `SRD ${(sellingPrice / p.portions).toFixed(2)} / SRD ${(recommendedPrice / p.portions).toFixed(2)}` : '---'}</p>
+                            <p class="font-bold text-[11px]">${p.portions > 1 ? `$${(sellingPrice / p.portions).toFixed(2)} / $${(recommendedPrice / p.portions).toFixed(2)}` : '---'}</p>
                         </div>
                         <div class="p-3 bg-card border-l-2 border-blue-400">
                             <p class="label-caps mb-1 opacity-50">Precio Recomendado</p>
-                            <p class="font-bold text-[11px]">SRD ${recommendedPrice.toFixed(2)}</p>
+                            <p class="font-bold text-[11px]">$${recommendedPrice.toFixed(2)}</p>
                         </div>
                         <div class="p-3 bg-card border-l-2 ${actualProfit > 0 ? 'border-green-500' : 'border-red-500'}">
                             <p class="label-caps mb-1 opacity-50">Precio Total / Margen Real</p>
-                            <p class="font-bold text-[11px]">SRD ${sellingPrice.toFixed(2)} / ${actualMargin}% (SRD ${actualProfit.toFixed(2)})</p>
+                            <p class="font-bold text-[11px]">$${sellingPrice.toFixed(2)} / ${actualMargin}% ($${actualProfit.toFixed(2)})</p>
                         </div>
                     </div>
                 </div>
@@ -211,7 +231,7 @@ const UI = {
         document.getElementById('repTotalCost').innerText = stats.totalCosts.toFixed(2);
         document.getElementById('repNetProfit').innerText = stats.netProfit.toFixed(2);
         
-        document.getElementById('repMarginAvg').innerText = `${stats.marginPercentage.toFixed(1)}% margen (SRD ${stats.netProfit.toFixed(2)})`;
+        document.getElementById('repMarginAvg').innerText = `${stats.marginPercentage.toFixed(1)}% margen ($${stats.netProfit.toFixed(2)})`;
 
         const breakdown = document.getElementById('profitBreakdown');
         breakdown.innerHTML = profitByProduct.length > 0 ? profitByProduct.map(item => `
@@ -223,19 +243,19 @@ const UI = {
                 <div class="grid grid-cols-2 gap-4 text-[10px]">
                     <div>
                         <p class="label-caps mb-1 flex items-center gap-1">Ventas / Costos <button onclick="APP.showInfo('ventasCostos')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
-                        <p class="font-bold">SRD ${item.totalRevenue.toFixed(2)} / ${item.totalCost.toFixed(2)}</p>
+                        <p class="font-bold">$${item.totalRevenue.toFixed(2)} / $${item.totalCost.toFixed(2)}</p>
                     </div>
                     <div>
                         <p class="label-caps mb-1 flex items-center gap-1">Gasto Servicio <button onclick="APP.showInfo('gastoServicio')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
-                        <p class="font-bold">${item.totalRevenue > 0 ? (item.totalService / item.totalRevenue * 100).toFixed(1) : 0}% (SRD ${item.totalService.toFixed(2)})</p>
+                        <p class="font-bold">${item.totalRevenue > 0 ? (item.totalService / item.totalRevenue * 100).toFixed(1) : 0}% ($${item.totalService.toFixed(2)})</p>
                     </div>
                     <div>
                         <p class="label-caps mb-1 flex items-center gap-1">Ganancia neta <button onclick="APP.showInfo('gananciaNeta')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
-                        <p class="font-bold text-teal">SRD ${item.profit.toFixed(2)}</p>
+                        <p class="font-bold text-teal">$${item.profit.toFixed(2)}</p>
                     </div>
                     <div>
                         <p class="label-caps mb-1 flex items-center gap-1">Margen Real <button onclick="APP.showInfo('margenReal')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
-                        <p class="font-bold">${item.margin.toFixed(1)}% (SRD ${item.profit.toFixed(2)})</p>
+                        <p class="font-bold">${item.margin.toFixed(1)}% ($${item.profit.toFixed(2)})</p>
                     </div>
                 </div>
             </div>
@@ -254,7 +274,7 @@ const UI = {
             const summary = {};
             Data.cart.forEach(item => {
                 if (!summary[item.id]) {
-                    summary[item.id] = { name: item.name, price: item.price, count: 0 };
+                    summary[item.id] = { name: item.name, price: item.price, count: 0, isPortion: item.isPortion };
                 }
                 summary[item.id].count += 1;
             });
@@ -269,15 +289,24 @@ const UI = {
                        </span>`
                     : `<input type="number" min="1" value="${info.count}" class="w-12 text-center text-xs bg-transparent border border-border rounded" onchange="APP.setCartQty('${id}', parseInt(this.value) || 1)">`;
 
+                const badge = info.isPortion 
+                    ? '<span class="text-[8px] bg-teal/20 text-teal px-1 rounded font-bold border border-teal/30">PORCIÓN</span>' 
+                    : '<span class="text-[8px] bg-white/10 px-1 rounded font-bold border border-white/20">ENTERO</span>';
+                
+                const displayName = info.name.replace(' (PORCIÓN)', '');
+
                 return `
                 <div class="flex justify-between items-center w-full">
                     <div class="flex items-center gap-2 flex-1">
                         <button class="cart-bar-btn" onclick="APP.changeCartQty('${id}',-1)">-</button>
-                        <span class="truncate max-w-[120px] font-bold text-sm">${info.name}</span>
+                        <div class="flex flex-col">
+                            <span class="truncate max-w-[100px] font-bold text-sm leading-tight">${displayName}</span>
+                            <div>${badge}</div>
+                        </div>
                         ${qtyEditor}
                         <button class="cart-bar-btn" onclick="APP.changeCartQty('${id}',1)">+</button>
                     </div>
-                    <span class="font-bold">SRD ${lineTotal}</span>
+                    <span class="font-bold">$${lineTotal}</span>
                 </div>`;
             }).join('');
         } else {
@@ -340,7 +369,7 @@ const UI = {
                         <p class="font-bold text-xs">${new Date(sale.timestamp).toLocaleString()}</p>
                     </div>
                     <div class="text-right">
-                        <p class="font-black text-sm">SRD ${sale.total.toFixed(2)}</p>
+                        <p class="font-black text-sm">$${sale.total.toFixed(2)}</p>
                         <p class="text-[9px] ${sale.paid ? 'text-teal font-bold' : 'text-red-500'}">${sale.paid ? 'PAGADO' : 'PENDIENTE'}</p>
                     </div>
                 </div>
@@ -479,12 +508,12 @@ const UI = {
                     <div class="grid grid-cols-3 gap-4 border-t border-border pt-4 mt-2">
                         <div>
                             <p class="label-caps opacity-50 mb-1">Ventas</p>
-                            <p class="font-black text-sm">SRD ${totalRevenue.toFixed(2)}</p>
+                            <p class="font-black text-sm">$${totalRevenue.toFixed(2)}</p>
                             <p class="text-[8px] text-muted">${shiftSales.length} transacciones</p>
                         </div>
                         <div>
                             <p class="label-caps opacity-50 mb-1 text-teal">Neto</p>
-                            <p class="font-black text-sm text-teal">SRD ${totalProfit.toFixed(2)}</p>
+                            <p class="font-black text-sm text-teal">$${totalProfit.toFixed(2)}</p>
                         </div>
                         <div class="text-right">
                              <button onclick="APP.viewShiftSales('${s.id}')" class="label-caps underline hover:text-teal">Detalle</button>
@@ -504,9 +533,9 @@ const UI = {
 
         if (Data.activeShiftId) {
             const shiftStats = Data.getSalesStats(Data.activeShiftId);
-            headerProfitEl.innerText = `SRD ${shiftStats.netProfit.toFixed(2)}`;
+            headerProfitEl.innerText = `$${shiftStats.netProfit.toFixed(2)}`;
         } else {
-            headerProfitEl.innerText = 'SRD 0.00';
+            headerProfitEl.innerText = '$0.00';
         }
     },
 

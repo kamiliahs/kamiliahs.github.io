@@ -7,7 +7,7 @@
     --text-muted: #6b7280;
     --border: #e5e7eb;
     --accent: #000000;
-    --teal: #0d9488;
+    --teal: #737373;
     --overlay-bg: rgba(255, 255, 255, 0.7);
 }
 
@@ -27,8 +27,8 @@
     --text-main: #ffffff;
     --text-muted: #a3a3a3;
     --border: #262626;
-    --accent: #2dd4bf;
-    --teal: #2dd4bf;
+    --accent: #d4d4d4;
+    --teal: #d4d4d4;
     --overlay-bg: rgba(0, 0, 0, 0.85);
 }
 
@@ -265,8 +265,8 @@ select:disabled {
 }
 
 .cart-bar {
-    background: var(--accent);
-    color: var(--bg);
+    background: #1c1c1c;
+    color: #ffffff;
     margin: 15px;
     margin-bottom: 100px;
     /* evita tapar con la barra inferior */
@@ -276,8 +276,8 @@ select:disabled {
 }
 
 .cart-bar-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
     width: 24px;
     height: 24px;
@@ -290,13 +290,51 @@ select:disabled {
 }
 
 .cart-bar-btn:active {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.35);
+}
+
+[data-theme="dark"] .cart-bar {
+    background: #f5f5f5;
+    color: #111111;
+}
+
+[data-theme="dark"] .cart-bar .label-caps {
+    color: rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme="dark"] .cart-bar #cartTotal {
+    color: #111111;
+}
+
+[data-theme="dark"] .cart-bar #cartItems {
+    color: #333333;
 }
 
 [data-theme="dark"] .cart-bar-btn {
-    background: rgba(0, 0, 0, 0.3);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.2);
+    color: #111111;
 }
+
+[data-theme="dark"] .cart-bar-btn:active {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .cart-bar {
+        background: #f5f5f5;
+        color: #111111;
+    }
+    :root:not([data-theme="light"]) .cart-bar .label-caps {
+        color: rgba(0, 0, 0, 0.45) !important;
+    }
+    :root:not([data-theme="light"]) .cart-bar-btn {
+        background: rgba(0, 0, 0, 0.1);
+        border-color: rgba(0, 0, 0, 0.2);
+        color: #111111;
+    }
+}
+
 
 .search-input {
     font-size: 0.9rem;
@@ -407,8 +445,8 @@ select:disabled {
         --text-main: #ffffff;
         --text-muted: #a3a3a3;
         --border: #262626;
-        --accent: #2dd4bf;
-        --teal: #2dd4bf;
+        --accent: #d4d4d4;
+        --teal: #d4d4d4;
         --overlay-bg: rgba(0, 0, 0, 0.85);
     }
 
@@ -491,4 +529,44 @@ select:disabled {
 
 [data-theme="dark"] #installBanner button#dismissBtn {
     background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* POS Product action buttons */
+.pos-btn-whole {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+.pos-btn-whole:hover, .pos-btn-whole:active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    transform: scale(0.97);
+}
+.pos-btn-portion {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px dashed var(--border);
+    white-space: nowrap;
+}
+.pos-btn-portion:hover, .pos-btn-portion:active {
+    background: var(--border);
+    color: var(--text-main);
+    transform: scale(0.97);
+}
+
+/* Cart bar label — adapts to bg contrast */
+.cart-bar-label {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+[data-theme="dark"] .cart-bar-label {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .cart-bar-label {
+        color: rgba(0, 0, 0, 0.4);
+    }
 }

@@ -103,7 +103,10 @@
                     <input type="text" id="newProdIcon" placeholder="🍕">
                 </div>
                 <div class="flex-1">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1">Precio Venta</p>
+                    <p class="text-[10px] text-muted uppercase font-bold mb-1 flex justify-between">
+                        <span>Precio Venta</span>
+                        <span id="newProdSuggestedPrice" class="text-teal hidden">Sug: $0.00</span>
+                    </p>
                     <input type="number" id="newProdPrice" placeholder="0.00">
                 </div>
             </div>
@@ -156,7 +159,10 @@
                     <input type="text" id="editProdIcon" placeholder="Emoji (🍕)">
                 </div>
                 <div class="flex-1">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1">Precio Venta</p>
+                    <p class="text-[10px] text-muted uppercase font-bold mb-1 flex justify-between">
+                        <span>Precio Venta</span>
+                        <span id="editProdSuggestedPrice" class="text-teal hidden">Sug: $0.00</span>
+                    </p>
                     <input type="number" id="editProdPrice" placeholder="Precio Venta">
                 </div>
             </div>
@@ -339,7 +345,7 @@
         <div id="productGrid" class="px-6"></div>
         <div class="cart-bar shadow-2xl transition-all" id="cartBar">
             <div class="flex justify-between items-center mb-4">
-                <span class="label-caps text-white/50">Orden Actual</span>
+                <span class="label-caps cart-bar-label">Orden Actual</span>
                 <span id="cartCount" class="font-bold text-[10px]">0</span>
             </div>
             <div id="cartItems" class="text-[11px] font-medium space-y-1 opacity-80 mb-6"></div>

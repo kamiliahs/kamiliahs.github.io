@@ -188,22 +188,34 @@ const Data = {
      * Calcular costo de producción de un producto
      * Respeta las equivalencias y unidades actuales
      */
-    calculateProductCost(productId) {
+    calculateProductCost(productId, asPortion = false) {
         const product = this.products.find(p => p.id === productId);
         if (!product) return 0;
+
+        const portions = parseFloat(product.portions) || 1;
 
         return product.recipe.reduce((total, item) => {
             const ingredient = this.ingredients.find(i => i.id === item.id);
             if (!ingredient) return total;
 
-            // Unit conversion logic
-            const quantity = item.qty;
+            const scope = item.scope || 'all';
+            
+            let multiplier = 0;
+            if (asPortion && portions > 1) {
+                if (scope === 'all') multiplier = 1 / portions;
+                else if (scope === 'portion') multiplier = 1;
+                else if (scope === 'whole') multiplier = 0;
+            } else {
+                if (scope === 'all') multiplier = 1;
+                else if (scope === 'portion') multiplier = 0;
+                else if (scope === 'whole') multiplier = 1;
+            }
+
+            if (multiplier === 0) return total;
+
+            const quantity = item.qty * multiplier;
             const itemUnit = item.unit || ingredient.unit;
-
-            // Convert quantity to ingredient's base unit
             const convertedQty = this.convertUnit(quantity, itemUnit, ingredient.unit);
-
-            // Cost is per ingredient base unit
             const unitCost = ingredient.cost;
 
             return total + (unitCost * convertedQty);
@@ -228,7 +240,7 @@ const Data = {
             id: isPortion ? product.id + '_portion' : product.id,
             productId: product.id,
             name: isPortion ? product.name + ' (PORCIÓN)' : product.name,
-            costAtSale: isPortion ? this.calculateProductCost(productId) / portions : this.calculateProductCost(productId),
+            costAtSale: this.calculateProductCost(productId, isPortion),
             price: isPortion ? effectivePrice / portions : effectivePrice,
             basePrice: isPortion ? basePrice / portions : basePrice,
             isPortion: isPortion

@@ -190,14 +190,21 @@ const Utils = {
         row.className = "flex gap-2 items-center pb-2 line-border";
 
         row.innerHTML = `
-            <select class="flex-1 text-[10px] font-bold uppercase border-none bg-transparent recipe-ing-select">
-                ${Data.ingredients.map(i => `<option value="${i.id}" ${data?.id === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}
-            </select>
+            <div class="flex-1 flex flex-col gap-1">
+                <select class="text-[10px] font-bold uppercase border-none bg-transparent p-0 m-0 recipe-ing-select">
+                    ${Data.ingredients.map(i => `<option value="${i.id}" ${data?.id === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}
+                </select>
+                <select class="text-[8px] opacity-70 border-none bg-transparent p-0 m-0 recipe-ing-scope">
+                    <option value="all" ${data?.scope === 'all' || !data?.scope ? 'selected' : ''}>Aplicar en: AMBOS</option>
+                    <option value="whole" ${data?.scope === 'whole' ? 'selected' : ''}>Aplicar en: SOLO ENTERO</option>
+                    <option value="portion" ${data?.scope === 'portion' ? 'selected' : ''}>Aplicar en: SOLO PORCIÓN</option>
+                </select>
+            </div>
             <div class="flex items-center gap-1">
                 <input type="number" class="w-16 text-[10px] recipe-ing-qty" placeholder="CANT." min="0" step="0.01" value="${data?.qty || ''}">
                 <select class="text-[9px] font-bold uppercase border-none bg-transparent recipe-ing-unit"></select>
             </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500">✕</button>
+            <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500 ml-2">✕</button>
         `;
         container.appendChild(row);
 
@@ -224,14 +231,21 @@ const Utils = {
         row.className = "flex gap-2 items-center pb-2 line-border";
 
         row.innerHTML = `
-            <select class="flex-1 text-[10px] font-bold uppercase border-none bg-transparent recipe-edit-ing-select">
-                ${Data.ingredients.map(i => `<option value="${i.id}" ${data?.id === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}
-            </select>
+            <div class="flex-1 flex flex-col gap-1">
+                <select class="text-[10px] font-bold uppercase border-none bg-transparent p-0 m-0 recipe-edit-ing-select">
+                    ${Data.ingredients.map(i => `<option value="${i.id}" ${data?.id === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}
+                </select>
+                <select class="text-[8px] opacity-70 border-none bg-transparent p-0 m-0 recipe-edit-ing-scope">
+                    <option value="all" ${data?.scope === 'all' || !data?.scope ? 'selected' : ''}>Aplicar en: AMBOS</option>
+                    <option value="whole" ${data?.scope === 'whole' ? 'selected' : ''}>Aplicar en: SOLO ENTERO</option>
+                    <option value="portion" ${data?.scope === 'portion' ? 'selected' : ''}>Aplicar en: SOLO PORCIÓN</option>
+                </select>
+            </div>
             <div class="flex items-center gap-1">
                 <input type="number" class="w-16 text-[10px] recipe-edit-ing-qty" placeholder="CANT." min="0" step="0.01" value="${data?.qty || ''}">
                 <select class="text-[9px] font-bold uppercase border-none bg-transparent recipe-edit-ing-unit"></select>
             </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500">✕</button>
+            <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500 ml-2">✕</button>
         `;
         container.appendChild(row);
 

@@ -183,16 +183,19 @@ const APP = {
         const selects = document.querySelectorAll('.recipe-ing-select');
         const qtyInputs = document.querySelectorAll('.recipe-ing-qty');
         const unitSelects = document.querySelectorAll('.recipe-ing-unit');
+        const scopeSelects = document.querySelectorAll('.recipe-ing-scope');
         const recipe = [];
 
         selects.forEach((select, i) => {
             const qty = parseFloat(qtyInputs[i].value);
             const unit = unitSelects[i].value;
+            const scope = scopeSelects[i]?.value || 'all';
             if (select.value && !isNaN(qty) && qty > 0) {
                 recipe.push({
                     id: select.value,
                     qty: qty,
-                    unit: unit
+                    unit: unit,
+                    scope: scope
                 });
             }
         });
@@ -317,16 +320,19 @@ const APP = {
         const selects = document.querySelectorAll('.recipe-edit-ing-select');
         const qtyInputs = document.querySelectorAll('.recipe-edit-ing-qty');
         const unitSelects = document.querySelectorAll('.recipe-edit-ing-unit');
+        const scopeSelects = document.querySelectorAll('.recipe-edit-ing-scope');
         const recipe = [];
 
         selects.forEach((select, i) => {
             const qty = parseFloat(qtyInputs[i].value);
             const unit = unitSelects[i].value;
+            const scope = scopeSelects[i]?.value || 'all';
             if (select.value && !isNaN(qty) && qty > 0) {
                 recipe.push({
                     id: select.value,
                     qty: qty,
-                    unit: unit
+                    unit: unit,
+                    scope: scope
                 });
             }
         });
@@ -369,16 +375,19 @@ const APP = {
         const selects = document.querySelectorAll('.recipe-edit-ing-select');
         const qtyInputs = document.querySelectorAll('.recipe-edit-ing-qty');
         const unitSelects = document.querySelectorAll('.recipe-edit-ing-unit');
+        const scopeSelects = document.querySelectorAll('.recipe-edit-ing-scope');
         const recipe = [];
 
         selects.forEach((select, i) => {
             const qty = parseFloat(qtyInputs[i].value);
             const unit = unitSelects[i].value;
+            const scope = scopeSelects[i]?.value || 'all';
             if (select.value && !isNaN(qty) && qty > 0) {
                 recipe.push({
                     id: select.value,
                     qty: qty,
-                    unit: unit
+                    unit: unit,
+                    scope: scope
                 });
             }
         });
@@ -405,6 +414,7 @@ const APP = {
         const prefix = isEdit ? 'edit' : 'new';
         const price = parseFloat(document.getElementById(`${prefix}ProdPrice`).value) || 0;
         const service = parseFloat(document.getElementById(`${prefix}ProdService`).value) || 0;
+        const expectedMargin = parseFloat(document.getElementById(`${prefix}ProdMargin`).value) || 0;
 
         let totalCost = 0;
         const selects = document.querySelectorAll(`.recipe-${isEdit ? 'edit-' : ''}ing-select`);
@@ -430,9 +440,22 @@ const APP = {
         const portions = parseFloat(document.getElementById(`${prefix}ProdPortions`).value) || 1;
         const pricePerPortion = portions > 0 ? (sellingPrice / portions).toFixed(2) : 0;
 
-        const previewEl = document.getElementById(`${isEdit ? 'edit' : 'new'}RecipeMarginPreview`);
+        const expectedProfit = totalCost * (expectedMargin / 100);
+        const recommendedPrice = (1 - (service / 100)) > 0 ? (totalCost + expectedProfit) / (1 - (service / 100)) : 0;
+
+        const sugEl = document.getElementById(`${prefix}ProdSuggestedPrice`);
+        if (sugEl) {
+            if (totalCost > 0) {
+                sugEl.innerText = `Sug: $${recommendedPrice.toFixed(2)}`;
+                sugEl.classList.remove('hidden');
+            } else {
+                sugEl.classList.add('hidden');
+            }
+        }
+
+        const previewEl = document.getElementById(`${prefix}RecipeMarginPreview`);
         if (previewEl) {
-            previewEl.innerText = `Costo Est: SRD ${totalCost.toFixed(2)} | Margen Real: ${margin}% | Porción: SRD ${pricePerPortion}`;
+            previewEl.innerText = `Costo Est: $${totalCost.toFixed(2)} | Margen Real: ${margin}% | Porción: $${pricePerPortion}`;
         }
     },
 
@@ -534,7 +557,7 @@ const APP = {
         const total = Data.getCartTotal();
         const count = Data.cart.length;
 
-        if (confirm(`¿Confirmar venta de ${count} artículo(s) por SRD ${total.toFixed(2)}?`)) {
+        if (confirm(`¿Confirmar venta de ${count} artículo(s) por $${total.toFixed(2)}?`)) {
             const result = Data.checkout();
             if (result === true) {
                 UI.updateCartUI();
@@ -586,10 +609,10 @@ const APP = {
         const select = document.getElementById('addItemSelect');
         let options = '<option value="">-- Añadir producto --</option>';
         Data.products.forEach(p => {
-            options += `<option value="${p.id}">${p.name} - SRD ${p.price.toFixed(2)}</option>`;
+            options += `<option value="${p.id}">${p.name} - $${p.price.toFixed(2)}</option>`;
             if (p.portions > 1) {
                 const portionPrice = p.price / p.portions;
-                options += `<option value="${p.id}_portion">${p.name} (POR.) - SRD ${portionPrice.toFixed(2)}</option>`;
+                options += `<option value="${p.id}_portion">${p.name} (POR.) - $${portionPrice.toFixed(2)}</option>`;
             }
         });
         select.innerHTML = options;
@@ -617,10 +640,10 @@ const APP = {
             <div class="flex justify-between items-center text-xs pb-2">
                 <div class="flex-1">
                     <p class="font-bold">${group.count}x ${group.name}</p>
-                    <p class="text-[9px] text-muted">SRD ${group.price.toFixed(2)} c/u ${group.servicePct ? `(+${group.servicePct}% serv.)` : ''}</p>
+                    <p class="text-[9px] text-muted">$${group.price.toFixed(2)} c/u ${group.servicePct ? `(+${group.servicePct}% serv.)` : ''}</p>
                 </div>
                 <div class="text-right flex items-center gap-3">
-                    <span class="font-black">SRD ${(group.price * group.count).toFixed(2)}</span>
+                    <span class="font-black">$${(group.price * group.count).toFixed(2)}</span>
                     ${sale.paid ? '' : `
                         <button class="bg-red-500/10 hover:bg-red-500/20 text-red-500 w-5 h-5 rounded flex items-center justify-center transition-colors" 
                                 onclick="APP.removeItemFromOrder('${saleId}', ${group.indices[group.indices.length - 1]})">
