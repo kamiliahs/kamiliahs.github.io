@@ -154,7 +154,7 @@ const UI = {
                             <p class="label-caps mb-1 opacity-50">Precio Recomendado</p>
                             <p class="font-bold text-[11px]">SRD ${recommendedPrice.toFixed(2)}</p>
                         </div>
-                        <div class="p-3 ${actualProfit > 0 ? 'btn-primary' : 'bg-red-500 text-white'}">
+                        <div class="p-3 bg-card border-l-2 ${actualProfit > 0 ? 'border-green-500' : 'border-red-500'}">
                             <p class="label-caps mb-1 opacity-50">Precio Total / Margen Real</p>
                             <p class="font-bold text-[11px]">SRD ${sellingPrice.toFixed(2)} / ${actualMargin}% (SRD ${actualProfit.toFixed(2)})</p>
                         </div>
