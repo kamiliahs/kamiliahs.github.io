@@ -458,6 +458,62 @@ const APP = {
     },
 
     /**
+     * Establecer cantidad específica en el carrito
+     */
+    setCartQty(cartItemId, newQty) {
+        if (newQty < 1) newQty = 1;
+        const currentQty = Data.cart.filter(item => item.id === cartItemId).length;
+        const delta = newQty - currentQty;
+        if (delta !== 0) {
+            this.changeCartQty(cartItemId, delta);
+        }
+    },
+
+    /**
+     * Numpad logic (Teclado numérico táctil)
+     */
+    openNumpadModal(cartItemId, currentQty) {
+        document.getElementById('numpadTargetId').value = cartItemId;
+        document.getElementById('numpadDisplay').innerText = currentQty.toString();
+        window.numpadCleared = false; // Flag para borrar al primer toque
+        Utils.openModal('numpadModal');
+    },
+
+    numpadInput(num) {
+        const display = document.getElementById('numpadDisplay');
+        if (!window.numpadCleared) {
+            display.innerText = num.toString();
+            window.numpadCleared = true;
+        } else {
+            if (display.innerText.length < 3) { // Limite de 999
+                display.innerText += num.toString();
+            }
+        }
+    },
+
+    numpadClear() {
+        document.getElementById('numpadDisplay').innerText = '1';
+        window.numpadCleared = true;
+    },
+
+    numpadDelete() {
+        const display = document.getElementById('numpadDisplay');
+        if (display.innerText.length > 1) {
+            display.innerText = display.innerText.slice(0, -1);
+        } else {
+            display.innerText = '1';
+            window.numpadCleared = true;
+        }
+    },
+
+    numpadConfirm() {
+        const cartItemId = document.getElementById('numpadTargetId').value;
+        const qty = parseInt(document.getElementById('numpadDisplay').innerText) || 1;
+        this.setCartQty(cartItemId, qty);
+        Utils.closeAllPopups();
+    },
+
+    /**
      * Eliminar un producto completamente del carrito
      */
     removeFromCart(productId) {

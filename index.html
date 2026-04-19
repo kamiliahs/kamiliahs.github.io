@@ -566,6 +566,39 @@
         </div>
     </div>
 
+    <!-- NUMPAD MODAL -->
+    <div id="numpadModal" class="modal">
+        <div class="flex justify-between items-center mb-6">
+            <p class="label-caps !mb-0">Editar Cantidad</p>
+            <button onclick="APP.closeAllPopups()" class="text-[10px] font-black uppercase text-muted hover:text-white transition-colors">✕ Cerrar</button>
+        </div>
+        
+        <input type="hidden" id="numpadTargetId">
+        
+        <div class="bg-card border border-border rounded-2xl p-4 mb-4 flex justify-center">
+            <span id="numpadDisplay" class="text-3xl font-black text-teal">1</span>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <button onclick="APP.numpadInput(1)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">1</button>
+            <button onclick="APP.numpadInput(2)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">2</button>
+            <button onclick="APP.numpadInput(3)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">3</button>
+            <button onclick="APP.numpadInput(4)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">4</button>
+            <button onclick="APP.numpadInput(5)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">5</button>
+            <button onclick="APP.numpadInput(6)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">6</button>
+            <button onclick="APP.numpadInput(7)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">7</button>
+            <button onclick="APP.numpadInput(8)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">8</button>
+            <button onclick="APP.numpadInput(9)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">9</button>
+            <button onclick="APP.numpadClear()" class="bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 text-red-500 border border-red-500/20 p-4 rounded-2xl text-sm font-black uppercase transition-colors">Borrar</button>
+            <button onclick="APP.numpadInput(0)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">0</button>
+            <button onclick="APP.numpadDelete()" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl flex items-center justify-center transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><path d="m21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+            </button>
+        </div>
+        
+        <button onclick="APP.numpadConfirm()" class="w-full btn-primary py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg">Confirmar Cantidad</button>
+    </div>
+
 
     <div id="ordersView" class="view-container hidden-view p-6">
         <div class="mb-6">
