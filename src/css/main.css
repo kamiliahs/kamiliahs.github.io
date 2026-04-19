@@ -570,3 +570,72 @@ select:disabled {
         color: rgba(0, 0, 0, 0.4);
     }
 }
+
+/* ── Cart item badges ────────────────────────────── */
+.cart-badge-whole,
+.cart-badge-portion {
+    font-size: 8px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: inline-block;
+    line-height: 1.6;
+}
+
+/* Light mode: cart is dark (#1c1c1c) → use white-ish tones */
+.cart-badge-whole {
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.08);
+}
+.cart-badge-portion {
+    color: rgba(255,255,255,0.6);
+    border: 1px dashed rgba(255,255,255,0.35);
+    background: transparent;
+}
+
+/* Dark mode: cart is whitesmoke (#f5f5f5) → use dark tones */
+[data-theme="dark"] .cart-badge-whole {
+    color: rgba(0,0,0,0.75);
+    border: 1px solid rgba(0,0,0,0.4);
+    background: rgba(0,0,0,0.06);
+}
+[data-theme="dark"] .cart-badge-portion {
+    color: rgba(0,0,0,0.5);
+    border: 1px dashed rgba(0,0,0,0.3);
+    background: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .cart-badge-whole {
+        color: rgba(0,0,0,0.75);
+        border: 1px solid rgba(0,0,0,0.4);
+        background: rgba(0,0,0,0.06);
+    }
+    :root:not([data-theme="light"]) .cart-badge-portion {
+        color: rgba(0,0,0,0.5);
+        border: 1px dashed rgba(0,0,0,0.3);
+        background: transparent;
+    }
+}
+
+/* ── Numpad trigger button in cart ───────────────── */
+.cart-numpad-btn {
+    border: 1px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.08);
+}
+[data-theme="dark"] .cart-numpad-btn {
+    border: 1px solid rgba(0,0,0,0.25);
+    color: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.07);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .cart-numpad-btn {
+        border: 1px solid rgba(0,0,0,0.25);
+        color: rgba(0,0,0,0.7);
+        background: rgba(0,0,0,0.07);
+    }
+}

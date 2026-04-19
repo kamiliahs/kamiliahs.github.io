@@ -283,15 +283,15 @@ const UI = {
                 const lineTotal = (info.price * info.count).toFixed(2);
                 
                 const qtyEditor = isTouch 
-                    ? `<span class="flex items-center gap-1 cursor-pointer bg-teal/10 px-2 py-1 rounded border border-teal/20" onclick="APP.openNumpadModal('${id}', ${info.count})">
+                    ? `<span class="cart-numpad-btn flex items-center gap-1 cursor-pointer px-2 py-1 rounded" onclick="APP.openNumpadModal('${id}', ${info.count})">
                            x${info.count} 
-                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-teal"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="8" y1="7" x2="8.01" y2="7"/><line x1="12" y1="7" x2="12.01" y2="7"/><line x1="16" y1="7" x2="16.01" y2="7"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="16" y1="12" x2="16.01" y2="12"/><line x1="8" y1="17" x2="8.01" y2="17"/><line x1="12" y1="17" x2="12.01" y2="17"/><line x1="16" y1="17" x2="16.01" y2="17"/></svg>
+                           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="8" y1="7" x2="8.01" y2="7"/><line x1="12" y1="7" x2="12.01" y2="7"/><line x1="16" y1="7" x2="16.01" y2="7"/><line x1="8" y1="12" x2="8.01" y2="12"/><line x1="12" y1="12" x2="12.01" y2="12"/><line x1="16" y1="12" x2="16.01" y2="16"/><line x1="8" y1="17" x2="8.01" y2="17"/><line x1="12" y1="17" x2="12.01" y2="17"/><line x1="16" y1="17" x2="16.01" y2="17"/></svg>
                        </span>`
                     : `<input type="number" min="1" value="${info.count}" class="w-12 text-center text-xs bg-transparent border border-border rounded" onchange="APP.setCartQty('${id}', parseInt(this.value) || 1)">`;
 
                 const badge = info.isPortion 
-                    ? '<span class="text-[8px] bg-teal/20 text-teal px-1 rounded font-bold border border-teal/30">PORCIÓN</span>' 
-                    : '<span class="text-[8px] bg-white/10 px-1 rounded font-bold border border-white/20">ENTERO</span>';
+                    ? '<span class="cart-badge-portion">PORCIÓN</span>' 
+                    : '<span class="cart-badge-whole">ENTERO</span>';
                 
                 const displayName = info.name.replace(' (PORCIÓN)', '');
 

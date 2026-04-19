@@ -91,7 +91,7 @@
     </div>
 
     <div id="recipeModal" class="modal">
-        <p class="label-caps mb-8">Escandallos / Nueva Ficha</p>
+        <p class="label-caps mb-8">Nueva Ficha</p>
         <div class="space-y-6 max-h-[60vh] overflow-y-auto">
             <div>
                 <p class="text-[10px] text-muted uppercase font-bold mb-1">Nombre del Plato</p>
@@ -125,19 +125,20 @@
                 </div>
             </div>
 
+            <div id="newRecipeMarginPreview" class="text-[10px] font-bold uppercase tracking-widest py-2 text-muted border-l-2 border-border pl-3">
+            </div>
+
+            <div id="recipeBuilder" class="space-y-4 pt-2"></div>
+            <button onclick="APP.addIngredientRow()" class="label-caps underline hover:text-teal"> + Añadir Insumo
+            </button>
+
             <div>
                 <p class="text-[10px] text-muted uppercase font-bold mb-1">Comentarios / Notas</p>
                 <textarea id="newProdComments" placeholder="Instrucciones o notas adicionales..."
                     class="w-full text-[12px] p-3 border rounded-lg bg-card" rows="3"></textarea>
             </div>
 
-            <div id="recipeBuilder" class="space-y-4 pt-4"></div>
-            <div id="newRecipeMarginPreview" class="text-[10px] font-bold text-teal uppercase tracking-widest pt-2">
-            </div>
-            <button onclick="APP.addIngredientRow()" class="label-caps underline hover:text-teal"> + Añadir Insumo
-            </button>
-
-            <div class="flex gap-4 pt-10">
+            <div class="flex gap-4 pt-6">
                 <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4">Cancelar</button>
                 <button onclick="APP.saveRecipe()"
                     class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest">Crear</button>
@@ -181,19 +182,20 @@
                 </div>
             </div>
 
+            <div id="editRecipeMarginPreview" class="text-[10px] font-bold uppercase tracking-widest py-2 text-muted border-l-2 border-border pl-3">
+            </div>
+
+            <div id="editRecipeBuilder" class="space-y-4 pt-2"></div>
+            <button onclick="APP.addEditIngredientRow()" class="label-caps underline hover:text-teal"> + Añadir Insumo
+            </button>
+
             <div>
                 <p class="text-[10px] text-muted uppercase font-bold mb-1">Comentarios / Notas</p>
                 <textarea id="editProdComments" placeholder="Instrucciones o notas adicionales..."
                     class="w-full text-[12px] p-3 border rounded-lg bg-card" rows="3"></textarea>
             </div>
 
-            <div id="editRecipeBuilder" class="space-y-4 pt-4"></div>
-            <div id="editRecipeMarginPreview" class="text-[10px] font-bold text-teal uppercase tracking-widest pt-2">
-            </div>
-            <button onclick="APP.addEditIngredientRow()" class="label-caps underline hover:text-teal"> + Añadir Insumo
-            </button>
-
-            <div class="flex gap-2 pt-10">
+            <div class="flex gap-2 pt-6">
                 <button onclick="APP.closeAllPopups()" class="w-1/3 label-caps btn-secondary py-4 text-[9px]">Cancelar</button>
                 <button onclick="APP.saveAsNewRecipe()" class="w-1/3 label-caps btn-secondary py-4 text-[9px]">Como Nueva</button>
                 <button onclick="APP.saveEditRecipe()"
