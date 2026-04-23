@@ -147,9 +147,13 @@ const UI = {
                                 <p class="text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
                                     <span class="text-teal">Ver Insumos y Cálculos</span>
                                     <span class="opacity-20">|</span>
-                                    <span class="text-muted">Venta: $${sellingPrice.toFixed(2)}</span>
-                                    <span class="opacity-20">|</span>
-                                    <span class="${actualProfit > 0 ? 'text-green-600' : 'text-red-500'}">Margen: ${actualMargin}%</span>
+                                    <span class="${sellingPrice > 0 ? 'text-muted' : 'text-blue-500'}">
+                                        ${sellingPrice > 0 ? 'Venta' : 'Sugerido'}: $${(sellingPrice > 0 ? sellingPrice : recommendedPrice).toFixed(2)}
+                                    </span>
+                                    ${p.portions > 1 ? `
+                                        <span class="opacity-20">|</span>
+                                        <span class="text-muted">Porción: $${((sellingPrice > 0 ? sellingPrice : recommendedPrice) / p.portions).toFixed(2)}</span>
+                                    ` : ''}
                                 </p>
                             </div>
                             <svg class="details-chevron transition-transform duration-300 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -195,7 +199,6 @@ const UI = {
                                 <div class="p-4 bg-card border-l-4 border-teal rounded-r-xl">
                                     <p class="label-caps mb-1 opacity-50">Costo Total</p>
                                     <p class="font-black text-sm">$${cost.toFixed(2)}</p>
-                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">Margen Esperado: ${expectedMargin}%</p>
                                 </div>
                                 <div class="p-4 bg-card border-l-4 border-orange-400 rounded-r-xl">
                                     <p class="label-caps mb-1 opacity-50">Gasto Servicio</p>
@@ -215,7 +218,6 @@ const UI = {
                                 <div class="p-4 bg-card border-l-4 ${actualProfit > 0 ? 'border-green-500' : 'border-red-500'} rounded-r-xl">
                                     <p class="label-caps mb-1 opacity-50">Ganancia Real</p>
                                     <p class="font-black text-sm ${actualProfit > 0 ? 'text-green-500' : 'text-red-500'}">$${actualProfit.toFixed(2)}</p>
-                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">Margen: ${actualMargin}%</p>
                                 </div>
                             </div>
                         </div>
