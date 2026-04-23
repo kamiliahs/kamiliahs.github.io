@@ -1,6 +1,18 @@
 [
   {
-    "hash": "f2b30a3",
+    "hash": "1763389",
+    "date": "2026-04-22",
+    "name": "mejoras",
+    "description": ""
+  },
+  {
+    "hash": "8305583",
+    "date": "2026-04-22",
+    "name": "feat: refactor recipe display into an interactive accordion and implement dynamic ingredient picker integration",
+    "description": ""
+  },
+  {
+    "hash": "1da707d",
     "date": "2026-04-18",
     "name": "Mejoras en la interfaz",
     "description": ""
