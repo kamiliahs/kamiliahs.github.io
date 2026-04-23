@@ -1185,20 +1185,69 @@ const APP = {
     },
 
     /**
-     * Agregar fila de ingrediente
+     * Agregar fila de ingrediente (Si no hay data, abre el picker)
      */
-    addIngredientRow() {
-        Utils.addIngredientRow();
+    addIngredientRow(data = null) {
+        if (!data) {
+            this.openIngredientPicker(false);
+            return;
+        }
+        Utils.addIngredientRow(data);
     },
 
 
 
 
     /**
-     * Agregar fila de ingrediente en edición
+     * Agregar fila de ingrediente en edición (Si no hay data, abre el picker)
      */
-    addEditIngredientRow() {
-        Utils.addEditIngredientRow();
+    addEditIngredientRow(data = null) {
+        if (!data) {
+            this.openIngredientPicker(true);
+            return;
+        }
+        Utils.addEditIngredientRow(data);
+    },
+
+    // ========== PICKER DE INSUMOS ==========
+
+    openIngredientPicker(isEdit = false) {
+        this._isEditPicker = isEdit;
+        const searchInput = document.getElementById('pickerSearch');
+        if (searchInput) searchInput.value = '';
+        UI.renderIngredientPicker('', isEdit);
+        Utils.openModal('ingredientPickerModal');
+        
+        // Enfocar búsqueda después de abrir
+        setTimeout(() => {
+            if (searchInput) searchInput.focus();
+        }, 300);
+    },
+
+    closeIngredientPicker() {
+        // Al cerrar el picker, no cerramos todo, solo el modal superior
+        const modal = document.getElementById('ingredientPickerModal');
+        if (modal) modal.classList.remove('visible');
+        // No cerramos el overlay si hay otros modales debajo, 
+        // pero en este sistema Utils.closeAllPopups es lo estándar.
+        // Sin embargo, queremos mantener el recipeModal abierto.
+        // Así que solo quitamos la clase visible de este modal específico.
+    },
+
+    filterPicker() {
+        const query = document.getElementById('pickerSearch').value;
+        UI.renderIngredientPicker(query, this._isEditPicker);
+    },
+
+    selectIngredientForRecipe(ingId, isEdit = false) {
+        const data = { id: ingId, qty: '', unit: '', scope: 'all' };
+        if (isEdit) {
+            Utils.addEditIngredientRow(data);
+        } else {
+            Utils.addIngredientRow(data);
+        }
+        this.closeIngredientPicker();
+        Utils.showToast('INSUMO AÑADIDO');
     },
 
     // ========== TURNO (SHIFTS) ==========

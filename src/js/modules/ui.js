@@ -129,58 +129,100 @@ const UI = {
             const expectedProfit = recommendedPrice * (expectedMargin / 100);
 
             return `
-                <div>
-                    <div class="flex justify-between items-end mb-4">
-                        <h4 class="heading-lg">${p.name}</h4>
+                <div class="recipe-item pb-10 line-border">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="label-caps mb-1">${p.icon} FICHA TÉCNICA</p>
+                            <h4 class="heading-lg">${p.name}</h4>
+                        </div>
                         <div class="space-x-4 flex">
-                            <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal">Editar</button>
-                            <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-red-500">Borrar</button>
+                            <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal transition-colors">Editar</button>
+                            <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-red-500 transition-colors">Borrar</button>
                         </div>
                     </div>
-                    <div class="space-y-1 mb-4 max-w-sm">
-                        ${p.recipe.map(r => {
+
+                    <details class="recipe-details group">
+                        <summary class="flex justify-between items-center cursor-pointer list-none py-3 px-4 -mx-4 bg-card rounded-2xl border border-transparent hover:border-border transition-all">
+                            <div class="flex-1">
+                                <p class="text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                                    <span class="text-teal">Ver Insumos y Cálculos</span>
+                                    <span class="opacity-20">|</span>
+                                    <span class="text-muted">Venta: $${sellingPrice.toFixed(2)}</span>
+                                    <span class="opacity-20">|</span>
+                                    <span class="${actualProfit > 0 ? 'text-green-600' : 'text-red-500'}">Margen: ${actualMargin}%</span>
+                                </p>
+                            </div>
+                            <svg class="details-chevron transition-transform duration-300 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </summary>
+
+                        <div class="pt-8 animate-fade-in">
+                            <div class="mb-8">
+                                <p class="label-caps mb-4 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-50"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                    Insumos y Costos
+                                </p>
+                                <div class="space-y-1.5 max-w-md">
+                                    ${p.recipe.map(r => {
                 const ing = Data.ingredients.find(i => i.id === r.id);
                 const unit = r.unit || ing?.unit || '';
                 let costStr = '';
                 if (ing) {
                     const convertedQty = Data.convertUnit(r.qty, unit, ing.unit);
                     const costForQty = ing.cost * convertedQty;
-                    costStr = `<span class="opacity-70 font-bold">$${costForQty.toFixed(2)}</span>`;
+                    costStr = `<span class="font-black text-xs">$${costForQty.toFixed(2)}</span>`;
                 }
                 let scopeLabel = '';
-                if (r.scope === 'whole') scopeLabel = ' <span class="text-[8px] opacity-50 bg-white/10 px-1 rounded ml-1">SOLO ENTERO</span>';
-                else if (r.scope === 'portion') scopeLabel = ' <span class="text-[8px] opacity-50 bg-teal/10 text-teal px-1 rounded ml-1">SOLO PORCIÓN</span>';
+                if (r.scope === 'whole') scopeLabel = ' <span class="text-[7px] font-black bg-white/10 px-1.5 py-0.5 rounded ml-2 opacity-50">SOLO ENTERO</span>';
+                else if (r.scope === 'portion') scopeLabel = ' <span class="text-[7px] font-black bg-teal/10 text-teal px-1.5 py-0.5 rounded ml-2">SOLO PORCIÓN</span>';
 
-                return `<div class="text-[10px] text-muted font-medium uppercase tracking-wider flex justify-between border-b border-white/5 pb-1">
-                            <span class="flex items-center">${r.qty} ${unit} ${ing?.name || '---'}${scopeLabel}</span>
-                            ${costStr}
-                        </div>`;
+                return `<div class="text-[11px] text-muted font-medium uppercase tracking-tight flex justify-between items-center border-b border-border/50 pb-2">
+                                            <span class="flex items-center gap-1">
+                                                <span class="text-main font-bold">${r.qty} ${unit}</span> 
+                                                <span class="opacity-60">${ing?.name || '---'}</span>
+                                                ${scopeLabel}
+                                            </span>
+                                            ${costStr}
+                                        </div>`;
             }).join('')}
-                    </div>
-                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                        <div class="p-3 bg-card border-l-2 border-teal">
-                            <p class="label-caps mb-1 opacity-50">Costo / Margen Esperado</p>
-                            <p class="font-bold text-[11px]">$${cost.toFixed(2)} / ${expectedMargin}% ($${expectedProfit.toFixed(2)})</p>
+                                </div>
+                            </div>
+
+                            <p class="label-caps mb-4 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-50"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                Análisis de Rentabilidad
+                            </p>
+                            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                                <div class="p-4 bg-card border-l-4 border-teal rounded-r-xl">
+                                    <p class="label-caps mb-1 opacity-50">Costo Total</p>
+                                    <p class="font-black text-sm">$${cost.toFixed(2)}</p>
+                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">Margen Esperado: ${expectedMargin}%</p>
+                                </div>
+                                <div class="p-4 bg-card border-l-4 border-orange-400 rounded-r-xl">
+                                    <p class="label-caps mb-1 opacity-50">Gasto Servicio</p>
+                                    <p class="font-black text-sm">$${serviceExpense.toFixed(2)}</p>
+                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">Tasa: ${servicePct}%</p>
+                                </div>
+                                <div class="p-4 bg-card border-l-4 border-purple-400 rounded-r-xl">
+                                    <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? 'Precio Porción' : 'Sin Porciones'}</p>
+                                    <p class="font-black text-sm">${p.portions > 1 ? `$${(sellingPrice / p.portions).toFixed(2)}` : '---'}</p>
+                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">${p.portions > 1 ? `Recomendado: $${(recommendedPrice / p.portions).toFixed(2)}` : 'N/A'}</p>
+                                </div>
+                                <div class="p-4 bg-card border-l-4 border-blue-400 rounded-r-xl">
+                                    <p class="label-caps mb-1 opacity-50">Sugerido (Ideal)</p>
+                                    <p class="font-black text-sm text-blue-500">$${recommendedPrice.toFixed(2)}</p>
+                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">Para ${expectedMargin}% de margen</p>
+                                </div>
+                                <div class="p-4 bg-card border-l-4 ${actualProfit > 0 ? 'border-green-500' : 'border-red-500'} rounded-r-xl">
+                                    <p class="label-caps mb-1 opacity-50">Ganancia Real</p>
+                                    <p class="font-black text-sm ${actualProfit > 0 ? 'text-green-500' : 'text-red-500'}">$${actualProfit.toFixed(2)}</p>
+                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">Margen: ${actualMargin}%</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="p-3 bg-card border-l-2 border-orange-400">
-                            <p class="label-caps mb-1 opacity-50">Gasto Servicio</p>
-                            <p class="font-bold text-[11px]">${servicePct}% ($${serviceExpense.toFixed(2)})</p>
-                        </div>
-                        <div class="p-3 bg-card border-l-2 border-purple-400">
-                            <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? 'Precio por Porción (Def. / Rcmd.)' : 'Sin Porciones'}</p>
-                            <p class="font-bold text-[11px]">${p.portions > 1 ? `$${(sellingPrice / p.portions).toFixed(2)} / $${(recommendedPrice / p.portions).toFixed(2)}` : '---'}</p>
-                        </div>
-                        <div class="p-3 bg-card border-l-2 border-blue-400">
-                            <p class="label-caps mb-1 opacity-50">Precio Recomendado</p>
-                            <p class="font-bold text-[11px]">$${recommendedPrice.toFixed(2)}</p>
-                        </div>
-                        <div class="p-3 bg-card border-l-2 ${actualProfit > 0 ? 'border-green-500' : 'border-red-500'}">
-                            <p class="label-caps mb-1 opacity-50">Precio Total / Margen Real</p>
-                            <p class="font-bold text-[11px]">$${sellingPrice.toFixed(2)} / ${actualMargin}% ($${actualProfit.toFixed(2)})</p>
-                        </div>
-                    </div>
+                    </details>
                 </div>
             `;
+
         }).join('') || '<p class="text-muted text-sm">No se encontraron recetas</p>';
     },
 
@@ -537,6 +579,30 @@ const UI = {
         } else {
             headerProfitEl.innerText = '$0.00';
         }
+    },
+    
+    /**
+     * Renderizar lista de selección de insumos para el picker
+     */
+    renderIngredientPicker(searchQuery = '', isEdit = false) {
+        const list = document.getElementById('pickerList');
+        if (!list) return;
+
+        const query = searchQuery.toLowerCase();
+        const filtered = Data.ingredients.filter(ing => 
+            ing.name.toLowerCase().includes(query)
+        );
+
+        list.innerHTML = filtered.map(ing => `
+            <div class="flex justify-between items-center p-4 bg-card rounded-2xl border border-transparent hover:border-teal active:scale-[0.98] transition-all cursor-pointer" 
+                 onclick="APP.selectIngredientForRecipe('${ing.id}', ${isEdit})">
+                <div>
+                    <p class="font-black text-sm uppercase">${ing.name}</p>
+                    <p class="text-[9px] text-muted font-bold uppercase">$${ing.cost.toFixed(2)} / ${ing.unit}</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-teal"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            </div>
+        `).join('') || '<p class="text-muted text-xs text-center py-8">No se encontraron insumos</p>';
     },
 
     renderAll() {
