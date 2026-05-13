@@ -3,7 +3,7 @@
  * Proporciona funcionalidad offline y caché de recursos
  */
 
-const CACHE_NAME = 'pos-minimalist-v1.0.24';
+const CACHE_NAME = 'pos-minimalist-v1.0.25';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

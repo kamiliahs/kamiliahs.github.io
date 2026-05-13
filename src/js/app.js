@@ -924,8 +924,8 @@ const APP = {
      */
     async shareApp() {
         const shareData = {
-            title: 'Kamiliahs POS',
-            text: 'Prueba Kamiliahs POS, el sistema minimalista de ventas',
+            title: 'Kamiliahs - Gestión Gastronómica',
+            text: 'Kamiliahs - Sistema POS especializado en la creación de recetas gastronómicas.',
             url: 'https://kamiliahs.github.io/'
         };
 
