@@ -1,6 +1,36 @@
 [
   {
-    "hash": "2323f33",
+    "hash": "01a9496",
+    "date": "2026-05-12",
+    "name": "Adding adds",
+    "description": ""
+  },
+  {
+    "hash": "2ef7511",
+    "date": "2026-05-12",
+    "name": "feat: implement dismissible sticky ad unit for A-ADS integration",
+    "description": ""
+  },
+  {
+    "hash": "28b988e",
+    "date": "2026-05-12",
+    "name": "feat: integrate A-ADS responsive advertisement unit into index page",
+    "description": ""
+  },
+  {
+    "hash": "533d234",
+    "date": "2026-05-08",
+    "name": "feat: add robots.txt and sitemap.xml for SEO indexing",
+    "description": ""
+  },
+  {
+    "hash": "6b6fc5e",
+    "date": "2026-05-08",
+    "name": "feat: add Google site verification file for domain ownership validation",
+    "description": ""
+  },
+  {
+    "hash": "f6a4704",
     "date": "2026-04-23",
     "name": "Barra de info recetas",
     "description": ""
