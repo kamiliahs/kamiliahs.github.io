@@ -50,27 +50,27 @@ const Utils = {
 
         // Actualizar títulos
         const titles = {
-            pos: 'VENTAS',
-            shifts: 'TURNOS',
-            inventory: 'INSUMOS',
-            recipes: 'RECETAS',
-            reports: 'ESTADÍSTICAS',
-            orders: 'PEDIDOS',
-            config: 'CONFIGURACIÓN'
+            pos: I18N.t('pos_title'),
+            shifts: I18N.t('shifts_title'),
+            inventory: I18N.t('inventory_title'),
+            recipes: I18N.t('recipes_title'),
+            reports: I18N.t('reports_title'),
+            orders: I18N.t('orders_title'),
+            config: I18N.t('config_title')
         };
 
         const subtitles = {
-            pos: 'OPERACIONES',
-            shifts: 'GESTIÓN TIEMPO',
-            inventory: 'STOCK',
-            recipes: 'RECETAS',
-            reports: 'ESTADÍSTICAS',
-            orders: 'HISTÓRICO',
-            config: 'AJUSTES'
+            pos: I18N.t('pos_subtitle'),
+            shifts: I18N.t('shifts_subtitle'),
+            inventory: I18N.t('inventory_subtitle'),
+            recipes: I18N.t('recipes_subtitle'),
+            reports: I18N.t('reports_subtitle'),
+            orders: I18N.t('orders_subtitle'),
+            config: I18N.t('config_subtitle')
         };
 
-        document.getElementById('viewTitle').innerText = titles[viewId] || 'TERMINAL';
-        document.getElementById('viewSubtitle').innerText = subtitles[viewId] || 'OPERACIONES';
+        document.getElementById('viewTitle').innerText = titles[viewId] || I18N.t('terminal_label');
+        document.getElementById('viewSubtitle').innerText = subtitles[viewId] || I18N.t('pos_subtitle');
 
         // Cerrar menú si está abierto
         if (document.getElementById('sidebar').classList.contains('open')) {
@@ -195,13 +195,13 @@ const Utils = {
                     ${Data.ingredients.map(i => `<option value="${i.id}" ${data?.id === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}
                 </select>
                 <select class="text-[8px] opacity-70 border-none bg-transparent p-0 m-0 recipe-ing-scope">
-                    <option value="all" ${data?.scope === 'all' || !data?.scope ? 'selected' : ''}>Aplicar en: AMBOS</option>
-                    <option value="whole" ${data?.scope === 'whole' ? 'selected' : ''}>Aplicar en: SOLO ENTERO</option>
-                    <option value="portion" ${data?.scope === 'portion' ? 'selected' : ''}>Aplicar en: SOLO PORCIÓN</option>
+                    <option value="all" ${data?.scope === 'all' || !data?.scope ? 'selected' : ''}>${I18N.t('apply_to')}: ${I18N.t('both_label')}</option>
+                    <option value="whole" ${data?.scope === 'whole' ? 'selected' : ''}>${I18N.t('apply_to')}: ${I18N.t('whole_only')}</option>
+                    <option value="portion" ${data?.scope === 'portion' ? 'selected' : ''}>${I18N.t('apply_to')}: ${I18N.t('portion_only')}</option>
                 </select>
             </div>
             <div class="flex items-center gap-1">
-                <input type="number" class="w-16 text-[10px] recipe-ing-qty" placeholder="CANT." min="0" step="0.01" value="${data?.qty || ''}">
+                <input type="number" class="w-16 text-[10px] recipe-ing-qty" placeholder="${I18N.t('qty_placeholder')}" min="0" step="0.01" value="${data?.qty || ''}">
                 <select class="text-[9px] font-bold uppercase border-none bg-transparent recipe-ing-unit"></select>
             </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500 ml-2">✕</button>
@@ -236,13 +236,13 @@ const Utils = {
                     ${Data.ingredients.map(i => `<option value="${i.id}" ${data?.id === i.id ? 'selected' : ''}>${i.name}</option>`).join('')}
                 </select>
                 <select class="text-[8px] opacity-70 border-none bg-transparent p-0 m-0 recipe-edit-ing-scope">
-                    <option value="all" ${data?.scope === 'all' || !data?.scope ? 'selected' : ''}>Aplicar en: AMBOS</option>
-                    <option value="whole" ${data?.scope === 'whole' ? 'selected' : ''}>Aplicar en: SOLO ENTERO</option>
-                    <option value="portion" ${data?.scope === 'portion' ? 'selected' : ''}>Aplicar en: SOLO PORCIÓN</option>
+                    <option value="all" ${data?.scope === 'all' || !data?.scope ? 'selected' : ''}>${I18N.t('apply_to')}: ${I18N.t('both_label')}</option>
+                    <option value="whole" ${data?.scope === 'whole' ? 'selected' : ''}>${I18N.t('apply_to')}: ${I18N.t('whole_only')}</option>
+                    <option value="portion" ${data?.scope === 'portion' ? 'selected' : ''}>${I18N.t('apply_to')}: ${I18N.t('portion_only')}</option>
                 </select>
             </div>
             <div class="flex items-center gap-1">
-                <input type="number" class="w-16 text-[10px] recipe-edit-ing-qty" placeholder="CANT." min="0" step="0.01" value="${data?.qty || ''}">
+                <input type="number" class="w-16 text-[10px] recipe-edit-ing-qty" placeholder="${I18N.t('qty_placeholder')}" min="0" step="0.01" value="${data?.qty || ''}">
                 <select class="text-[9px] font-bold uppercase border-none bg-transparent recipe-edit-ing-unit"></select>
             </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-xs cursor-pointer hover:text-red-500 ml-2">✕</button>

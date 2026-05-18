@@ -17,10 +17,10 @@ const UI = {
                     <div class="w-20 h-20 mb-6 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
-                    <h3 class="heading-lg mb-2 uppercase tracking-tight">Ventas Bloqueadas</h3>
-                    <p class="text-xs text-muted font-bold uppercase mb-8 max-w-[200px]">Debes abrir un turno para poder procesar ventas</p>
+                    <h3 class="heading-lg mb-2 uppercase tracking-tight">${I18N.t('sales_blocked')}</h3>
+                    <p class="text-xs text-muted font-bold uppercase mb-8 max-w-[200px]">${I18N.t('must_open_shift')}</p>
                     <button onclick="APP.openShiftModal()" class="btn-primary px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-teal/20">
-                        Abrir Nuevo Turno
+                        ${I18N.t('new_shift_btn')}
                     </button>
                 </div>
             `;
@@ -45,14 +45,14 @@ const UI = {
                         <button onclick="event.stopPropagation(); APP.addToCart('${p.id}')"
                                 class="pos-btn-whole text-[8px] font-black px-3 py-1.5 rounded transition-all flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
-                            ENTERO · $${p.price.toFixed(2)}
+                            ${I18N.t('whole_label')} · $${p.price.toFixed(2)}
                         </button>
                         <button onclick="event.stopPropagation(); APP.addToCart('${p.id}', true)"
                                 class="pos-btn-portion text-[8px] font-black px-3 py-1.5 rounded transition-all flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-                            PORCIÓN · $${portionPrice}
+                            ${I18N.t('portion_label')} · $${portionPrice}
                         </button>
-                   </div>`
+                    </div>`
                 : `<div>
                         <p class="font-black text-xl">${p.price.toFixed(0)}</p>
                         <p class="text-[9px] font-bold text-muted uppercase">$</p>
@@ -61,7 +61,7 @@ const UI = {
             return `
             <div class="product-card flex justify-between items-center ${hasPortions ? '' : 'cursor-pointer'}" ${hasPortions ? '' : `onclick="APP.addToCart('${p.id}')"`}>
                 <div>
-                    <p class="label-caps mb-1">${p.icon} RECETA</p>
+                    <p class="label-caps mb-1">${p.icon} ${I18N.t('recipe_label')}</p>
                     <h4 class="font-black text-lg leading-none">${p.name}</h4>
                     ${!hasPortions ? `<p class="text-[10px] text-muted mt-0.5">$${p.price.toFixed(2)}</p>` : ''}
                 </div>
@@ -70,7 +70,7 @@ const UI = {
                 </div>
             </div>
         `;
-        }).join('') || '<p class="text-muted text-sm px-6">No se encontraron platos</p>';
+        }).join('') || `<p class="text-muted text-sm px-6">${I18N.t('no_products_found')}</p>`;
     },
 
     /**
@@ -87,17 +87,17 @@ const UI = {
         body.innerHTML = filtered.map(ing => `
             <div class="flex justify-between items-end pb-4 line-border">
                 <div>
-                    <p class="label-caps mb-1">Costo/${ing.unit}</p>
+                    <p class="label-caps mb-1">${I18N.t('cost_per_unit')} / ${ing.unit}</p>
                     <p class="font-black text-sm">${ing.name}</p>
-                    ${ing.packQty > 1 ? `<p class="text-[8px] text-muted uppercase">Pack de ${ing.packQty}</p>` : ''}
+                    ${ing.packQty > 1 ? `<p class="text-[8px] text-muted uppercase">${I18N.t('pack_of')} ${ing.packQty}</p>` : ''}
                 </div>
                 <div class="flex items-center gap-4">
                     <input type="number" value="${ing.cost}" onchange="APP.updateIngredientCost('${ing.id}', this.value)" class="w-20 text-right !p-0">
-                    <button onclick="APP.editIngredient('${ing.id}')" class="text-teal text-[10px] cursor-pointer font-bold">EDITAR</button>
+                    <button onclick="APP.editIngredient('${ing.id}')" class="text-teal text-[10px] cursor-pointer font-bold">${I18N.t('edit_btn')}</button>
                     <button onclick="APP.deleteIngredient('${ing.id}')" class="text-muted text-[10px] cursor-pointer hover:text-red-500">✕</button>
                 </div>
             </div>
-        `).join('') || '<p class="text-muted text-sm">No se encontraron insumos</p>';
+        `).join('') || `<p class="text-muted text-sm">${I18N.t('no_ingredients_found')}</p>`;
     },
 
     /**
@@ -132,12 +132,12 @@ const UI = {
                 <div class="recipe-item pb-10 line-border">
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <p class="label-caps mb-1">${p.icon} FICHA TÉCNICA</p>
+                            <p class="label-caps mb-1">${p.icon} ${I18N.t('recipe_label')}</p>
                             <h4 class="heading-lg">${p.name}</h4>
                         </div>
                         <div class="space-x-4 flex">
-                            <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal transition-colors">Editar</button>
-                            <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-red-500 transition-colors">Borrar</button>
+                            <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal transition-colors">${I18N.t('edit_btn')}</button>
+                            <button onclick="APP.deleteProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-red-500 transition-colors">${I18N.t('delete_btn')}</button>
                         </div>
                     </div>
 
@@ -145,14 +145,14 @@ const UI = {
                         <summary class="flex justify-between items-center cursor-pointer list-none py-3 px-4 -mx-4 bg-card rounded-2xl border border-transparent hover:border-border transition-all">
                             <div class="flex-1">
                                 <p class="text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
-                                    <span class="text-teal">Ver Insumos y Cálculos</span>
+                                    <span class="text-teal">${I18N.t('view_ingredients')}</span>
                                     <span class="opacity-20">|</span>
                                     <span class="${sellingPrice > 0 ? 'text-muted' : 'text-blue-500'}">
-                                        ${sellingPrice > 0 ? 'Venta' : 'Sugerido'}: $${(sellingPrice > 0 ? sellingPrice : recommendedPrice).toFixed(2)}
+                                        ${sellingPrice > 0 ? I18N.t('selling_label') : I18N.t('suggested_label')}: $${(sellingPrice > 0 ? sellingPrice : recommendedPrice).toFixed(2)}
                                     </span>
                                     ${p.portions > 1 ? `
                                         <span class="opacity-20">|</span>
-                                        <span class="text-muted">Porción: $${((sellingPrice > 0 ? sellingPrice : recommendedPrice) / p.portions).toFixed(2)}</span>
+                                        <span class="text-muted">${I18N.t('portion_label')}: $${((sellingPrice > 0 ? sellingPrice : recommendedPrice) / p.portions).toFixed(2)}</span>
                                     ` : ''}
                                 </p>
                             </div>
@@ -163,7 +163,7 @@ const UI = {
                             <div class="mb-8">
                                 <p class="label-caps mb-4 flex items-center gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-50"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                    Insumos y Costos
+                                    ${I18N.t('ingredients_label')}
                                 </p>
                                 <div class="space-y-1.5 max-w-md">
                                     ${p.recipe.map(r => {
@@ -176,8 +176,8 @@ const UI = {
                     costStr = `<span class="font-black text-xs">$${costForQty.toFixed(2)}</span>`;
                 }
                 let scopeLabel = '';
-                if (r.scope === 'whole') scopeLabel = ' <span class="text-[7px] font-black bg-white/10 px-1.5 py-0.5 rounded ml-2 opacity-50">SOLO ENTERO</span>';
-                else if (r.scope === 'portion') scopeLabel = ' <span class="text-[7px] font-black bg-teal/10 text-teal px-1.5 py-0.5 rounded ml-2">SOLO PORCIÓN</span>';
+                if (r.scope === 'whole') scopeLabel = ` <span class="text-[7px] font-black bg-white/10 px-1.5 py-0.5 rounded ml-2 opacity-50 uppercase">${I18N.t('whole_only')}</span>`;
+                else if (r.scope === 'portion') scopeLabel = ` <span class="text-[7px] font-black bg-teal/10 text-teal px-1.5 py-0.5 rounded ml-2 uppercase">${I18N.t('portion_only')}</span>`;
 
                 return `<div class="text-[11px] text-muted font-medium uppercase tracking-tight flex justify-between items-center border-b border-border/50 pb-2">
                                             <span class="flex items-center gap-1">
@@ -193,30 +193,30 @@ const UI = {
 
                             <p class="label-caps mb-4 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-50"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                Análisis de Rentabilidad
+                                ${I18N.t('profitability_label')}
                             </p>
                             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                                 <div class="p-4 bg-card border-l-4 border-teal rounded-r-xl">
-                                    <p class="label-caps mb-1 opacity-50">Costo Total</p>
+                                    <p class="label-caps mb-1 opacity-50">${I18N.t('total_cost')}</p>
                                     <p class="font-black text-sm">$${cost.toFixed(2)}</p>
                                 </div>
                                 <div class="p-4 bg-card border-l-4 border-orange-400 rounded-r-xl">
-                                    <p class="label-caps mb-1 opacity-50">Gasto Servicio</p>
+                                    <p class="label-caps mb-1 opacity-50">${I18N.t('service_expense')}</p>
                                     <p class="font-black text-sm">$${serviceExpense.toFixed(2)}</p>
-                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">Tasa: ${servicePct}%</p>
+                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">${I18N.t('rate_label')}: ${servicePct}%</p>
                                 </div>
                                 <div class="p-4 bg-card border-l-4 border-purple-400 rounded-r-xl">
-                                    <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? 'Precio Porción' : 'Sin Porciones'}</p>
+                                    <p class="label-caps mb-1 opacity-50">${p.portions > 1 ? I18N.t('portion_price') : I18N.t('no_portions')}</p>
                                     <p class="font-black text-sm">${p.portions > 1 ? `$${(sellingPrice / p.portions).toFixed(2)}` : '---'}</p>
-                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">${p.portions > 1 ? `Recomendado: $${(recommendedPrice / p.portions).toFixed(2)}` : 'N/A'}</p>
+                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">${p.portions > 1 ? `${I18N.t('suggested_label')}: $${(recommendedPrice / p.portions).toFixed(2)}` : 'N/A'}</p>
                                 </div>
                                 <div class="p-4 bg-card border-l-4 border-blue-400 rounded-r-xl">
-                                    <p class="label-caps mb-1 opacity-50">Sugerido (Ideal)</p>
+                                    <p class="label-caps mb-1 opacity-50">${I18N.t('suggested_label')} (${I18N.t('ideal_label')})</p>
                                     <p class="font-black text-sm text-blue-500">$${recommendedPrice.toFixed(2)}</p>
-                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">Para ${expectedMargin}% de margen</p>
+                                    <p class="text-[8px] text-muted mt-1 uppercase font-bold">${I18N.t('for_label')} ${expectedMargin}% ${I18N.t('margin_label')}</p>
                                 </div>
                                 <div class="p-4 bg-card border-l-4 ${actualProfit > 0 ? 'border-green-500' : 'border-red-500'} rounded-r-xl">
-                                    <p class="label-caps mb-1 opacity-50">Ganancia Real</p>
+                                    <p class="label-caps mb-1 opacity-50">${I18N.t('actual_profit')}</p>
                                     <p class="font-black text-sm ${actualProfit > 0 ? 'text-green-500' : 'text-red-500'}">$${actualProfit.toFixed(2)}</p>
                                 </div>
                             </div>
@@ -225,7 +225,7 @@ const UI = {
                 </div>
             `;
 
-        }).join('') || '<p class="text-muted text-sm">No se encontraron recetas</p>';
+        }).join('') || `<p class="text-muted text-sm">${I18N.t('no_recipes_found')}</p>`;
     },
 
     /**
@@ -275,35 +275,35 @@ const UI = {
         document.getElementById('repTotalCost').innerText = stats.totalCosts.toFixed(2);
         document.getElementById('repNetProfit').innerText = stats.netProfit.toFixed(2);
         
-        document.getElementById('repMarginAvg').innerText = `${stats.marginPercentage.toFixed(1)}% margen ($${stats.netProfit.toFixed(2)})`;
+        document.getElementById('repMarginAvg').innerText = `${stats.marginPercentage.toFixed(1)}% ${I18N.t('margin_label')} ($${stats.netProfit.toFixed(2)})`;
 
         const breakdown = document.getElementById('profitBreakdown');
         breakdown.innerHTML = profitByProduct.length > 0 ? profitByProduct.map(item => `
             <div class="pb-6 line-border">
                 <div class="flex justify-between items-center mb-2">
                     <p class="font-bold text-sm">${item.name}</p>
-                    <p class="text-xs text-muted">${item.count} venta${item.count > 1 ? 's' : ''}</p>
+                    <p class="text-xs text-muted">${item.count} ${item.count > 1 ? I18N.t('sales_label') : I18N.t('sale_label')}</p>
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-[10px]">
                     <div>
-                        <p class="label-caps mb-1 flex items-center gap-1">Ventas / Costos <button onclick="APP.showInfo('ventasCostos')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
+                        <p class="label-caps mb-1 flex items-center gap-1">${I18N.t('sales_label')} / ${I18N.t('costs_label')} <button onclick="APP.showInfo('ventasCostos')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
                         <p class="font-bold">$${item.totalRevenue.toFixed(2)} / $${item.totalCost.toFixed(2)}</p>
                     </div>
                     <div>
-                        <p class="label-caps mb-1 flex items-center gap-1">Gasto Servicio <button onclick="APP.showInfo('gastoServicio')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
+                        <p class="label-caps mb-1 flex items-center gap-1">${I18N.t('service_expense')} <button onclick="APP.showInfo('gastoServicio')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
                         <p class="font-bold">${item.totalRevenue > 0 ? (item.totalService / item.totalRevenue * 100).toFixed(1) : 0}% ($${item.totalService.toFixed(2)})</p>
                     </div>
                     <div>
-                        <p class="label-caps mb-1 flex items-center gap-1">Ganancia neta <button onclick="APP.showInfo('gananciaNeta')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
+                        <p class="label-caps mb-1 flex items-center gap-1">${I18N.t('net_profit')} <button onclick="APP.showInfo('gananciaNeta')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
                         <p class="font-bold text-teal">$${item.profit.toFixed(2)}</p>
                     </div>
                     <div>
-                        <p class="label-caps mb-1 flex items-center gap-1">Margen Real <button onclick="APP.showInfo('margenReal')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
+                        <p class="label-caps mb-1 flex items-center gap-1">${I18N.t('actual_margin')} <button onclick="APP.showInfo('margenReal')" class="text-teal text-[12px] opacity-70 hover:opacity-100">ⓘ</button></p>
                         <p class="font-bold">${item.margin.toFixed(1)}% ($${item.profit.toFixed(2)})</p>
                     </div>
                 </div>
             </div>
-        `).join('') : '<p class="text-muted text-sm">Sin datos para estos filtros</p>';
+        `).join('') : `<p class="text-muted text-sm">${I18N.t('no_data_filters')}</p>`;
     },
 
     /**
@@ -334,8 +334,8 @@ const UI = {
                     : `<input type="number" min="1" value="${info.count}" class="w-12 text-center text-xs bg-transparent border border-border rounded" onchange="APP.setCartQty('${id}', parseInt(this.value) || 1)">`;
 
                 const badge = info.isPortion 
-                    ? '<span class="cart-badge-portion">PORCIÓN</span>' 
-                    : '<span class="cart-badge-whole">ENTERO</span>';
+                    ? `<span class="cart-badge-portion">${I18N.t('portion_label')}</span>` 
+                    : `<span class="cart-badge-whole">${I18N.t('whole_label')}</span>`;
                 
                 const displayName = info.name.replace(' (PORCIÓN)', '');
 
@@ -354,7 +354,7 @@ const UI = {
                 </div>`;
             }).join('');
         } else {
-            itemsContainer.innerHTML = '<span class="text-muted text-xs">Carrito vacío</span>';
+            itemsContainer.innerHTML = `<span class="text-muted text-xs">${I18N.t('empty_cart')}</span>`;
         }
 
         document.getElementById('cartTotal').innerText = total.toFixed(2);
@@ -383,7 +383,7 @@ const UI = {
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = `<p class="text-muted text-sm">No se encontraron pedidos ${shiftId ? 'en este turno' : ''}</p>`;
+            container.innerHTML = `<p class="text-muted text-sm">${I18N.t('no_orders_found')} ${shiftId ? I18N.t('in_this_shift') : ''}</p>`;
             return;
         }
 
@@ -414,15 +414,15 @@ const UI = {
                     </div>
                     <div class="text-right">
                         <p class="font-black text-sm">$${sale.total.toFixed(2)}</p>
-                        <p class="text-[9px] ${sale.paid ? 'text-teal font-bold' : 'text-red-500'}">${sale.paid ? 'PAGADO' : 'PENDIENTE'}</p>
+                        <p class="text-[9px] ${sale.paid ? 'text-teal font-bold' : 'text-red-500'}">${sale.paid ? I18N.t('paid_label') : I18N.t('unpaid_label')}</p>
                     </div>
                 </div>
                 <div class="flex justify-between items-end">
                     <p class="text-[10px] text-muted truncate max-w-[180px]">${summaryText}</p>
                     <div class="flex gap-3 text-[9px] font-black tracking-widest uppercase">
-                        <span class="text-muted/60">Costo: ${saleCost.toFixed(2)}</span>
-                        <span class="text-orange-400">Servicio: ${saleServiceExpense.toFixed(2)}</span>
-                        <span class="text-teal">Neto: ${saleNetProfit.toFixed(2)}</span>
+                        <span class="text-muted/60">${I18N.t('costs_label')}: ${saleCost.toFixed(2)}</span>
+                        <span class="text-orange-400">${I18N.t('service_expense')}: ${saleServiceExpense.toFixed(2)}</span>
+                        <span class="text-teal">${I18N.t('net_label')}: ${saleNetProfit.toFixed(2)}</span>
                     </div>
                 </div>
             </div>
@@ -444,10 +444,10 @@ const UI = {
         unitsList.innerHTML = (s.units || []).map(u => `
             <div class="flex justify-between items-center text-sm p-4 bg-card rounded">
                 <div class="flex-1">
-                    <input type="text" class="text-xs w-24 border-0 bg-transparent font-bold" value="${u.symbol}" readonly data-unit-symbol="${u.symbol}" class="unitSymbolInput">
-                    <span class="text-xs text-muted ml-2">${u.name}</span>
+                    <input type="text" class="text-xs w-24 border-0 bg-transparent font-bold unitSymbolInput" value="${u.symbol}" readonly data-unit-symbol="${u.symbol}">
+                    <span class="text-xs text-muted ml-2">${I18N.t(u.name)}</span>
                 </div>
-                <button class="text-blue-500 text-xs mr-2" onclick="APP.openEditUnitModal('${u.symbol}', '${u.name}')">Editar</button>
+                <button class="text-blue-500 text-xs mr-2" onclick="APP.openEditUnitModal('${u.symbol}', '${u.name}')">${I18N.t('edit_btn')}</button>
                 <button class="text-red-500 text-xs" onclick="APP.deleteUnit('${u.symbol}')">✕</button>
             </div>
         `).join('');
@@ -472,10 +472,10 @@ const UI = {
         // Populate selects for creating equivalence
         const fromSelect = document.getElementById('eqFromUnit');
         const toSelect = document.getElementById('eqToUnit');
-        const options = (s.units || []).map(u => `<option value="${u.symbol}">${u.symbol.toUpperCase()} (${u.name})</option>`).join('');
+        const options = (s.units || []).map(u => `<option value="${u.symbol}">${u.symbol.toUpperCase()} (${I18N.t(u.name)})</option>`).join('');
 
-        fromSelect.innerHTML = '<option value="">De --</option>' + options;
-        toSelect.innerHTML = '<option value="">A --</option>' + options;
+        fromSelect.innerHTML = `<option value="">${I18N.t('from_label')}</option>` + options;
+        toSelect.innerHTML = `<option value="">${I18N.t('to_label')}</option>` + options;
 
     },
 
@@ -511,7 +511,7 @@ const UI = {
         if (activeShift) {
             activeBanner.classList.remove('hidden');
             activeName.innerText = activeShift.name;
-            activeInfo.innerText = `${activeShift.date} · DESDE ${new Date(activeShift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            activeInfo.innerText = `${activeShift.date} · ${I18N.t('from_label').toUpperCase()} ${new Date(activeShift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
         } else {
             activeBanner.classList.add('hidden');
         }
@@ -535,7 +535,7 @@ const UI = {
                         <div>
                             <div class="flex items-center gap-2 mb-1">
                                 <p class="label-caps">${s.date}</p>
-                                ${isActive ? '<span class="px-2 py-0.5 bg-teal text-white text-[8px] font-black rounded-full">EN CURSO</span>' : ''}
+                                ${isActive ? `<span class="px-2 py-0.5 bg-teal text-white text-[8px] font-black rounded-full">${I18N.t('active_tag')}</span>` : ''}
                             </div>
                             <h4 class="heading-lg">${s.name}</h4>
                             <p class="text-[10px] text-muted font-bold uppercase">
@@ -544,28 +544,28 @@ const UI = {
                             </p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="APP.editShift('${s.id}')" class="text-teal text-[10px] font-black uppercase hover:underline">Editar</button>
-                            ${!isActive ? `<button onclick="APP.deleteShift('${s.id}')" class="text-red-500 text-[10px] font-black uppercase hover:underline">Borrar</button>` : ''}
+                            <button onclick="APP.editShift('${s.id}')" class="text-teal text-[10px] font-black uppercase hover:underline">${I18N.t('edit_btn')}</button>
+                            ${!isActive ? `<button onclick="APP.deleteShift('${s.id}')" class="text-red-500 text-[10px] font-black uppercase hover:underline">${I18N.t('delete_btn')}</button>` : ''}
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-4 border-t border-border pt-4 mt-2">
                         <div>
-                            <p class="label-caps opacity-50 mb-1">Ventas</p>
+                            <p class="label-caps opacity-50 mb-1">${I18N.t('sales_label')}</p>
                             <p class="font-black text-sm">$${totalRevenue.toFixed(2)}</p>
-                            <p class="text-[8px] text-muted">${shiftSales.length} transacciones</p>
+                            <p class="text-[8px] text-muted">${shiftSales.length} ${I18N.t('transaction_count')}</p>
                         </div>
                         <div>
-                            <p class="label-caps opacity-50 mb-1 text-teal">Neto</p>
+                            <p class="label-caps opacity-50 mb-1 text-teal">${I18N.t('net_label')}</p>
                             <p class="font-black text-sm text-teal">$${totalProfit.toFixed(2)}</p>
                         </div>
                         <div class="text-right">
-                             <button onclick="APP.viewShiftSales('${s.id}')" class="label-caps underline hover:text-teal">Detalle</button>
+                             <button onclick="APP.viewShiftSales('${s.id}')" class="label-caps underline hover:text-teal">${I18N.t('detail_btn')}</button>
                         </div>
                     </div>
                 </div>
             `;
-        }).join('') || '<p class="text-muted text-sm italic">No hay historial de turnos</p>';
+        }).join('') || `<p class="text-muted text-sm italic">${I18N.t('no_shift_history')}</p>`;
     },
 
     /**
@@ -604,7 +604,7 @@ const UI = {
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-teal"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
             </div>
-        `).join('') || '<p class="text-muted text-xs text-center py-8">No se encontraron insumos</p>';
+        `).join('') || `<p class="text-muted text-xs text-center py-8">${I18N.t('no_ingredients_found')}</p>`;
     },
 
     renderAll() {

@@ -18,6 +18,7 @@ const Data = {
             { symbol: 'pza', name: 'Pieza' }
         ],
         equivalences: {},
+        lang: 'es'
     },
 
     /**

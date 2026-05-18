@@ -8,12 +8,27 @@ const APP = {
     swRegistration: null,
 
     /**
+     * Cambiar idioma de la aplicación
+     */
+    changeLanguage(lang) {
+        I18N.setLang(lang);
+        Data.updateSettings({ lang: lang });
+        UI.renderAll();
+        UI.renderConfig();
+        // Recargar pos si es necesario o disparar eventos
+        Utils.showToast(I18N.t('settings_saved'));
+    },
+
+    /**
      * Inicializar aplicación
      */
     init() {
         // Inicializar datos (incluye settings)
         Data.init();
 
+        // Inicializar i18n
+        I18N.init(Data.settings.lang || 'es');
+        I18N.translatePage();
 
         // Aplicar tema guardado
         this.applyTheme(Data.settings.theme);
@@ -109,12 +124,12 @@ const APP = {
         const packQty = packQtyInput ? parseFloat(packQtyInput.value) || 1 : 1;
 
         if (!name) {
-            Utils.showToast('Nombre requerido');
+            Utils.showToast(I18N.t('name_required'));
             return;
         }
 
         if (isNaN(packCost) || packCost < 0) {
-            Utils.showToast('Costo inválido');
+            Utils.showToast(I18N.t('invalid_cost'));
             return;
         }
 
@@ -124,7 +139,7 @@ const APP = {
         Data.addIngredient(name, unitCost, unit, packQty);
         UI.renderInventory();
         Utils.closeAllPopups();
-        Utils.showToast('INSUMO GUARDADO');
+        Utils.showToast(I18N.t('ingredient_saved'));
 
         // Limpiar campos
         document.getElementById('newIngName').value = '';
@@ -139,23 +154,23 @@ const APP = {
         const cost = parseFloat(value);
 
         if (isNaN(cost) || cost < 0) {
-            Utils.showToast('Costo inválido');
+            Utils.showToast(I18N.t('invalid_cost'));
             return;
         }
 
         Data.updateIngredientCost(id, cost);
         UI.renderAll();
-        Utils.showToast('COSTO ACTUALIZADO');
+        Utils.showToast(I18N.t('cost_updated'));
     },
 
     /**
      * Eliminar ingrediente
      */
     deleteIngredient(id) {
-        if (confirm('¿Eliminar este insumo?')) {
+        if (confirm(I18N.t('confirm_delete_ingredient'))) {
             Data.deleteIngredient(id);
             UI.renderAll();
-            Utils.showToast('INSUMO ELIMINADO');
+            Utils.showToast(I18N.t('ingredient_deleted'));
         }
     },
 
@@ -170,12 +185,12 @@ const APP = {
         const price = parseFloat(document.getElementById('newProdPrice').value);
 
         if (!name) {
-            Utils.showToast('Nombre requerido');
+            Utils.showToast(I18N.t('name_required'));
             return;
         }
 
         if (isNaN(price) || price < 0) {
-            Utils.showToast('Precio inválido');
+            Utils.showToast(I18N.t('invalid_price'));
             return;
         }
 
@@ -201,7 +216,7 @@ const APP = {
         });
 
         if (recipe.length === 0) {
-            Utils.showToast('Agregar al menos un insumo');
+            Utils.showToast(I18N.t('add_at_least_one'));
             return;
         }
 
@@ -213,17 +228,17 @@ const APP = {
         const product = Data.addProduct(name, icon, price, recipe, service, margin, portions, comments);
         UI.renderAll();
         Utils.closeAllPopups();
-        Utils.showToast('RECETA CREADA');
+        Utils.showToast(I18N.t('recipe_created'));
     },
 
     /**
      * Eliminar producto
      */
     deleteProduct(id) {
-        if (confirm('¿Eliminar esta receta?')) {
+        if (confirm(I18N.t('confirm_delete_recipe'))) {
             Data.deleteProduct(id);
             UI.renderAll();
-            Utils.showToast('RECETA ELIMINADA');
+            Utils.showToast(I18N.t('recipe_deleted'));
         }
     },
 
@@ -257,12 +272,12 @@ const APP = {
         const packQty = packQtyInput ? parseFloat(packQtyInput.value) || 1 : 1;
 
         if (!name) {
-            Utils.showToast('Nombre requerido');
+            Utils.showToast(I18N.t('name_required'));
             return;
         }
 
         if (isNaN(packCost) || packCost < 0) {
-            Utils.showToast('Costo inválido');
+            Utils.showToast(I18N.t('invalid_cost'));
             return;
         }
 
@@ -271,7 +286,7 @@ const APP = {
         Data.updateIngredient(id, name, unitCost, unit, packQty);
         UI.renderAll();
         Utils.closeAllPopups();
-        Utils.showToast('INSUMO ACTUALIZADO');
+        Utils.showToast(I18N.t('ingredient_updated'));
     },
 
     /**
@@ -308,12 +323,12 @@ const APP = {
         const price = parseFloat(document.getElementById('editProdPrice').value);
 
         if (!name) {
-            Utils.showToast('Nombre requerido');
+            Utils.showToast(I18N.t('name_required'));
             return;
         }
 
         if (isNaN(price) || price < 0) {
-            Utils.showToast('Precio inválido');
+            Utils.showToast(I18N.t('invalid_price'));
             return;
         }
 
@@ -338,7 +353,7 @@ const APP = {
         });
 
         if (recipe.length === 0) {
-            Utils.showToast('Agregar al menos un insumo');
+            Utils.showToast(I18N.t('add_at_least_one'));
             return;
         }
 
@@ -350,7 +365,7 @@ const APP = {
         Data.addProduct(name, icon, price, recipe, service, margin, portions, comments);
         UI.renderAll();
         Utils.closeAllPopups();
-        Utils.showToast('RECETA CREADA (COPIA)');
+        Utils.showToast(I18N.t('recipe_created_copy'));
     },
 
     /**
@@ -363,12 +378,12 @@ const APP = {
         const price = parseFloat(document.getElementById('editProdPrice').value);
 
         if (!name) {
-            Utils.showToast('Nombre requerido');
+            Utils.showToast(I18N.t('name_required'));
             return;
         }
 
         if (isNaN(price) || price < 0) {
-            Utils.showToast('Precio inválido');
+            Utils.showToast(I18N.t('invalid_price'));
             return;
         }
 
@@ -393,7 +408,7 @@ const APP = {
         });
 
         if (recipe.length === 0) {
-            Utils.showToast('Agregar al menos un insumo');
+            Utils.showToast(I18N.t('add_at_least_one'));
             return;
         }
 
@@ -404,7 +419,7 @@ const APP = {
         Data.updateProduct(id, name, icon, price, recipe, service, margin, portions, comments);
         UI.renderAll();
         Utils.closeAllPopups();
-        Utils.showToast('RECETA ACTUALIZADA');
+        Utils.showToast(I18N.t('recipe_updated'));
     },
 
     /**
@@ -455,7 +470,7 @@ const APP = {
 
         const previewEl = document.getElementById(`${prefix}RecipeMarginPreview`);
         if (previewEl) {
-            previewEl.innerText = `Costo Est: $${totalCost.toFixed(2)} | Margen Real: ${margin}% | Porción: $${pricePerPortion}`;
+            previewEl.innerText = `${I18N.t('est_cost')}: $${totalCost.toFixed(2)} | ${I18N.t('actual_margin')}: ${margin}% | ${I18N.t('portion_label')}: $${pricePerPortion}`;
         }
     },
 
@@ -468,7 +483,7 @@ const APP = {
         const item = Data.addToCart(productId, asPortion);
         if (item) {
             UI.updateCartUI();
-            Utils.showToast(`${item.name} AGREGADO`);
+            Utils.showToast(`${item.name} ${I18N.t('added_toast')}`);
         }
     },
 
@@ -550,21 +565,21 @@ const APP = {
      */
     checkout() {
         if (Data.cart.length === 0) {
-            Utils.showToast('Carrito vacío');
+            Utils.showToast(I18N.t('empty_cart'));
             return;
         }
 
         const total = Data.getCartTotal();
         const count = Data.cart.length;
 
-        if (confirm(`¿Confirmar venta de ${count} artículo(s) por $${total.toFixed(2)}?`)) {
+        if (confirm(`${I18N.t('confirm_checkout')} ${count} ${I18N.t('items_label')}(s) ${I18N.t('for_label')} $${total.toFixed(2)}?`)) {
             const result = Data.checkout();
             if (result === true) {
                 UI.updateCartUI();
                 UI.renderReports();
-                Utils.showToast('TRANSACCIÓN COMPLETADA');
+                Utils.showToast(I18N.t('transaction_completed'));
             } else if (result && result.error === 'NO_ACTIVE_SHIFT') {
-                Utils.showToast('⚠️ ERROR: DEBES ABRIR UN TURNO PRIMERO');
+                Utils.showToast(`⚠️ ${I18N.t('error_label').toUpperCase()}: ${I18N.t('must_open_shift').toUpperCase()}`);
                 this.switchView('shifts');
             }
         }
@@ -596,23 +611,23 @@ const APP = {
         const statusSpan = document.getElementById('orderPaidStatus');
         const markBtn = document.getElementById('markPaidBtn');
         if (sale.paid) {
-            statusSpan.innerText = 'Estado: Pagado';
-            markBtn.innerText = 'Desmarcar pago';
+            statusSpan.innerText = `${I18N.t('status_label')}: ${I18N.t('paid_label')}`;
+            markBtn.innerText = I18N.t('unmark_paid_btn');
         } else {
-            statusSpan.innerText = 'Estado: No pagado';
-            markBtn.innerText = 'Marcar pagado';
+            statusSpan.innerText = `${I18N.t('status_label')}: ${I18N.t('unpaid_label')}`;
+            markBtn.innerText = I18N.t('mark_paid_btn');
         }
         // deshabilitar edición de precio si está pagado
         document.getElementById('orderEditPrice').disabled = sale.paid;
 
         // populate product select
         const select = document.getElementById('addItemSelect');
-        let options = '<option value="">-- Añadir producto --</option>';
+        let options = `<option value="">-- ${I18N.t('add_product_label')} --</option>`;
         Data.products.forEach(p => {
             options += `<option value="${p.id}">${p.name} - $${p.price.toFixed(2)}</option>`;
             if (p.portions > 1) {
                 const portionPrice = p.price / p.portions;
-                options += `<option value="${p.id}_portion">${p.name} (POR.) - $${portionPrice.toFixed(2)}</option>`;
+                options += `<option value="${p.id}_portion">${p.name} (${I18N.t('portion_short')}) - $${portionPrice.toFixed(2)}</option>`;
             }
         });
         select.innerHTML = options;
@@ -674,7 +689,7 @@ const APP = {
         if (newPrice && !isNaN(parseFloat(newPrice))) {
             const price = parseFloat(newPrice);
             if (price < 0) {
-                Utils.showToast('Precio inválido');
+                Utils.showToast(I18N.t('invalid_price'));
                 return;
             }
             Data.updateSale(saleId, price);
@@ -682,7 +697,7 @@ const APP = {
 
         UI.renderAll();
         Utils.closeAllPopups();
-        Utils.showToast('PEDIDO ACTUALIZADO');
+        Utils.showToast(I18N.t('order_updated'));
     },
 
     /**
@@ -692,14 +707,14 @@ const APP = {
         const saleId = document.getElementById('orderDetailModal').dataset.saleId;
         const sale = Data.getSale(saleId);
         if (sale && sale.paid) {
-            Utils.showToast('No se puede eliminar un pedido pagado');
+            Utils.showToast(I18N.t('cannot_delete_paid'));
             return;
         }
-        if (confirm('¿Eliminar este pedido?')) {
+        if (confirm(I18N.t('confirm_delete_order'))) {
             Data.deleteSale(saleId);
             UI.renderAll();
             Utils.closeAllPopups();
-            Utils.showToast('PEDIDO ELIMINADO');
+            Utils.showToast(I18N.t('order_deleted'));
         }
     },
 
@@ -742,7 +757,7 @@ const APP = {
 
             sale.items.push({
                 id: cartItemId,
-                name: isPortion ? product.name + ' (PORCIÓN)' : product.name,
+                name: isPortion ? product.name + ` (${I18N.t('portion_label')})` : product.name,
                 price: itemPrice,
                 cost: itemCost,
                 servicePct: servicePct,
@@ -770,10 +785,10 @@ const APP = {
      * Vaciar listado de pedidos
      */
     clearOrders() {
-        if (confirm('¿Vaciar todo el historial de pedidos? Esta acción no se puede deshacer.')) {
+        if (confirm(I18N.t('confirm_clear_history'))) {
             Data.clearSales();
             this.switchView('orders');
-            Utils.showToast('HISTORIAL VACIADO');
+            Utils.showToast(I18N.t('history_cleared'));
         }
     },
 
@@ -871,7 +886,7 @@ const APP = {
         a.download = `backup-kamiliahs-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        Utils.showToast('BACKUP GENERADO');
+        Utils.showToast(I18N.t('backup_generated'));
     },
 
     /**
@@ -885,18 +900,18 @@ const APP = {
         reader.onload = (e) => {
             try {
                 const data = JSON.parse(e.target.result);
-                if (confirm('¿Importar respaldo? Los datos actuales serán reemplazados por completo.')) {
+                if (confirm(I18N.t('confirm_import_backup'))) {
                     if (Data.importFullAppData(data)) {
-                        Utils.showToast('RESTAURACIÓN COMPLETADA');
+                        Utils.showToast(I18N.t('restoration_completed'));
                         // Reiniciar app para refrescar todo
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
-                        Utils.showToast('Archivo incompatible');
+                        Utils.showToast(I18N.t('incompatible_file'));
                     }
                 }
             } catch (err) {
                 console.error(err);
-                Utils.showToast('Error de lectura JSON');
+                Utils.showToast(I18N.t('json_read_error'));
             }
             event.target.value = ''; // permitir re-importar el mismo archivo
         };
@@ -934,7 +949,7 @@ const APP = {
                 await navigator.share(shareData);
             } else {
                 await navigator.clipboard.writeText(shareData.url);
-                Utils.showToast('ENLACE COPIADO AL PORTAPAPELES');
+                Utils.showToast(I18N.t('link_copied'));
             }
         } catch (err) {
             if (err.name !== 'AbortError') {
@@ -997,7 +1012,7 @@ const APP = {
                 if (this.swRegistration.waiting) {
                     this.showUpdateToast();
                 } else {
-                    Utils.showToast('SISTEMA AL DÍA');
+                    Utils.showToast(I18N.t('system_up_to_date'));
                 }
             });
         }
@@ -1015,7 +1030,7 @@ const APP = {
             const title = document.getElementById('changelogTitle');
             const desc = document.getElementById('changelogDesc');
             
-            if (label) label.innerText = `Versión Actual: ${data.version} (${data.date})`;
+            if (label) label.innerText = `${I18N.t('current_version')}: ${data.version} (${data.date})`;
             if (title) title.innerText = data.name;
             if (desc) desc.innerText = data.description;
         } catch (err) {
@@ -1080,7 +1095,7 @@ const APP = {
 
         this.applyTheme(theme);
 
-        Utils.showToast('Configuración guardada');
+        Utils.showToast(I18N.t('settings_saved'));
     },
 
     /**
@@ -1091,7 +1106,7 @@ const APP = {
         const name = document.getElementById('newUnitName').value.trim();
 
         if (!symbol || !name) {
-            Utils.showToast('Complete símbolo y nombre');
+            Utils.showToast(I18N.t('complete_fields'));
             return;
         }
 
@@ -1099,9 +1114,9 @@ const APP = {
             document.getElementById('newUnitSymbol').value = '';
             document.getElementById('newUnitName').value = '';
             UI.renderConfig();
-            Utils.showToast(`Unidad "${symbol}" agregada`);
+            Utils.showToast(`${I18N.t('unit_label')} "${symbol}" ${I18N.t('added_toast')}`);
         } else {
-            Utils.showToast('Unidad duplicada o inválida');
+            Utils.showToast(I18N.t('duplicate_unit_error'));
         }
     },
 
@@ -1116,9 +1131,9 @@ const APP = {
 
         if (Data.editUnit(symbol, newSymbol, newName)) {
             UI.renderConfig();
-            Utils.showToast('Unidad actualizada');
+            Utils.showToast(I18N.t('unit_updated'));
         } else {
-            Utils.showToast('Error al actualizar unidad');
+            Utils.showToast(I18N.t('update_unit_error'));
         }
     },
 
@@ -1126,13 +1141,13 @@ const APP = {
      * Eliminar unidad de medida
      */
     deleteUnit(symbol) {
-        if (!confirm(`¿Eliminar la unidad "${symbol}"?`)) return;
+        if (!confirm(`${I18N.t('confirm_delete_unit')} "${symbol}"?`)) return;
 
         if (Data.deleteUnit(symbol)) {
             UI.renderConfig();
-            Utils.showToast(`Unidad "${symbol}" eliminada`);
+            Utils.showToast(`${I18N.t('unit_label')} "${symbol}" ${I18N.t('deleted_toast')}`);
         } else {
-            Utils.showToast('Error al eliminar unidad');
+            Utils.showToast(I18N.t('delete_unit_error'));
         }
     },
 
@@ -1145,7 +1160,7 @@ const APP = {
         const toUnit = document.getElementById('eqToUnit').value;
 
         if (!fromUnit || !toUnit || !ratio) {
-            Utils.showToast('Complete todos los campos');
+            Utils.showToast(I18N.t('complete_fields'));
             return;
         }
 
@@ -1154,9 +1169,9 @@ const APP = {
             document.getElementById('eqFromUnit').value = '';
             document.getElementById('eqToUnit').value = '';
             UI.renderConfig();
-            Utils.showToast('Equivalencia agregada');
+            Utils.showToast(I18N.t('equivalence_added'));
         } else {
-            Utils.showToast('Error en equivalencia');
+            Utils.showToast(I18N.t('equivalence_error'));
         }
     },
 
@@ -1166,7 +1181,7 @@ const APP = {
     removeEquivalence(key) {
         if (Data.removeEquivalence(key)) {
             UI.renderConfig();
-            Utils.showToast('Equivalencia eliminada');
+            Utils.showToast(I18N.t('equivalence_removed'));
         }
     },
 
@@ -1247,7 +1262,7 @@ const APP = {
             Utils.addIngredientRow(data);
         }
         this.closeIngredientPicker();
-        Utils.showToast('INSUMO AÑADIDO');
+        Utils.showToast(I18N.t('ingredient_added'));
     },
 
     // ========== TURNO (SHIFTS) ==========
@@ -1271,14 +1286,14 @@ const APP = {
 
         if (id) {
             Data.updateShift(id, name, date);
-            Utils.showToast('TURNO ACTUALIZADO');
+            Utils.showToast(I18N.t('shift_updated'));
         } else {
             if (Data.activeShiftId) {
-                Utils.showToast('Ya hay un turno abierto');
+                Utils.showToast(I18N.t('shift_already_open'));
                 return;
             }
             Data.openShift(name, date);
-            Utils.showToast('TURNO ABIERTO');
+            Utils.showToast(I18N.t('shift_opened'));
         }
 
         UI.renderAll();
@@ -1289,10 +1304,10 @@ const APP = {
         const active = Data.getActiveShift();
         if (!active) return;
 
-        if (confirm(`¿Cerrar el turno "${active.name}"?`)) {
+        if (confirm(`${I18N.t('confirm_close_shift')} "${active.name}"?`)) {
             Data.closeShift();
             UI.renderAll();
-            Utils.showToast('TURNO CERRADO');
+            Utils.showToast(I18N.t('shift_closed'));
         }
     },
 
@@ -1307,10 +1322,10 @@ const APP = {
     },
 
     deleteShift(id) {
-        if (confirm('¿Eliminar este turno y todas sus ventas asociadas? Esta acción es irreversible.')) {
+        if (confirm(I18N.t('confirm_delete_shift'))) {
             Data.deleteShift(id);
             UI.renderAll();
-            Utils.showToast('TURNO ELIMINADO');
+            Utils.showToast(I18N.t('shift_deleted'));
         }
     },
 
@@ -1331,7 +1346,7 @@ const APP = {
         // O mejor, añadir un filtro por turno a renderOrders si fuera necesario.
         // Por ahora, simularemos un filtrado visual.
         UI.renderOrders(query, paidFilter, id); 
-        Utils.showToast(`Ventas de: ${shift.name}`);
+        Utils.showToast(`${I18N.t('sales_of')}: ${shift.name}`);
     },
 
 
@@ -1346,20 +1361,20 @@ const APP = {
 
         const info = {
             ventasCostos: {
-                title: 'Ventas / Costos',
-                content: 'Representa la relación entre el ingreso bruto (lo que paga el cliente) y la inversión directa en insumos/ingredientes utilizados para la preparación del plato.'
+                title: I18N.t('sales_costs_info_title'),
+                content: I18N.t('sales_costs_info_content')
             },
             gastoServicio: {
-                title: 'Gasto por Servicio',
-                content: 'Es el costo operativo indirecto (alquiler, electricidad, gas, sueldos, etc.) que se aplica como un porcentaje sobre el precio de venta para asegurar que la operación sea sustentable.'
+                title: I18N.t('service_expense_info_title'),
+                content: I18N.t('service_expense_info_content')
             },
             gananciaNeta: {
-                title: 'Ganancia Neta',
-                content: 'Es el beneficio real que queda para el negocio después de haber pagado tanto los ingredientes como los gastos operativos. Es el dinero "limpio" o excedente final.'
+                title: I18N.t('net_profit_info_title'),
+                content: I18N.t('net_profit_info_content')
             },
             margenReal: {
-                title: 'Margen Real (%)',
-                content: 'Es el porcentaje de rentabilidad real del producto. Indica qué parte de cada moneda vendida se convierte efectivamente en ganancia neta para el negocio.'
+                title: I18N.t('actual_margin_info_title'),
+                content: I18N.t('actual_margin_info_content')
             }
         };
 
