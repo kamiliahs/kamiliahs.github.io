@@ -27,7 +27,10 @@ const APP = {
         Data.init();
 
         // Inicializar i18n
-        I18N.init(Data.settings.lang || 'es');
+        I18N.init(Data.settings.lang);
+        if (!Data.settings.lang) {
+            Data.updateSettings({ lang: I18N.currentLang });
+        }
         I18N.translatePage();
 
         // Aplicar tema guardado

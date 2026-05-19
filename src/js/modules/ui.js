@@ -61,8 +61,7 @@ const UI = {
             return `
             <div class="product-card flex justify-between items-center ${hasPortions ? '' : 'cursor-pointer'}" ${hasPortions ? '' : `onclick="APP.addToCart('${p.id}')"`}>
                 <div>
-                    <p class="label-caps mb-1">${p.icon} ${I18N.t('recipe_label')}</p>
-                    <h4 class="font-black text-lg leading-none">${p.name}</h4>
+                    <h4 class="font-black text-lg leading-none mb-1">${p.icon} ${p.name}</h4>
                     ${!hasPortions ? `<p class="text-[10px] text-muted mt-0.5">$${p.price.toFixed(2)}</p>` : ''}
                 </div>
                 <div class="text-right flex items-center gap-3">
@@ -132,8 +131,7 @@ const UI = {
                 <div class="recipe-item pb-10 line-border">
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <p class="label-caps mb-1">${p.icon} ${I18N.t('recipe_label')}</p>
-                            <h4 class="heading-lg">${p.name}</h4>
+                            <h4 class="heading-lg">${p.icon} ${p.name}</h4>
                         </div>
                         <div class="space-x-4 flex">
                             <button onclick="APP.editProduct('${p.id}')" class="label-caps underline cursor-pointer hover:text-teal transition-colors">${I18N.t('edit_btn')}</button>
@@ -438,6 +436,10 @@ const UI = {
 
         // Theme
         document.getElementById('configTheme').value = s.theme || 'system';
+        
+        // Language
+        const langSelect = document.getElementById('configLang');
+        if (langSelect) langSelect.value = I18N.currentLang;
 
         // Units list with edit/delete
         const unitsList = document.getElementById('unitsList');
