@@ -1258,7 +1258,8 @@ const I18N = {
             lang_fr: 'Francês',
             lang_it: 'Italiano',
             lang_pt: 'Português'
-        },
+        }
+    },
 
     /**
      * Initialize I18N
