@@ -1,909 +1,312 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <meta name="description" content="Kamiliahs - Sistema POS de ventas especializado en la creación y gestión de recetas gastronómicas.">
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://kamiliahs.github.io/">
-    <meta property="og:title" content="Kamiliahs - Gestión Gastronómica">
-    <meta property="og:description" content="Sistema POS especializado en la creación y gestión de recetas.">
-    <meta property="og:image" content="./assets/share-preview.png">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://kamiliahs.github.io/">
-    <meta property="twitter:title" content="Kamiliahs - Gestión Gastronómica">
-    <meta property="twitter:description" content="Sistema POS especializado en la creación y gestión de recetas.">
-    <meta property="twitter:image" content="./assets/share-preview.png">
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="./manifest.json">
-    <link rel="icon" type="image/svg+xml" href="./assets/icons/favicon.svg">
-    <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.svg">
-
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="./src/css/main.css">
-    <script src="./src/lib/tailwind.min.js"></script>
-
-
-
-    <title>Kamiliahs - Gestión Gastronómica</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>FÁCIL - Mi Móvil Sencillo</title>
+  <meta name="description" content="Aplicación sencilla con texto grande e iconos minimalistas para facilitar el uso del teléfono a personas neófitas en tecnología.">
+  <meta name="theme-color" content="#1e293b">
+  
+  <!-- Configuración PWA relativa para GitHub Pages -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  
+  <!-- Tipografía de Alta Legibilidad -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./styles.css">
 </head>
-
 <body>
-    <div id="splashScreen">
-        <div class="flex items-baseline justify-center">
-            <svg class="splash-logo" xmlns="http://www.w3.org/2000/svg" viewBox="100 100 300 300" style="height: 0.72em; margin-right: 0.02em;">
-                <g fill="currentColor">
-                    <path d="M 100 100.125 L 100 349.339 L 175 399.805 L 400 199.735 L 400 100 L 175 292.689 L 175 149.868 L 100 100.125 Z"></path>
-                    <path d="M 275 400 L 400 279.5 L 400 399.2 L 275 400 Z"></path>
-                </g>
-            </svg>
-            <span>AMILIAHS</span>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" data-i18n="confirm_btn">CONFIRMADO</div>
-
-    <!-- Global Overlay -->
-    <div class="overlay" id="globalOverlay" onclick="APP.closeAllPopups()"></div>
-
-    <!-- MODALS -->
-    <div id="ingridientModal" class="modal">
-        <p class="label-caps mb-8" data-i18n="new_ingredient_title">Gestión de Insumos / Nuevo</p>
-        <div class="space-y-6">
-            <input type="text" id="newIngName" placeholder="Nombre del Insumo" data-i18n="search_placeholder">
-            <div class="flex gap-4">
-                <input type="number" id="newIngCost" placeholder="Costo Unitario" data-i18n="cost_per_unit">
-                <select id="newIngUnit" class="w-1/3">
-                    <option value="gr">GR</option>
-                    <option value="ml">ML</option>
-                    <option value="pza">PZA</option>
-                </select>
-            </div>
-            <div class="flex gap-4 items-center">
-                <input type="number" id="newIngPackQty" placeholder="Unidades por Pack" value="1" class="w-1/2" data-i18n="portions_label">
-                <p class="text-[10px] text-muted uppercase font-bold" data-i18n="portions_label">Unidades por Pack</p>
-            </div>
-            <div class="flex gap-4 pt-10">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4" data-i18n="close_btn">Cerrar</button>
-                <button onclick="APP.saveIngredient()"
-                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest" data-i18n="save_btn">Guardar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="editIngridientModal" class="modal">
-        <p class="label-caps mb-8" data-i18n="edit_ingredient_title">Editar Insumo</p>
-        <div class="space-y-6">
-            <input type="hidden" id="editIngId">
-            <input type="text" id="editIngName" placeholder="Nombre del Insumo" data-i18n="search_placeholder">
-            <div class="flex gap-4">
-                <input type="number" id="editIngCost" placeholder="Costo Unitario" data-i18n="cost_per_unit">
-                <select id="editIngUnit" class="w-1/3">
-                    <option value="gr">GR</option>
-                    <option value="ml">ML</option>
-                    <option value="pza">PZA</option>
-                </select>
-            </div>
-            <div class="flex gap-4 items-center">
-                <input type="number" id="editIngPackQty" placeholder="Unidades por Pack" value="1" class="w-1/2" data-i18n="portions_label">
-                <p class="text-[10px] text-muted uppercase font-bold" data-i18n="portions_label">Insumo por Pack/Caja</p>
-            </div>
-            <div class="flex gap-4 pt-10">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4" data-i18n="cancel_btn">Cancelar</button>
-                <button onclick="APP.saveEditIngredient()"
-                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest" data-i18n="update_btn">Actualizar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="recipeModal" class="modal">
-        <p class="label-caps mb-8" data-i18n="new_recipe_title">Nueva Ficha</p>
-        <div class="space-y-6 max-h-[60vh] overflow-y-auto">
-            <div>
-                <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="dish_name">Nombre del Plato</p>
-                <input type="text" id="newProdName" placeholder="Ej: Pizza Margarita" data-i18n="dish_name_placeholder">
-            </div>
-            <div class="flex gap-4">
-                <div class="w-1/4">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="icon_label">Icono</p>
-                    <input type="text" id="newProdIcon" placeholder="🍕">
-                </div>
-                <div class="flex-1">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1 flex justify-between">
-                        <span data-i18n="selling_label">Precio Venta</span>
-                        <span id="newProdSuggestedPrice" class="hidden">Sug: $0.00</span>
-                    </p>
-                    <input type="number" id="newProdPrice" placeholder="0.00">
-                </div>
-            </div>
-            <div class="flex gap-4">
-                <div class="w-1/3">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="service_pct">% Servicio</p>
-                    <input type="number" id="newProdService" placeholder="0">
-                </div>
-                <div class="w-1/3">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="margin_pct">% Margen</p>
-                    <input type="number" id="newProdMargin" placeholder="0">
-                </div>
-                <div class="w-1/3">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="portions_label">Porciones</p>
-                    <input type="number" id="newProdPortions" placeholder="1" value="1">
-                </div>
-            </div>
-
-            <div id="newRecipeMarginPreview" class="text-[10px] font-bold uppercase tracking-widest py-2 text-muted border-l-2 border-border pl-3">
-            </div>
-
-            <div id="recipeBuilder" class="space-y-4 pt-2"></div>
-            <button onclick="APP.addIngredientRow()" class="label-caps underline hover:text-teal" data-i18n="new_ingredient_btn"> + Añadir Insumo
-            </button>
-
-            <div>
-                <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="comments_label">Comentarios / Notas</p>
-                <textarea id="newProdComments" placeholder="Instrucciones o notas adicionales..."
-                    class="w-full text-[12px] p-3 border rounded-lg bg-card" rows="3" data-i18n="comments_placeholder"></textarea>
-            </div>
-
-            <div class="flex gap-4 pt-6">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4" data-i18n="cancel_btn">Cancelar</button>
-                <button onclick="APP.saveRecipe()"
-                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest" data-i18n="create_btn">Crear</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="editRecipeModal" class="modal">
-        <p class="label-caps mb-8" data-i18n="edit_recipe_title">Editar Ficha</p>
-        <div class="space-y-6 max-h-[60vh] overflow-y-auto">
-            <input type="hidden" id="editProdId">
-            <div>
-                <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="dish_name">Nombre del Plato</p>
-                <input type="text" id="editProdName" placeholder="Nombre del Plato" data-i18n="dish_name_placeholder">
-            </div>
-            <div class="flex gap-4">
-                <div class="w-1/4">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="icon_label">Icono</p>
-                    <input type="text" id="editProdIcon" placeholder="Emoji (🍕)">
-                </div>
-                <div class="flex-1">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1 flex justify-between">
-                        <span data-i18n="selling_label">Precio Venta</span>
-                        <span id="editProdSuggestedPrice" class="hidden">Sug: $0.00</span>
-                    </p>
-                    <input type="number" id="editProdPrice" placeholder="Precio Venta">
-                </div>
-            </div>
-            <div class="flex gap-4">
-                <div class="w-1/3">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="service_pct">% Servicio</p>
-                    <input type="number" id="editProdService" placeholder="% Servicio">
-                </div>
-                <div class="w-1/3">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="margin_pct">% Margen</p>
-                    <input type="number" id="editProdMargin" placeholder="% Margen">
-                </div>
-                <div class="w-1/3">
-                    <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="portions_label">Porciones</p>
-                    <input type="number" id="editProdPortions" placeholder="Porciones" value="1">
-                </div>
-            </div>
-
-            <div id="editRecipeMarginPreview" class="text-[10px] font-bold uppercase tracking-widest py-2 text-muted border-l-2 border-border pl-3">
-            </div>
-
-            <div id="editRecipeBuilder" class="space-y-4 pt-2"></div>
-            <button onclick="APP.addEditIngredientRow()" class="label-caps underline hover:text-teal" data-i18n="new_ingredient_btn"> + Añadir Insumo
-            </button>
-
-            <div>
-                <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="comments_label">Comentarios / Notas</p>
-                <textarea id="editProdComments" placeholder="Instrucciones o notas adicionales..."
-                    class="w-full text-[12px] p-3 border rounded-lg bg-card" rows="3" data-i18n="comments_placeholder"></textarea>
-            </div>
-
-            <div class="flex gap-2 pt-6">
-                <button onclick="APP.closeAllPopups()" class="w-1/3 label-caps btn-secondary py-4 text-[9px]" data-i18n="cancel_btn">Cancelar</button>
-                <button onclick="APP.saveAsNewRecipe()" class="w-1/3 label-caps btn-secondary py-4 text-[9px]" data-i18n="as_new_btn">Como Nueva</button>
-                <button onclick="APP.saveEditRecipe()"
-                    class="w-1/3 btn-primary font-bold py-4 uppercase text-[9px] tracking-widest" data-i18n="update_btn">Actualizar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="orderDetailModal" class="modal">
-        <p class="label-caps mb-8" data-i18n="order_detail_title">Detalle del Pedido</p>
-        <div class="space-y-6 max-h-[60vh] overflow-y-auto">
-            <div>
-                <p class="label-caps opacity-50 mb-1" data-i18n="original_total">Total Original</p>
-                <div class="flex justify-between items-end">
-                    <p class="heading-lg" id="orderDetailTotal">0.00</p>
-                    <div class="flex gap-4 mb-1">
-                        <div class="text-right">
-                            <p class="text-[8px] text-muted uppercase font-bold" data-i18n="costs_label">Costo</p>
-                            <p class="text-[10px] font-black" id="orderDetailCost">0.00</p>
-                        </div>
-                        <div class="text-right text-orange-400">
-                            <p class="text-[8px] uppercase font-bold" data-i18n="service_expense">Servicio</p>
-                            <p class="text-[10px] font-black" id="orderDetailService">0.00</p>
-                        </div>
-                        <div class="text-right text-teal">
-                            <p class="text-[8px] uppercase font-bold" data-i18n="net_label">Neto</p>
-                            <p class="text-[10px] font-black" id="orderDetailProfit">0.00</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <input type="number" id="orderEditPrice" placeholder="Nuevo Total (opcional)" data-i18n="new_total_optional">
-            <div class="flex justify-between items-center mb-4">
-                <span id="orderPaidStatus" class="text-xs font-medium text-muted" data-i18n="status_label">Estado: --</span>
-                <button id="markPaidBtn" onclick="APP.toggleOrderPaid()" class="label-caps text-[10px] underline" data-i18n="mark_paid">Marcar
-                    pagado</button>
-            </div>
-            <div class="mb-4">
-                <select id="addItemSelect" class="w-full border">
-                    <option value="" data-i18n="add_product_placeholder">-- Añadir producto --</option>
-                </select>
-                <button onclick="APP.addItemToOrder()"
-                    class="w-full label-caps underline hover:text-teal mt-2" data-i18n="add_btn">Añadir</button>
-            </div>
-            <div id="orderDetailItems" class="space-y-2 text-sm py-4"></div>
-            <div class="flex gap-4 pt-10">
-                <button onclick="APP.deleteOrder()" class="w-1/2 label-caps text-red-500 py-4" data-i18n="delete_btn">Eliminar</button>
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4" data-i18n="cancel_btn">Cancelar</button>
-                <button onclick="APP.saveOrderEdit()"
-                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest" data-i18n="save_btn">Guardar</button>
-            </div>
-        </div>
-    </div>
-
-
-
-
-    <!-- INFO MODAL -->
-    <div id="shiftModal" class="modal">
-        <p class="label-caps mb-8" data-i18n="shift_mgmt_title">Gestión de Turno</p>
-        <div class="space-y-6">
-            <input type="hidden" id="editShiftId">
-            <div>
-                <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="shift_name_label">Nombre del Turno</p>
-                <input type="text" id="shiftName" placeholder="Eje: MAÑANA, TARDE..." data-i18n="shift_name_placeholder">
-            </div>
-            <div>
-                <p class="text-[10px] text-muted uppercase font-bold mb-1" data-i18n="shift_date_label">Fecha del Turno</p>
-                <input type="date" id="shiftDate">
-            </div>
-            <div class="flex gap-4 pt-10">
-                <button onclick="APP.closeAllPopups()" class="w-1/2 label-caps btn-secondary py-4" data-i18n="cancel_btn">Cancelar</button>
-                <button onclick="APP.saveShift()"
-                    class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest" data-i18n="save_btn">Guardar</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="infoModal" class="modal">
-        <p class="label-caps mb-8" id="infoModalTitle" data-i18n="info_title">Información</p>
-        <div class="space-y-6">
-            <p id="infoModalContent" class="text-sm leading-relaxed opacity-80"></p>
-            <button onclick="APP.closeAllPopups()" class="w-full label-caps btn-secondary py-4 mt-6" data-i18n="confirm_btn">Entendido</button>
-        </div>
-    </div>
-
-
-    <!-- SIDEBAR -->
-    <div class="sidebar flex flex-col justify-between overflow-y-auto" id="sidebar">
+  <!-- BANNER DE INSTALACIÓN PWA IN-APP -->
+  <div id="install-banner" class="install-banner hidden" role="region" aria-label="Instalación de la aplicación">
+    <div class="install-banner-content">
+      <div class="install-banner-text">
+        <span class="install-icon">📲</span>
         <div>
-            <button onclick="APP.toggleMenu()" class="label-caps mb-20" data-i18n="back_btn">← Volver</button>
-            <div class="space-y-12">
-                <div onclick="APP.switchView('recipes')" class="heading-xl hover:text-teal transition-colors cursor-pointer" data-i18n="nav_recipes">RECETAS</div>
-                <div onclick="APP.switchView('inventory')" class="heading-xl hover:text-teal transition-colors cursor-pointer" data-i18n="nav_inventory">INSUMOS</div>
-                <div onclick="APP.switchView('pos')" class="heading-xl hover:text-teal transition-colors cursor-pointer" data-i18n="nav_pos">VENTAS</div>
-                <div onclick="APP.switchView('reports')" class="heading-xl hover:text-teal transition-colors cursor-pointer" data-i18n="nav_reports">ESTADÍSTICAS</div>
-                <div onclick="APP.switchView('shifts')" class="heading-xl hover:text-teal transition-colors cursor-pointer" data-i18n="nav_shifts">TURNOS</div>
-                <div onclick="APP.switchView('config')" class="heading-xl hover:text-teal transition-colors cursor-pointer" data-i18n="nav_config">CONFIGURACIÓN</div>
-            </div>
+          <strong>¿Quieres tener esta App en tu Móvil?</strong>
+          <p>Pulsa el botón para añadirla a tu pantalla principal sin ocupar espacio.</p>
         </div>
-
-        <!-- SHARE APP SECTION test -->
-        <div class="mt-16 pt-8 border-t border-border">
-            <p class="text-[9px] font-black uppercase tracking-widest opacity-40 mb-4" data-i18n="share_app">Compartir App</p>
-            <div class="flex gap-6 items-center">
-                <!-- Share API -->
-                <button onclick="APP.shareApp()" class="text-muted hover:text-teal transition-colors" title="Compartir" data-i18n-title="share_title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                </button>
-                <!-- WhatsApp -->
-                <a href="https://api.whatsapp.com/send?text=Kamiliahs%20-%20Sistema%20POS%20especializado%20en%20la%20creaci%C3%B3n%20de%20recetas%20gastron%C3%B3micas%3A%20https%3A%2F%2Fkamiliahs.github.io%2F" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-[#25D366] transition-colors" title="WhatsApp">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                </a>
-                <!-- Twitter -->
-                <a href="https://twitter.com/intent/tweet?text=Kamiliahs%20-%20Sistema%20POS%20especializado%20en%20la%20creaci%C3%B3n%20de%20recetas%20gastron%C3%B3micas&url=https%3A%2F%2Fkamiliahs.github.io%2F" target="_blank" rel="noopener noreferrer" class="text-muted hover:text-white transition-colors" title="Twitter/X">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg>
-                </a>
-            </div>
-        </div>
+      </div>
+      <div class="install-banner-actions">
+        <button id="btn-install-app" class="btn-primary btn-install">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          INSTALAR AHORA
+        </button>
+        <button id="btn-dismiss-install" class="btn-subtle" title="Cerrar aviso">
+          ✕
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- HEADER -->
-    <header class="p-6 pt-10 line-border flex justify-between items-end gap-2 flex-wrap">
-        <div class="flex items-center gap-4 flex-1 min-w-[120px]">
-            <button onclick="APP.goBack()" id="headerBackBtn" class="hidden hover:opacity-100 opacity-60 transition-opacity">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <div class="flex-1">
-                <p class="label-caps mb-1 opacity-60" id="viewSubtitle" data-i18n="store_label">Store No. 01</p>
-                <h1 class="heading-lg truncate" id="viewTitle" data-i18n="terminal_title">TERMINAL</h1>
-            </div>
+  <!-- HEADER PRINCIPAL -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand">
+        <img src="./icon.svg" alt="Logo FÁCIL" class="brand-logo" width="40" height="40">
+        <h1 class="brand-title">FÁCIL</h1>
+      </div>
+      <div class="header-controls">
+        <!-- Indicador de Red (Online / Offline) -->
+        <div id="net-status" class="net-status online" title="Estado de conexión">
+          <span class="dot"></span>
+          <span id="net-status-text">En línea</span>
         </div>
-        <div class="flex gap-2" id="headerActionButtons">
 
-            <button onclick="APP.switchView('orders')" class="btn-secondary px-3 sm:px-5 py-2 sm:py-3 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 sm:gap-2 shadow-sm whitespace-nowrap">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sm:w-3.5 sm:h-3.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                <span data-i18n="orders_btn">Pedidos</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- VIEWS -->
-    <!-- POS View -->
-    <div id="posView" class="view-container hidden-view">
-        <div class="px-6 mb-4">
-            <input type="text" id="posSearch" placeholder="Buscar plato..." class="search-input"
-                oninput="APP.filterPOS()" data-i18n="pos_search">
-        </div>
-        <div id="productGrid" class="px-6"></div>
-        <div class="cart-bar shadow-2xl transition-all" id="cartBar">
-            <div class="flex justify-between items-center mb-4">
-                <span class="label-caps cart-bar-label" data-i18n="cart_title">Orden Actual</span>
-                <span id="cartCount" class="font-bold text-[10px]">0</span>
-            </div>
-            <div id="cartItems" class="text-[11px] font-medium space-y-1 opacity-80 mb-6"></div>
-            <div class="flex justify-between items-center">
-                <span id="cartTotal" class="heading-lg">0.00</span>
-                <button onclick="APP.checkout()"
-                    class="bg-white text-black px-8 py-3 font-black text-[10px] uppercase tracking-tighter hover:bg-opacity-90 transition-all" data-i18n="checkout_btn">Ordenar</button>
-            </div>
-        </div>
+        <!-- Botón Tamaño de Texto (Accesibilidad) -->
+        <button id="btn-toggle-text-size" class="btn-header-tool" title="Cambiar tamaño de letra">
+          <span class="tool-icon">Aa</span>
+          <span class="tool-label">Letra</span>
+        </button>
+      </div>
     </div>
+  </header>
 
-    <div id="shiftsView" class="view-container hidden-view p-6">
-        <div class="mb-8 flex justify-between items-end">
+  <!-- CONTENIDOS SPA (SECCIONES PRINCIPALES) -->
+  <main class="app-main" id="main-content">
+    
+    <!-- SECCIÓN 1: CONTACTOS RÁPIDOS -->
+    <section id="view-contacts" class="spa-view active" aria-labelledby="heading-contacts">
+      <div class="view-header">
+        <h2 id="heading-contacts">📞 Mis Contactos</h2>
+        <p class="subtitle">Pulsa sobre cualquier botón para llamar o mandar un mensaje.</p>
+      </div>
+
+      <div id="contacts-list" class="cards-grid">
+        <!-- Contactos por defecto cargados por JS -->
+      </div>
+
+      <button id="btn-add-contact-modal" class="btn-action-add">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        AÑADIR NUEVO CONTACTO
+      </button>
+    </section>
+
+    <!-- SECCIÓN 2: MIS RECORDATORIOS / MEDICINAS -->
+    <section id="view-reminders" class="spa-view hidden" aria-labelledby="heading-reminders">
+      <div class="view-header">
+        <h2 id="heading-reminders">💊 Mis Recordatorios</h2>
+        <p class="subtitle">Lo que tienes que hacer hoy. Pulsa el cuadrado verde cuando lo cumplas.</p>
+      </div>
+
+      <div id="reminders-list" class="cards-list">
+        <!-- Lista de medicinas por JS -->
+      </div>
+
+      <button id="btn-add-reminder-modal" class="btn-action-add">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        AÑADIR MEDICINA O TAREA
+      </button>
+    </section>
+
+    <!-- SECCIÓN 3: LISTA DE LA COMPRA -->
+    <section id="view-shopping" class="spa-view hidden" aria-labelledby="heading-shopping">
+      <div class="view-header">
+        <h2 id="heading-shopping">📝 Nota de la Compra</h2>
+        <p class="subtitle">Anota lo que necesitas comprar. Toca un producto para tacharlo.</p>
+      </div>
+
+      <!-- Añadir rápido con 1 toque -->
+      <div class="quick-add-section">
+        <span class="quick-title">Añadir con 1 toque:</span>
+        <div class="quick-chips">
+          <button class="chip-btn" data-item="🥛 Leche">🥛 Leche</button>
+          <button class="chip-btn" data-item="🍞 Pan">🍞 Pan</button>
+          <button class="chip-btn" data-item="🍎 Fruta">🍎 Fruta</button>
+          <button class="chip-btn" data-item="🥚 Huevos">🥚 Huevos</button>
+          <button class="chip-btn" data-item="🧻 Papel">🧻 Papel</button>
+          <button class="chip-btn" data-item="💧 Agua">💧 Agua</button>
+        </div>
+      </div>
+
+      <!-- Campo de texto grande para producto personalizado -->
+      <form id="form-add-item" class="custom-add-form">
+        <input type="text" id="input-new-item" class="large-input" placeholder="Escribe algo aquí... (ej. Tomates)" required autocomplete="off">
+        <button type="submit" class="btn-primary btn-add-inline">GUARDAR</button>
+      </form>
+
+      <div id="shopping-list" class="shopping-items-container">
+        <!-- Elementos de la lista -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: HERRAMIENTAS Y ÚTILES -->
+    <section id="view-tools" class="spa-view hidden" aria-labelledby="heading-tools">
+      <div class="view-header">
+        <h2 id="heading-tools">💡 Ayudas Útiles</h2>
+        <p class="subtitle">Herramientas sencillas para usar en tu día a día.</p>
+      </div>
+
+      <div class="tools-grid">
+        <!-- HERRAMIENTA 1: PANTALLA LUZ BLANCA / LINTERNA -->
+        <div class="tool-card">
+          <div class="tool-info">
+            <span class="tool-badge-icon">🔦</span>
             <div>
-                <p class="label-caps mb-1" data-i18n="time_management">Gestión de Tiempo</p>
-                <h2 class="heading-lg" data-i18n="shifts_title">Turnos</h2>
+              <h3>Luz / Linterna</h3>
+              <p>Ilumina la pantalla al máximo en la oscuridad.</p>
             </div>
-            <button onclick="APP.openShiftModal()" class="label-caps underline hover:text-teal" data-i18n="new_shift_btn">+ Nuevo Turno</button>
+          </div>
+          <button id="btn-toggle-light" class="btn-tool-action">ENCENDER LUZ</button>
         </div>
 
-        <div id="activeShiftBanner" class="mb-8 p-6 rounded-2xl border-2 border-teal bg-teal/5 transition-all hidden">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <p class="label-caps text-teal mb-1" data-i18n="active_shift_banner">Turno Activo</p>
-                    <h3 id="activeShiftName" class="heading-lg" data-i18n="no_shift_active">SIN TURNO</h3>
-                    <p id="activeShiftInfo" class="text-[10px] text-muted font-bold uppercase"></p>
-                </div>
-                <button onclick="APP.closeActiveShift()" class="btn-primary px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest" data-i18n="close_shift_btn">Cerrar Turno</button>
-            </div>
-        </div>
-
-        <div id="shiftsList" class="space-y-6"></div>
-    </div>
-
-    <div id="inventoryView" class="view-container hidden-view p-6">
-        <div class="mb-6">
-            <div class="flex gap-4 items-center mb-4">
-                <input type="text" id="inventorySearch" placeholder="Buscar insumo..." class="search-input flex-1"
-                    oninput="APP.filterInventory()" data-i18n="inventory_search">
-                <button onclick="APP.openModal('ingridientModal')"
-                    class="label-caps underline hover:text-teal text-[10px] whitespace-nowrap" data-i18n="new_ingredient_btn">+ Nuevo Insumo</button>
-            </div>
-        </div>
-        <div id="inventoryBody" class="space-y-6"></div>
-    </div>
-
-
-    <!-- Configuración View -->
-    <div id="configView" class="view-container hidden-view p-6">
-
-        <!-- IDIOMA -->
-        <div class="mb-8 pb-8 line-border">
-            <p class="label-caps mb-3" data-i18n="lang_label">Idioma</p>
-            <select id="configLang" class="w-full border" onchange="APP.changeLanguage(this.value)">
-                <option value="es" data-i18n="lang_es">Español</option>
-                <option value="en" data-i18n="lang_en">Inglés</option>
-                <option value="nl" data-i18n="lang_nl">Neerlandés</option>
-                <option value="fr" data-i18n="lang_fr">Francés</option>
-                <option value="it" data-i18n="lang_it">Italiano</option>
-                <option value="pt" data-i18n="lang_pt">Portugués</option>
-            </select>
-        </div>
-
-        <!-- TEMA -->
-        <div class="mb-8 pb-8 line-border">
-            <p class="label-caps mb-3" data-i18n="theme_label">Tema</p>
-            <select id="configTheme" class="w-full border">
-                <option value="light" data-i18n="theme_light">Claro</option>
-                <option value="dark" data-i18n="theme_dark">Oscuro</option>
-                <option value="system" data-i18n="theme_system">Sistema</option>
-            </select>
-        </div>
-
-        <!-- UNIDADES DE MEDIDA -->
-        <div class="mb-8 pb-8 line-border">
-            <p class="label-caps mb-4" data-i18n="units_label">Unidades de Medida</p>
-            <div id="unitsList" class="space-y-2 mb-4 max-h-[200px] overflow-y-auto"></div>
-            <div class="space-y-2 mb-4">
-                <input type="text" id="newUnitSymbol" placeholder="Símbolo (kg, l, etc)" class="w-full" data-i18n="symbol_placeholder">
-                <input type="text" id="newUnitName" placeholder="Nombre (Kilogramo, Litro, etc)" class="w-full" data-i18n="name_placeholder">
-                <button onclick="APP.addUnit()" class="w-full label-caps underline hover:text-teal" data-i18n="add_unit_btn">+ Agregar
-                    Unidad</button>
-            </div>
-        </div>
-
-        <!-- EQUIVALENCIAS -->
-        <div class="mb-8 pb-8 line-border">
-            <p class="label-caps mb-4" data-i18n="equivalences_label">Equivalencias</p>
-            <div id="equivalencesList" class="space-y-2 mb-4 text-sm"></div>
-            <div class="space-y-2">
-                <select id="eqFromUnit" class="w-full border">
-                    <option value="" data-i18n="from_label">De --</option>
-                </select>
-                <input type="number" id="eqRatio" placeholder="Cantidad" step="0.01" data-i18n="qty_label">
-                <select id="eqToUnit" class="w-full border">
-                    <option value="" data-i18n="to_label">A --</option>
-                </select>
-                <button onclick="APP.addEquivalence()" class="w-full label-caps underline hover:text-teal" data-i18n="create_equivalence_btn">Crear
-                    Equivalencia</button>
-            </div>
-        </div>
-
-
-
-        <!-- RESPALDO Y DATOS -->
-        <div class="mb-8 pb-8 line-border">
-            <p class="label-caps mb-4 text-teal" data-i18n="backup_label">Respaldo y Datos (Backup)</p>
-            <div class="space-y-4">
-                <button onclick="APP.exportAppData()"
-                    class="w-full label-caps underline hover:text-teal font-black text-left text-[10px] uppercase tracking-widest transition-colors" data-i18n="export_backup">
-                    ⬇ EXPORTAR BACKUP (.JSON)
-                </button>
-                <div class="relative">
-                    <input type="file" id="importFile" class="hidden" accept=".json"
-                        onchange="APP.importAppData(event)">
-                    <button onclick="document.getElementById('importFile').click()"
-                        class="w-full label-caps underline hover:text-teal font-black text-left text-[10px] uppercase tracking-widest transition-colors" data-i18n="import_backup">
-                        ⬆ IMPORTAR BACKUP (SELECCIONAR)
-                    </button>
-                </div>
-                <p class="text-[8px] text-muted opacity-60 uppercase font-black tracking-wider shadow-sm" data-i18n="import_warning">Atención: La
-                    importación sobrescribirá toda la información actual.</p>
-            </div>
-        </div>
-
-        <!-- ACTUALIZACIONES Y CHANGELOG -->
-        <div class="mb-12 pb-8">
-            <p class="label-caps mb-4 text-teal" data-i18n="updates_label">Actualizaciones y Cambios</p>
-            <div id="changelogContent" class="bg-card p-6 rounded-3xl border border-border mb-4">
-                <p class="text-[9px] font-black uppercase tracking-widest opacity-40 mb-2" id="currentVerLabel" data-i18n="current_version">Versión Actual</p>
-                <h4 class="font-black text-xs uppercase mb-1" id="changelogTitle" data-i18n="loading">Cargando información</h4>
-                <p class="text-xs text-muted leading-relaxed" id="changelogDesc" data-i18n="wait_please">Por favor, espera</p>
-            </div>
-            <button onclick="APP.checkForUpdates()" class="w-full btn-secondary border border-border py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:border-teal transition-all shadow-sm mb-4" data-i18n="check_updates_btn">
-                Buscar Actualizaciones
-            </button>
-            <button onclick="APP.openChangelogModal()" class="w-full text-center text-[9px] font-black uppercase tracking-widest underline hover:text-teal transition-colors" data-i18n="full_changelog_btn">
-                Ver Historial Completo de Versiones
-            </button>
-        </div>
-
-        <!-- BOTONES -->
-        <div class="flex gap-4">
-            <button onclick="APP.saveSettings()"
-                class="w-1/2 btn-primary font-bold py-4 uppercase text-[10px] tracking-widest" data-i18n="save_btn">Guardar</button>
-            <button onclick="APP.switchView('pos')" class="w-1/2 label-caps btn-secondary py-4" data-i18n="cancel_btn">Cancelar</button>
-        </div>
-    </div>
-
-    <!-- Recipes View -->
-    <div id="recipesView" class="view-container p-6">
-        <div class="mb-6">
-            <div class="flex gap-4 items-center mb-4">
-                <input type="text" id="recipeSearch" placeholder="Buscar receta..." class="search-input flex-1"
-                    oninput="APP.filterRecipes()" data-i18n="recipe_search">
-                <button onclick="APP.openModal('recipeModal')"
-                    class="label-caps underline hover:text-teal text-[10px] whitespace-nowrap" data-i18n="new_recipe_btn">+ Nueva Receta</button>
-            </div>
-        </div>
-        <div id="recipesContainer" class="space-y-12"></div>
-    </div>
-
-    <!-- Reports View -->
-    <div id="reportsView" class="view-container hidden-view p-6">
-        <div class="mb-4 flex justify-between items-center">
-            <p class="label-caps !mb-0" data-i18n="reports_title">Estadísticas</p>
-            <span class="text-[8px] font-black uppercase text-teal bg-teal/10 px-2 py-1 rounded" data-i18n="paid_only">Solo Pagados</span>
-        </div>
-        <div class="mb-8 space-y-4">
-            <p class="label-caps mb-2" data-i18n="filter_stats">Filtrar Estadísticas</p>
-            
-            <div class="flex gap-2">
-                <input type="text" id="reportsSearch" placeholder="Buscar turno o producto..." class="search-input flex-1 !mb-0" oninput="APP.filterReports()" data-i18n="reports_search">
-            </div>
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <p class="text-[8px] font-black uppercase text-muted mb-1" data-i18n="date_from">Desde</p>
-                    <input type="date" id="reportsDateStart" class="search-input !text-[10px] !p-2 !mb-0" onchange="APP.filterReports()">
-                </div>
-                <div>
-                    <p class="text-[8px] font-black uppercase text-muted mb-1" data-i18n="date_to">Hasta</p>
-                    <input type="date" id="reportsDateEnd" class="search-input !text-[10px] !p-2 !mb-0" onchange="APP.filterReports()">
-                </div>
-            </div>
-            
-            <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar" id="reportsTags">
-                <button onclick="APP.setReportsTag('all', this)" class="tag-filter active" data-tag="all" data-i18n="tag_all">Todo</button>
-                <button onclick="APP.setReportsTag('today', this)" class="tag-filter" data-tag="today" data-i18n="tag_today">Hoy</button>
-                <button onclick="APP.setReportsTag('yesterday', this)" class="tag-filter" data-tag="yesterday" data-i18n="tag_yesterday">Ayer</button>
-                <button onclick="APP.setReportsTag('week', this)" class="tag-filter" data-tag="week" data-i18n="tag_week">Esta Semana</button>
-                <button onclick="APP.setReportsTag('current_shift', this)" class="tag-filter" data-tag="current_shift" data-i18n="tag_current_shift">Turno Activo</button>
-            </div>
-        </div>
-
-        <div class="mb-12">
-            <p class="label-caps mb-4" data-i18n="general_balance">Balance General</p>
-            <div class="heading-xl mb-2" id="repNetProfit">0.00</div>
-            <p class="text-xs font-bold text-muted" id="repMarginAvg" data-i18n="net_margin_desc">0% de margen neto</p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-8 line-border pb-8 mb-8">
+        <!-- HERRAMIENTA 2: LECTURA EN VOZ ALTA -->
+        <div class="tool-card">
+          <div class="tool-info">
+            <span class="tool-badge-icon">🔊</span>
             <div>
-                <p class="label-caps mb-2" data-i18n="sales_label">Ventas</p>
-                <p class="font-bold" id="repTotalSales">0.00</p>
+              <h3>Asistente de Voz</h3>
+              <p>Escucha cómo funciona esta aplicación.</p>
             </div>
+          </div>
+          <button id="btn-speak-help" class="btn-tool-action">ESCUCHAR AYUDA</button>
+        </div>
+
+        <!-- HERRAMIENTA 3: ALARMA / SONIDO SOS -->
+        <div class="tool-card tool-sos">
+          <div class="tool-info">
+            <span class="tool-badge-icon">🚨</span>
             <div>
-                <p class="label-caps mb-2" data-i18n="costs_label">Costos</p>
-                <p class="font-bold text-red-500" id="repTotalCost">0.00</p>
+              <h3>Sonido de Emergencia</h3>
+              <p>Hace sonar una alarma fuerte si necesitas ayuda inmediata.</p>
             </div>
+          </div>
+          <button id="btn-toggle-sos" class="btn-tool-action btn-danger">SONAR ALARMA</button>
         </div>
 
-        <div class="mb-10">
-            <p class="label-caps mb-6" data-i18n="performance_label">Rendimiento</p>
-            <div id="profitBreakdown" class="space-y-6"></div>
-        </div>
-    </div>
-
-    <!-- INFO MODAL -->
-    <div id="infoModal" class="modal">
-        <p class="label-caps mb-8" id="infoModalTitle">Información</p>
-        <div class="space-y-6">
-            <p id="infoModalContent" class="text-xs leading-relaxed opacity-80"></p>
-            <button onclick="APP.closeAllPopups()" class="w-full label-caps btn-secondary py-4 mt-6">Cerrar</button>
-        </div>
-    </div>
-
-    <!-- CHANGELOG MODAL -->
-    <div id="changelogModal" class="modal max-h-[85vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-6">
-            <p class="label-caps !mb-0" data-i18n="version_history_title">Historial de Versiones</p>
-            <button onclick="APP.closeAllPopups()" class="text-[10px] font-black uppercase text-muted hover:text-white transition-colors" data-i18n="close_btn">✕ Cerrar</button>
-        </div>
-        <div id="fullChangelogContainer" class="space-y-6">
-            <p class="text-xs text-muted text-center py-4" data-i18n="loading">Cargando historial...</p>
-        </div>
-    </div>
-
-    <!-- NUMPAD MODAL -->
-    <div id="numpadModal" class="modal">
-        <div class="flex justify-between items-center mb-6">
-            <p class="label-caps !mb-0" data-i18n="edit_qty_title">Editar Cantidad</p>
-            <button onclick="APP.closeAllPopups()" class="text-[10px] font-black uppercase text-muted hover:text-white transition-colors" data-i18n="close_btn">✕ Cerrar</button>
-        </div>
-        
-        <input type="hidden" id="numpadTargetId">
-        
-        <div class="bg-card border border-border rounded-2xl p-4 mb-4 flex justify-center">
-            <span id="numpadDisplay" class="text-3xl font-black text-teal">1</span>
-        </div>
-        
-        <div class="grid grid-cols-3 gap-3 mb-6">
-            <button onclick="APP.numpadInput(1)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">1</button>
-            <button onclick="APP.numpadInput(2)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">2</button>
-            <button onclick="APP.numpadInput(3)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">3</button>
-            <button onclick="APP.numpadInput(4)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">4</button>
-            <button onclick="APP.numpadInput(5)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">5</button>
-            <button onclick="APP.numpadInput(6)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">6</button>
-            <button onclick="APP.numpadInput(7)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">7</button>
-            <button onclick="APP.numpadInput(8)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">8</button>
-            <button onclick="APP.numpadInput(9)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">9</button>
-            <button onclick="APP.numpadClear()" class="bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 text-red-500 border border-red-500/20 p-4 rounded-2xl text-sm font-black uppercase transition-colors" data-i18n="numpad_clear">Borrar</button>
-            <button onclick="APP.numpadInput(0)" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl text-xl font-black transition-colors">0</button>
-            <button onclick="APP.numpadDelete()" class="bg-card hover:bg-white/5 active:bg-white/10 border border-border p-4 rounded-2xl flex items-center justify-center transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><path d="m21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
-            </button>
-        </div>
-        
-        <button onclick="APP.numpadConfirm()" class="w-full btn-primary py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg" data-i18n="numpad_confirm">Confirmar Cantidad</button>
-    </div>
-
-    <!-- INGREDIENT PICKER MODAL -->
-    <div id="ingredientPickerModal" class="modal">
-        <div class="flex justify-between items-center mb-6">
-            <p class="label-caps !mb-0" data-i18n="select_ingredient_title">Seleccionar Insumo</p>
-            <button onclick="APP.closeIngredientPicker()" class="text-[10px] font-black uppercase text-muted hover:text-white transition-colors" data-i18n="close_btn">✕ Cerrar</button>
-        </div>
-        <div class="mb-6">
-            <input type="text" id="pickerSearch" placeholder="Buscar insumo..." class="search-input !mb-0" oninput="APP.filterPicker()" data-i18n="inventory_search">
-        </div>
-        <div id="pickerList" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 no-scrollbar">
-            <!-- List populated via JS -->
-        </div>
-    </div>
-
-
-
-    <div id="ordersView" class="view-container hidden-view p-6">
-        <div class="mb-6">
-            <div class="flex gap-4 items-center mb-4">
-                <input type="text" id="orderSearch" placeholder="Buscar ID o fecha..." class="search-input flex-1"
-                    oninput="APP.filterOrders()" data-i18n="order_search_placeholder">
-                <button onclick="APP.clearOrders()"
-                    class="label-caps underline text-red-500 hover:text-red-700 text-[10px] whitespace-nowrap" data-i18n="vaciar_todo">Vaciar
-                    Todo</button>
+        <!-- HERRAMIENTA 4: GUÍA MANUAL DE INSTALACIÓN -->
+        <div class="tool-card">
+          <div class="tool-info">
+            <span class="tool-badge-icon">📲</span>
+            <div>
+              <h3>Instalar esta App</h3>
+              <p>Instrucciones sencillas para poner el icono en la pantalla.</p>
             </div>
-            <div class="flex flex-wrap" id="orderFilters">
-                <span class="tag-filter active" onclick="APP.filterOrdersByPaid('all', this)" data-i18n="filter_all">Todos</span>
-                <span class="tag-filter" onclick="APP.filterOrdersByPaid('paid', this)" data-i18n="filter_paid">Pagados</span>
-                <span class="tag-filter" onclick="APP.filterOrdersByPaid('unpaid', this)" data-i18n="filter_unpaid">Pendientes</span>
-            </div>
+          </div>
+          <button id="btn-open-install-guide" class="btn-tool-action">VER PASOS</button>
         </div>
-        <div id="ordersContainer" class="space-y-4"></div>
-    </div>
+      </div>
+    </section>
 
+  </main>
 
+  <!-- BARRA DE NAVEGACIÓN INFERIOR ESTILO ANDROID -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <button class="nav-item active" data-target="view-contacts">
+      <svg class="nav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <span class="nav-label">Contactos</span>
+    </button>
 
+    <button class="nav-item" data-target="view-reminders">
+      <svg class="nav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+      <span class="nav-label">Medicinas</span>
+    </button>
 
-    <nav class="bottom-nav">
-        <div onclick="APP.switchView('recipes')" class="nav-item active" id="nav-recipes" data-i18n="nav_recipes">Recetas</div>
-        <div onclick="APP.switchView('inventory')" class="nav-item" id="nav-inventory" data-i18n="nav_inventory">Insumos</div>
-        <div onclick="APP.switchView('pos')" class="nav-item" id="nav-pos" data-i18n="nav_pos">Ventas</div>
-        <div onclick="APP.toggleMenu()" class="nav-item" data-i18n="nav_menu">Menú</div>
-    </nav>
+    <button class="nav-item" data-target="view-shopping">
+      <svg class="nav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span class="nav-label">Lista</span>
+    </button>
 
-    <!-- Scripts -->
-    <script src="./src/js/modules/storage.js"></script>
-    <script src="./src/js/modules/i18n.js"></script>
-    <script src="./src/js/modules/data.js"></script>
-    <script src="./src/js/modules/ui.js"></script>
-    <script src="./src/js/modules/utils.js"></script>
+    <button class="nav-item" data-target="view-tools">
+      <svg class="nav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <span class="nav-label">Útiles</span>
+    </button>
+  </nav>
 
-    <script src="./src/js/app.js"></script>
-
-    <!-- Update Toast -->
-    <div id="updateToast" class="fixed bottom-24 left-4 right-4 p-4 rounded-2xl shadow-2xl z-[6000] hidden transform translate-y-full transition-transform duration-500" style="background:#bbf7d0; color:#14532d;">
-        <div class="flex items-center justify-between gap-4">
-            <div class="flex-1">
-                <p class="text-[10px] font-black uppercase tracking-widest mb-1" data-i18n="new_version_toast">Nueva Versión Disponible</p>
-                <p class="text-xs opacity-75" id="updateInfo" data-i18n="improvements_applied">Se han aplicado mejoras al sistema.</p>
-            </div>
-            <button onclick="APP.applyUpdate()" style="background:#14532d; color:#bbf7d0; border:none;" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all" data-i18n="update_btn">Actualizar</button>
+  <!-- MODAL: AÑADIR CONTACTO -->
+  <dialog id="modal-add-contact" class="app-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Añadir Nuevo Contacto</h3>
+        <button class="btn-close-modal" data-modal="modal-add-contact">✕</button>
+      </div>
+      <form id="form-contact">
+        <div class="form-group">
+          <label for="contact-name">Nombre de la persona:</label>
+          <input type="text" id="contact-name" class="large-input" placeholder="ej. Mi Hijo Carlos" required>
         </div>
-    </div>
-
-    <script>
-        // Registro de Service Worker con gestión de actualizaciones
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    console.log('SW registrado');
-                    
-                    // Guardar referencia para actualizar manualmente
-                    APP.swRegistration = reg;
-
-                    // Detectar si hay un worker esperando (ya descargado anteriormente)
-                    if (reg.waiting) {
-                        APP.showUpdateToast();
-                    }
-
-                    // Detectar nuevas actualizaciones
-                    reg.addEventListener('updatefound', () => {
-                        const newWorker = reg.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                APP.showUpdateToast();
-                            }
-                        });
-                    });
-                });
-
-                // Recargar cuando el nuevo SW tome el control
-                let refreshing = false;
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    if (refreshing) return;
-                    window.location.reload();
-                    refreshing = true;
-                });
-            });
-        }
-    </script>
-    <div id="installBanner"
-        class="fixed bottom-4 left-4 right-4 text-white p-5 rounded-lg shadow-2xl z-50 hidden transition-all duration-300">
-        <div class="flex items-center justify-between gap-4">
-            <div class="flex-1">
-                <h3 class="font-bold text-base mb-1" data-i18n="install_title">📱 Instalar Kamiliahs</h3>
-                <p class="text-sm opacity-95" data-i18n="install_desc">Agrega a tu pantalla de inicio para acceso rápido</p>
-            </div>
-            <div class="flex gap-3 flex-shrink-0">
-                <button id="installBtn"
-                    class="bg-white btn-primary px-5 py-2 rounded-lg font-bold text-sm hover:opacity-90 transition" data-i18n="install_btn">Instalar</button>
-                <button id="dismissBtn" class="px-5 py-2 rounded-lg text-sm transition">✕</button>
-            </div>
+        <div class="form-group">
+          <label for="contact-phone">Número de teléfono:</label>
+          <input type="tel" id="contact-phone" class="large-input" placeholder="ej. 600 123 456" required>
         </div>
-    </div>
-
-    <script>
-        let deferredPrompt = null;
-        const installBannerDismissedKey = 'pwa_installBannerDismissed';
-        const installCheckInterval = 'pwa_installCheckInterval';
-
-        // Función para mostrar banner
-        function showInstallBanner() {
-            const banner = document.getElementById('installBanner');
-            if (banner && !isAppInstalled()) {
-                banner.classList.remove('hidden');
-                banner.style.animation = 'slideInUp 0.3s ease-out';
-            }
-        }
-
-        // Función para ocultar banner
-        function hideInstallBanner() {
-            const banner = document.getElementById('installBanner');
-            if (banner) {
-                banner.classList.add('hidden');
-            }
-        }
-
-        // Verificar si la app está instalada
-        function isAppInstalled() {
-            // Verificación 1: display-mode standalone
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                return true;
-            }
-
-            // Verificación 2: navigator.standalone (Safari iOS)
-            if (navigator.standalone === true) {
-                return true;
-            }
-
-            // Verificación 3: fullscreen mode
-            if (window.matchMedia('(display-mode: fullscreen)').matches) {
-                return true;
-            }
-
-            return false;
-        }
-
-        // Event: beforeinstallprompt (navegadores que lo soportan)
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            console.log('beforeinstallprompt detectado');
-
-            // Mostrar banner si no está instalado
-            if (!isAppInstalled() && localStorage.getItem(installBannerDismissedKey) !== 'true') {
-                showInstallBanner();
-            }
-        });
-
-        // Event: appinstalled
-        window.addEventListener('appinstalled', () => {
-            console.log('✅ PWA instalada');
-            hideInstallBanner();
-            localStorage.setItem(installBannerDismissedKey, 'true');
-            deferredPrompt = null;
-        });
-
-        // Botón de instalar
-        document.addEventListener('DOMContentLoaded', () => {
-            const installBtn = document.getElementById('installBtn');
-            const dismissBtn = document.getElementById('dismissBtn');
-
-            if (installBtn) {
-                installBtn.addEventListener('click', async () => {
-                    if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        console.log(`Usuario elegió: ${outcome}`);
-                        hideInstallBanner();
-                    } else {
-                        // Si no hay deferredPrompt, mostrar instrucciones alternativas
-                        showAlternativeInstallInstructions();
-                    }
-                });
-            }
-
-            if (dismissBtn) {
-                dismissBtn.addEventListener('click', () => {
-                    localStorage.setItem(installBannerDismissedKey, 'true');
-                    hideInstallBanner();
-                });
-            }
-
-            // Mostrar banner si aplica
-            if (!isAppInstalled() && localStorage.getItem(installBannerDismissedKey) !== 'true') {
-                // Si no hay beforeinstallprompt pero no está instalado, esperar un poco y mostrar
-                setTimeout(() => {
-                    if (!deferredPrompt && !isAppInstalled()) {
-                        showInstallBanner();
-                    }
-                }, 2000);
-            }
-        });
-
-        // Mostrar instrucciones alternativas
-        function showAlternativeInstallInstructions() {
-            const message = `
-Para instalar esta app:
-            
-📱 Android (Chrome):
-1. Toca el menú (⋮)
-2. Selecciona "Instalar app"
-
-🍎 iOS (Safari):
-1. Toca Compartir (↗️)
-2. Selecciona "Agregar a pantalla de inicio"
-
-🖥️ Desktop (Chrome/Edge):
-1. Toca el ícono de instalación (⊞) en la barra
-O
-1. Menú (⋮) → "Instalar Kamiliahs"
-            `;
-            alert(message);
-        }
-
-        // Estilos de animación
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInUp {
-                from {
-                    transform: translateY(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
-    <!-- BEGIN AADS AD UNIT 2437456 -->
-    <div style="position: absolute; z-index: 99999">
-        <input autocomplete="off" type="checkbox" id="aadsstickymp39707r" hidden />
-        <div style="padding-top: auto; padding-bottom: 0;">
-            <div style="width:100%;height:auto;position:fixed;text-align:center;font-size:0;top:0;left:0;right:0;margin:auto">
-                <label for="aadsstickymp39707r" style="top: 50%;transform: translateY(-50%);right:24px; position: absolute;border-radius: 4px; background: rgba(248, 248, 249, 0.70); padding: 4px;z-index: 99999;cursor:pointer">
-                    <svg fill="#000000" height="16px" width="16px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 490 490">
-                        <polygon points="456.851,0 245,212.564 33.149,0 0.708,32.337 212.669,245.004 0.708,457.678 33.149,490 245,277.443 456.851,490 489.292,457.678 277.331,245.004 489.292,32.337 "/>
-                    </svg>
-                </label>
-                <div id="frame" style="width: 100%;margin: auto;position: relative; z-index: 99998;"><iframe data-aa=2437456 src=//acceptable.a-ads.com/2437456/?size=Adaptive style='border:0; padding:0; width:70%; height:auto; overflow:hidden; margin: auto'></iframe></div>
-            </div>
-            <style>
-                #aadsstickymp39707r:checked + div {
-                    display: none;
-                }
-            </style>
+        <div class="form-group">
+          <label for="contact-icon">Icono / Parentesco:</label>
+          <select id="contact-icon" class="large-input">
+            <option value="👤">👤 Familiar / Amigo</option>
+            <option value="❤️">❤️ Hijo / Hija</option>
+            <option value="👨‍⚕️">👨‍⚕️ Médico / Doctor</option>
+            <option value="🏠">🏠 Casa / Vecino</option>
+            <option value="🚨">🚨 Emergencia</option>
+          </select>
         </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">GUARDAR CONTACTO</button>
+        </div>
+      </form>
     </div>
-    <!-- END AADS AD UNIT 2437456 -->
+  </dialog>
+
+  <!-- MODAL: AÑADIR RECORDATORIO -->
+  <dialog id="modal-add-reminder" class="app-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Añadir Recordatorio</h3>
+        <button class="btn-close-modal" data-modal="modal-add-reminder">✕</button>
+      </div>
+      <form id="form-reminder">
+        <div class="form-group">
+          <label for="reminder-text">¿Qué tienes que recordar?</label>
+          <input type="text" id="reminder-text" class="large-input" placeholder="ej. Tomar la pastilla de la tensión" required>
+        </div>
+        <div class="form-group">
+          <label for="reminder-time">Hora del día:</label>
+          <input type="time" id="reminder-time" class="large-input" value="09:00" required>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn-primary">GUARDAR RECORDATORIO</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- MODAL: GUÍA DE INSTALACIÓN EN EL MÓVIL -->
+  <dialog id="modal-install-guide" class="app-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📱 Cómo instalar en tu móvil</h3>
+        <button class="btn-close-modal" data-modal="modal-install-guide">✕</button>
+      </div>
+      <div class="guide-steps">
+        <div class="step-card">
+          <span class="step-num">1</span>
+          <p>Pulsa los <strong>3 puntos (⋮)</strong> en la esquina superior derecha del navegador Chrome (o el botón de compartir en iPhone).</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">2</span>
+          <p>Busca la opción que dice <strong>"Añadir a la pantalla de inicio"</strong> o <strong>"Instalar aplicación"</strong>.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">3</span>
+          <p>Pulsa en <strong>Aceptar / Añadir</strong>. ¡Listo! Ya aparecerá el icono como una app más en tu teléfono.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary btn-close-modal" data-modal="modal-install-guide">ENTENDIDO</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- PANTALLA MODO LUZ BLANCA (LINTERNA) -->
+  <div id="full-light-overlay" class="light-overlay hidden">
+    <div class="light-controls">
+      <p> PANTALLA DE LUZ MÁXIMA </p>
+      <button id="btn-close-light" class="btn-close-light">APAGAR LUZ</button>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
 </body>
-
 </html>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0fdf4" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Fondo Redondeado Estilo Android -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  
+  <!-- Círculo interior de contraste -->
+  <circle cx="256" cy="256" r="190" fill="#ffffff" fill-opacity="0.15" />
+  
+  <g filter="url(#shadow)">
+    <!-- Simbolo de Casa/Móvil Sencillo Minimalista -->
+    <path d="M 256 110 L 390 220 C 398 226 400 236 394 244 C 388 252 376 254 368 248 L 256 156 L 144 248 C 136 254 124 252 118 244 C 112 236 114 226 122 220 Z" fill="#ffffff" />
+    
+    <!-- Corazón / Toque Humano en el centro -->
+    <path d="M 256 380 C 240 365 170 305 170 240 C 170 195 205 160 256 200 C 307 160 342 195 342 240 C 342 305 272 365 256 380 Z" fill="url(#heartGrad)" />
+  </g>
+</svg>

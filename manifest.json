@@ -1,82 +1,21 @@
 {
-  "name": "POS Minimalist - Editorial Design",
-  "short_name": "POS Minimalist",
-  "description": "Sistema de gestión de puntos de venta con diseño editorial minimalista. Instalable como aplicación en cualquier dispositivo.",
-  "start_url": "./index.html",
+  "name": "FÁCIL - Mi Móvil Sencillo",
+  "short_name": "FÁCIL",
+  "description": "Aplicación ultra sencilla basada en texto e iconos grandes para facilitar el uso del móvil a personas neófitas en tecnología.",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "prefer_related_applications": false,
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#1e293b",
+  "lang": "es",
+  "categories": ["utilities", "lifestyle", "accessibility"],
   "icons": [
     {
-      "src": "./assets/icons/icon-192x192.svg",
-      "sizes": "192x192",
+      "src": "./icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 512x512",
       "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "./assets/icons/icon-512x512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "./assets/icons/icon-maskable-192x192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "./assets/icons/icon-maskable-512x512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
-  ],
-  "screenshots": [
-    {
-      "src": "./assets/icons/screenshot-1.svg",
-      "sizes": "540x720",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "./assets/icons/screenshot-2.svg",
-      "sizes": "1280x720",
-      "type": "image/svg+xml",
-      "form_factor": "wide"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Nuevo Pedido",
-      "short_name": "Pedido",
-      "description": "Crear nuevo pedido en POS",
-      "url": "./index.html?view=pos",
-      "icons": [
-        {
-          "src": "./assets/icons/shortcut-pos.svg",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Ver Reportes",
-      "short_name": "Reportes",
-      "description": "Ver estadísticas y márgenes",
-      "url": "./index.html?view=reports",
-      "icons": [
-        {
-          "src": "./assets/icons/shortcut-reports.svg",
-          "sizes": "96x96"
-        }
-      ]
-    }
-  ],
-  "categories": [
-    "productivity",
-    "business"
   ]
 }
