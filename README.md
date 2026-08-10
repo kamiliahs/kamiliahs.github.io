@@ -6,7 +6,7 @@ Cuenta con un sistema de instalación in-app desde el navegador Android/Desktop,
 
 ---
 
-## 🚀 Cómo desplegar en GitHub Pages
+## 🚀 Cómo desplegar en GitHub Pages-
 
 Esta aplicación ha sido diseñada con **rutas 100% relativas (`./`)** para funcionar en cualquier repositorio o subdirectorio de GitHub Pages (ejemplo: `https://tu-usuario.github.io/tu-repositorio/`).
 
