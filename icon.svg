@@ -1,29 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0d9488" />
-      <stop offset="100%" stop-color="#0f766e" />
-    </linearGradient>
-    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="100%" stop-color="#f0fdf4" />
-    </linearGradient>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
-    </filter>
+    <style>
+      .bg { fill: #09090b; }
+      .grid { stroke: #27272a; stroke-width: 2; opacity: 0.4; }
+      .border { stroke: #3f3f46; stroke-width: 8; fill: none; }
+      .accent-box { fill: #2563eb; }
+      .icon-stroke { stroke: #ffffff; stroke-width: 20; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .text-title { font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif; font-weight: 800; font-size: 88px; fill: #ffffff; letter-spacing: 6px; }
+      .text-sub { font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif; font-weight: 600; font-size: 32px; fill: #a1a1aa; letter-spacing: 4px; }
+    </style>
   </defs>
   
-  <!-- Fondo Redondeado Estilo Android -->
-  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <!-- Fondo Suizo Minimalista -->
+  <rect class="bg" width="512" height="512" rx="64" />
   
-  <!-- Círculo interior de contraste -->
-  <circle cx="256" cy="256" r="190" fill="#ffffff" fill-opacity="0.15" />
+  <!-- Rejilla de Fondo -->
+  <line class="grid" x1="128" y1="0" x2="128" y2="512" />
+  <line class="grid" x1="256" y1="0" x2="256" y2="512" />
+  <line class="grid" x1="384" y1="0" x2="384" y2="512" />
+  <line class="grid" x1="0" y1="128" x2="512" y2="128" />
+  <line class="grid" x1="0" y1="256" x2="512" y2="256" />
+  <line class="grid" x1="0" y1="384" x2="512" y2="384" />
   
-  <g filter="url(#shadow)">
-    <!-- Simbolo de Casa/Móvil Sencillo Minimalista -->
-    <path d="M 256 110 L 390 220 C 398 226 400 236 394 244 C 388 252 376 254 368 248 L 256 156 L 144 248 C 136 254 124 252 118 244 C 112 236 114 226 122 220 Z" fill="#ffffff" />
-    
-    <!-- Corazón / Toque Humano en el centro -->
-    <path d="M 256 380 C 240 365 170 305 170 240 C 170 195 205 160 256 200 C 307 160 342 195 342 240 C 342 305 272 365 256 380 Z" fill="url(#heartGrad)" />
-  </g>
+  <!-- Borde nítido exterior -->
+  <rect class="border" x="16" y="16" width="480" height="480" rx="52" />
+
+  <!-- Bloque de Acento Azul Neón Suizo -->
+  <rect class="accent-box" x="64" y="64" width="80" height="80" rx="16" />
+
+  <!-- Icono Lineal Vectorial de Móvil / Escudo -->
+  <rect class="icon-stroke" x="176" y="96" width="160" height="240" rx="24" />
+  <line class="icon-stroke" x1="236" y1="136" x2="276" y2="136" />
+  <circle cx="256" cy="286" r="14" fill="#ffffff" />
+  
+  <!-- Tipografía Principal FÁCIL -->
+  <text x="256" y="410" text-anchor="middle" class="text-title">FÁCIL</text>
+  <text x="256" y="452" text-anchor="middle" class="text-sub">01 / MINIMAL</text>
 </svg>

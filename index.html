@@ -1,65 +1,73 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>FÁCIL - Mi Móvil Sencillo</title>
-  <meta name="description" content="Aplicación sencilla con texto grande e iconos minimalistas para facilitar el uso del teléfono a personas neófitas en tecnología.">
-  <meta name="theme-color" content="#1e293b">
+  <title>FÁCIL — Web Minimalista Accesible</title>
+  <meta name="description" content="Aplicación web minimalista basada en alta tipografía e iconos vectoriales lineales de máxima legibilidad y accesibilidad.">
+  <meta name="theme-color" content="#09090b">
   
   <!-- Configuración PWA relativa para GitHub Pages -->
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
   <link rel="apple-touch-icon" href="./icon.svg">
   
-  <!-- Tipografía de Alta Legibilidad -->
+  <!-- Tipografía Suiza Minimalista: Space Grotesk, Inter y Space Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <!-- BANNER DE INSTALACIÓN PWA IN-APP -->
+  <!-- BANNER DE INSTALACIÓN PWA -->
   <div id="install-banner" class="install-banner hidden" role="region" aria-label="Instalación de la aplicación">
     <div class="install-banner-content">
       <div class="install-banner-text">
-        <span class="install-icon">📲</span>
+        <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
         <div>
-          <strong>¿Quieres tener esta App en tu Móvil?</strong>
-          <p>Pulsa el botón para añadirla a tu pantalla principal sin ocupar espacio.</p>
+          <strong>INSTALAR EN EL MÓVIL</strong>
+          <p>Añade el acceso directo a tu pantalla de inicio.</p>
         </div>
       </div>
       <div class="install-banner-actions">
-        <button id="btn-install-app" class="btn-primary btn-install">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <button id="btn-install-app" class="btn-install">
+          <svg class="icon-svg" width="20" height="20" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           INSTALAR AHORA
         </button>
-        <button id="btn-dismiss-install" class="btn-subtle" title="Cerrar aviso">
+        <button id="btn-dismiss-install" class="btn-dismiss" title="Cerrar aviso" aria-label="Cerrar aviso">
           ✕
         </button>
       </div>
     </div>
   </div>
 
-  <!-- HEADER PRINCIPAL -->
+  <!-- HEADER PRINCIPAL SUIZO -->
   <header class="app-header">
-    <div class="header-top">
+    <div class="header-container">
       <div class="brand">
-        <img src="./icon.svg" alt="Logo FÁCIL" class="brand-logo" width="40" height="40">
+        <div class="brand-icon-wrap">
+          <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        </div>
         <h1 class="brand-title">FÁCIL</h1>
       </div>
-      <div class="header-controls">
-        <!-- Indicador de Red (Online / Offline) -->
-        <div id="net-status" class="net-status online" title="Estado de conexión">
-          <span class="dot"></span>
-          <span id="net-status-text">En línea</span>
+
+      <div class="header-actions">
+        <!-- Indicador de Red -->
+        <div id="net-status" class="net-badge" title="Estado de conexión">
+          <span class="net-dot"></span>
+          <span id="net-status-text">ONLINE</span>
         </div>
 
-        <!-- Botón Tamaño de Texto (Accesibilidad) -->
-        <button id="btn-toggle-text-size" class="btn-header-tool" title="Cambiar tamaño de letra">
-          <span class="tool-icon">Aa</span>
-          <span class="tool-label">Letra</span>
+        <!-- Selector de Tema (Oscuro / Claro) -->
+        <button id="btn-toggle-theme" class="btn-icon-control" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema">
+          <svg class="icon-svg" id="theme-icon-sun" width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-svg hidden" id="theme-icon-moon" width="22" height="22" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+
+        <!-- Botón Tamaño de Texto -->
+        <button id="btn-toggle-text-size" class="btn-icon-control" title="Cambiar tamaño de letra" aria-label="Cambiar tamaño de letra">
+          <span>Aa</span>
         </button>
       </div>
     </div>
@@ -70,81 +78,96 @@
     
     <!-- SECCIÓN 1: CONTACTOS RÁPIDOS -->
     <section id="view-contacts" class="spa-view active" aria-labelledby="heading-contacts">
-      <div class="view-header">
-        <h2 id="heading-contacts">📞 Mis Contactos</h2>
-        <p class="subtitle">Pulsa sobre cualquier botón para llamar o mandar un mensaje.</p>
+      <div class="section-header">
+        <span class="section-tag">01 / CONTACTOS</span>
+        <h2 id="heading-contacts" class="section-title">MIS CONTACTOS</h2>
+        <p class="section-subtitle">Pulsa para llamar directamente o enviar un mensaje rápido.</p>
       </div>
 
       <div id="contacts-list" class="cards-grid">
-        <!-- Contactos por defecto cargados por JS -->
+        <!-- Cargado dinámicamente desde app.js -->
       </div>
 
-      <button id="btn-add-contact-modal" class="btn-action-add">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <button id="btn-add-contact-modal" class="btn-primary-action">
+        <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         AÑADIR NUEVO CONTACTO
       </button>
     </section>
 
-    <!-- SECCIÓN 2: MIS RECORDATORIOS / MEDICINAS -->
+    <!-- SECCIÓN 2: RECORDATORIOS -->
     <section id="view-reminders" class="spa-view hidden" aria-labelledby="heading-reminders">
-      <div class="view-header">
-        <h2 id="heading-reminders">💊 Mis Recordatorios</h2>
-        <p class="subtitle">Lo que tienes que hacer hoy. Pulsa el cuadrado verde cuando lo cumplas.</p>
+      <div class="section-header">
+        <span class="section-tag">02 / RECORDATORIOS</span>
+        <h2 id="heading-reminders" class="section-title">MIS RECORDATORIOS</h2>
+        <p class="section-subtitle">Tareas y medicinas para hoy. Marca la casilla al completarlas.</p>
       </div>
 
-      <div id="reminders-list" class="cards-list">
-        <!-- Lista de medicinas por JS -->
+      <div id="reminders-list" class="reminders-list">
+        <!-- Cargado dinámicamente desde app.js -->
       </div>
 
-      <button id="btn-add-reminder-modal" class="btn-action-add">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <button id="btn-add-reminder-modal" class="btn-primary-action">
+        <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         AÑADIR MEDICINA O TAREA
       </button>
     </section>
 
     <!-- SECCIÓN 3: LISTA DE LA COMPRA -->
     <section id="view-shopping" class="spa-view hidden" aria-labelledby="heading-shopping">
-      <div class="view-header">
-        <h2 id="heading-shopping">📝 Nota de la Compra</h2>
-        <p class="subtitle">Anota lo que necesitas comprar. Toca un producto para tacharlo.</p>
+      <div class="section-header">
+        <span class="section-tag">03 / LISTA</span>
+        <h2 id="heading-shopping" class="section-title">NOTA DE LA COMPRA</h2>
+        <p class="section-subtitle">Productos pendientes de comprar. Toca un elemento para tacharlo.</p>
       </div>
 
       <!-- Añadir rápido con 1 toque -->
       <div class="quick-add-section">
-        <span class="quick-title">Añadir con 1 toque:</span>
+        <span class="quick-title">AÑADIR RÁPIDO CON 1 TOQUE:</span>
         <div class="quick-chips">
-          <button class="chip-btn" data-item="🥛 Leche">🥛 Leche</button>
-          <button class="chip-btn" data-item="🍞 Pan">🍞 Pan</button>
-          <button class="chip-btn" data-item="🍎 Fruta">🍎 Fruta</button>
-          <button class="chip-btn" data-item="🥚 Huevos">🥚 Huevos</button>
-          <button class="chip-btn" data-item="🧻 Papel">🧻 Papel</button>
-          <button class="chip-btn" data-item="💧 Agua">💧 Agua</button>
+          <button class="chip-btn" data-item="Leche">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24"><path d="M6 2h12v4H6z"/><path d="M6 6l-2 4v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10l-2-4H6z"/></svg> Leche
+          </button>
+          <button class="chip-btn" data-item="Pan">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-10 10c0 5.5 4.5 10 10 10s10-4.5 10-10A10 10 0 0 0 12 2z"/></svg> Pan
+          </button>
+          <button class="chip-btn" data-item="Fruta">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v4"/></svg> Fruta
+          </button>
+          <button class="chip-btn" data-item="Huevos">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24"><path d="M12 2C8 2 5 8 5 14a7 7 0 0 0 14 0c0-6-3-12-7-12z"/></svg> Huevos
+          </button>
+          <button class="chip-btn" data-item="Agua">
+            <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg> Agua
+          </button>
         </div>
       </div>
 
-      <!-- Campo de texto grande para producto personalizado -->
+      <!-- Campo de texto para añadir producto -->
       <form id="form-add-item" class="custom-add-form">
-        <input type="text" id="input-new-item" class="large-input" placeholder="Escribe algo aquí... (ej. Tomates)" required autocomplete="off">
-        <button type="submit" class="btn-primary btn-add-inline">GUARDAR</button>
+        <input type="text" id="input-new-item" class="large-input" placeholder="Escribe un producto... (ej. Tomates)" required autocomplete="off">
+        <button type="submit" class="btn-primary-action btn-add-inline">GUARDAR</button>
       </form>
 
       <div id="shopping-list" class="shopping-items-container">
-        <!-- Elementos de la lista -->
+        <!-- Elementos por JS -->
       </div>
     </section>
 
     <!-- SECCIÓN 4: HERRAMIENTAS Y ÚTILES -->
     <section id="view-tools" class="spa-view hidden" aria-labelledby="heading-tools">
-      <div class="view-header">
-        <h2 id="heading-tools">💡 Ayudas Útiles</h2>
-        <p class="subtitle">Herramientas sencillas para usar en tu día a día.</p>
+      <div class="section-header">
+        <span class="section-tag">04 / ÚTILES</span>
+        <h2 id="heading-tools" class="section-title">HERRAMIENTAS DE AYUDA</h2>
+        <p class="section-subtitle">Utilidades rápidas para tu día a día.</p>
       </div>
 
       <div class="tools-grid">
-        <!-- HERRAMIENTA 1: PANTALLA LUZ BLANCA / LINTERNA -->
+        <!-- LUZ BLANCA / LINTERNA -->
         <div class="tool-card">
           <div class="tool-info">
-            <span class="tool-badge-icon">🔦</span>
+            <div class="tool-badge-icon">
+              <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.7.7 1.3 1.5 1.5 2.5h6z"/></svg>
+            </div>
             <div>
               <h3>Luz / Linterna</h3>
               <p>Ilumina la pantalla al máximo en la oscuridad.</p>
@@ -153,10 +176,12 @@
           <button id="btn-toggle-light" class="btn-tool-action">ENCENDER LUZ</button>
         </div>
 
-        <!-- HERRAMIENTA 2: LECTURA EN VOZ ALTA -->
+        <!-- ASISTENTE DE VOZ -->
         <div class="tool-card">
           <div class="tool-info">
-            <span class="tool-badge-icon">🔊</span>
+            <div class="tool-badge-icon">
+              <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </div>
             <div>
               <h3>Asistente de Voz</h3>
               <p>Escucha cómo funciona esta aplicación.</p>
@@ -165,25 +190,29 @@
           <button id="btn-speak-help" class="btn-tool-action">ESCUCHAR AYUDA</button>
         </div>
 
-        <!-- HERRAMIENTA 3: ALARMA / SONIDO SOS -->
+        <!-- SONIDO SOS / ALARMA -->
         <div class="tool-card tool-sos">
           <div class="tool-info">
-            <span class="tool-badge-icon">🚨</span>
+            <div class="tool-badge-icon">
+              <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
             <div>
-              <h3>Sonido de Emergencia</h3>
-              <p>Hace sonar una alarma fuerte si necesitas ayuda inmediata.</p>
+              <h3>Sonido Emergencia</h3>
+              <p>Alarma sonora fuerte si necesitas ayuda urgente.</p>
             </div>
           </div>
-          <button id="btn-toggle-sos" class="btn-tool-action btn-danger">SONAR ALARMA</button>
+          <button id="btn-toggle-sos" class="btn-tool-action btn-danger">SONAR ALARMA SOS</button>
         </div>
 
-        <!-- HERRAMIENTA 4: GUÍA MANUAL DE INSTALACIÓN -->
+        <!-- GUÍA PASOS INSTALACIÓN -->
         <div class="tool-card">
           <div class="tool-info">
-            <span class="tool-badge-icon">📲</span>
+            <div class="tool-badge-icon">
+              <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            </div>
             <div>
-              <h3>Instalar esta App</h3>
-              <p>Instrucciones sencillas para poner el icono en la pantalla.</p>
+              <h3>Pasos de Instalación</h3>
+              <p>Guía sencilla para colocar la app en tu teléfono.</p>
             </div>
           </div>
           <button id="btn-open-install-guide" class="btn-tool-action">VER PASOS</button>
@@ -193,25 +222,25 @@
 
   </main>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR ESTILO ANDROID -->
+  <!-- BARRA DE NAVEGACIÓN INFERIOR SUIZA -->
   <nav class="bottom-nav" aria-label="Navegación principal">
     <button class="nav-item active" data-target="view-contacts">
-      <svg class="nav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
       <span class="nav-label">Contactos</span>
     </button>
 
     <button class="nav-item" data-target="view-reminders">
-      <svg class="nav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+      <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span class="nav-label">Medicinas</span>
     </button>
 
     <button class="nav-item" data-target="view-shopping">
-      <svg class="nav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
       <span class="nav-label">Lista</span>
     </button>
 
     <button class="nav-item" data-target="view-tools">
-      <svg class="nav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg class="icon-svg" width="24" height="24" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       <span class="nav-label">Útiles</span>
     </button>
   </nav>
@@ -220,8 +249,8 @@
   <dialog id="modal-add-contact" class="app-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Añadir Nuevo Contacto</h3>
-        <button class="btn-close-modal" data-modal="modal-add-contact">✕</button>
+        <h3>AÑADIR CONTACTO</h3>
+        <button class="btn-close-modal" data-modal="modal-add-contact" aria-label="Cerrar">✕</button>
       </div>
       <form id="form-contact">
         <div class="form-group">
@@ -233,17 +262,17 @@
           <input type="tel" id="contact-phone" class="large-input" placeholder="ej. 600 123 456" required>
         </div>
         <div class="form-group">
-          <label for="contact-icon">Icono / Parentesco:</label>
+          <label for="contact-icon">Tipo de relación / Categora:</label>
           <select id="contact-icon" class="large-input">
-            <option value="👤">👤 Familiar / Amigo</option>
-            <option value="❤️">❤️ Hijo / Hija</option>
-            <option value="👨‍⚕️">👨‍⚕️ Médico / Doctor</option>
-            <option value="🏠">🏠 Casa / Vecino</option>
-            <option value="🚨">🚨 Emergencia</option>
+            <option value="user">👤 Familiar / Amigo</option>
+            <option value="heart">❤️ Hijo / Hija</option>
+            <option value="med">👨‍⚕️ Médico / Doctor</option>
+            <option value="home">🏠 Casa / Vecino</option>
+            <option value="sos">🚨 Emergencia</option>
           </select>
         </div>
         <div class="modal-actions">
-          <button type="submit" class="btn-primary">GUARDAR CONTACTO</button>
+          <button type="submit" class="btn-primary-action">GUARDAR CONTACTO</button>
         </div>
       </form>
     </div>
@@ -253,56 +282,56 @@
   <dialog id="modal-add-reminder" class="app-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Añadir Recordatorio</h3>
-        <button class="btn-close-modal" data-modal="modal-add-reminder">✕</button>
+        <h3>AÑADIR RECORDATORIO</h3>
+        <button class="btn-close-modal" data-modal="modal-add-reminder" aria-label="Cerrar">✕</button>
       </div>
       <form id="form-reminder">
         <div class="form-group">
           <label for="reminder-text">¿Qué tienes que recordar?</label>
-          <input type="text" id="reminder-text" class="large-input" placeholder="ej. Tomar la pastilla de la tensión" required>
+          <input type="text" id="reminder-text" class="large-input" placeholder="ej. Pastilla de la tensión" required>
         </div>
         <div class="form-group">
           <label for="reminder-time">Hora del día:</label>
           <input type="time" id="reminder-time" class="large-input" value="09:00" required>
         </div>
         <div class="modal-actions">
-          <button type="submit" class="btn-primary">GUARDAR RECORDATORIO</button>
+          <button type="submit" class="btn-primary-action">GUARDAR RECORDATORIO</button>
         </div>
       </form>
     </div>
   </dialog>
 
-  <!-- MODAL: GUÍA DE INSTALACIÓN EN EL MÓVIL -->
+  <!-- MODAL: GUÍA DE INSTALACIÓN -->
   <dialog id="modal-install-guide" class="app-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>📱 Cómo instalar en tu móvil</h3>
-        <button class="btn-close-modal" data-modal="modal-install-guide">✕</button>
+        <h3>CÓMO INSTALAR EN EL MÓVIL</h3>
+        <button class="btn-close-modal" data-modal="modal-install-guide" aria-label="Cerrar">✕</button>
       </div>
       <div class="guide-steps">
         <div class="step-card">
           <span class="step-num">1</span>
-          <p>Pulsa los <strong>3 puntos (⋮)</strong> en la esquina superior derecha del navegador Chrome (o el botón de compartir en iPhone).</p>
+          <p>Pulsa el menú de <strong>3 puntos (⋮)</strong> en el navegador Chrome (o el botón de compartir en iPhone).</p>
         </div>
         <div class="step-card">
           <span class="step-num">2</span>
-          <p>Busca la opción que dice <strong>"Añadir a la pantalla de inicio"</strong> o <strong>"Instalar aplicación"</strong>.</p>
+          <p>Selecciona <strong>"Añadir a pantalla de inicio"</strong> o <strong>"Instalar aplicación"</strong>.</p>
         </div>
         <div class="step-card">
           <span class="step-num">3</span>
-          <p>Pulsa en <strong>Aceptar / Añadir</strong>. ¡Listo! Ya aparecerá el icono como una app más en tu teléfono.</p>
+          <p>Pulsa <strong>Aceptar</strong>. ¡Listo! El icono aparecerá como una app en tu móvil.</p>
         </div>
       </div>
       <div class="modal-actions">
-        <button class="btn-primary btn-close-modal" data-modal="modal-install-guide">ENTENDIDO</button>
+        <button class="btn-primary-action btn-close-modal" data-modal="modal-install-guide">ENTENDIDO</button>
       </div>
     </div>
   </dialog>
 
-  <!-- PANTALLA MODO LUZ BLANCA (LINTERNA) -->
+  <!-- PANTALLA MODO LUZ BLANCA -->
   <div id="full-light-overlay" class="light-overlay hidden">
     <div class="light-controls">
-      <p> PANTALLA DE LUZ MÁXIMA </p>
+      <p>LINTERNA / LUZ DE PANTALLA</p>
       <button id="btn-close-light" class="btn-close-light">APAGAR LUZ</button>
     </div>
   </div>
